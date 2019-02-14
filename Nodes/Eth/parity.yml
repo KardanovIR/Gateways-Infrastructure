@@ -1,0 +1,13 @@
+version: "2.0"
+services:
+  parity:
+    image: parity/parity:v2.1.0
+    volumes:
+      - ./ethereum/:/root/.local/share/io.parity.ethereum/
+    command: --tracing=on --jsonrpc-interface=all --ws-interface=all --jsonrpc-port=8545 --ws-port 8546 --auto-update=none
+    ports:
+      - 30303:30303
+      - 30303:30303/udp
+      - 8545:8545
+      - 8546:8546
+    restart: always

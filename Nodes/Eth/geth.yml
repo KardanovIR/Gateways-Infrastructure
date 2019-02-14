@@ -1,0 +1,12 @@
+version: "2"
+services:
+  geth:
+    image: ethereum/client-go
+    volumes:
+      - ./ethereum:/root/.ethereum
+    command: --syncmode "fast" --rpcapi debug,eth,web3,personal,net --rpc --rpcaddr "0.0.0.0" --ws --wsaddr "0.0.0.0" --wsorigins="*" --port 30303 --wsport 8546 --rpcport 8545
+    ports:
+      - 30303:30303
+      - 8545:8545
+      - 8546:8546
+    restart: always
