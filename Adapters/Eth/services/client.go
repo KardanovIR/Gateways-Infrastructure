@@ -10,25 +10,25 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
-type IClient interface {
+type INodeClient interface {
 	SuggestGasPrice(ctx context.Context) (*big.Int, error)
 }
 
-type client struct {
+type nodeClient struct {
 	ethClient *ethclient.Client
 }
 
-func (cl *client) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
+func (cl *nodeClient) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
 	return cl.ethClient.SuggestGasPrice(ctx)
 }
 
 var (
-	cl                    IClient
+	cl                    INodeClient
 	onceRPCClientInstance sync.Once
 )
 
-// CreateNodeClient create node's client with connection to eth node
-func CreateNodeClient(host string) error {
+// New create node's client with connection to eth node
+func New(host string) error {
 	var err error
 	onceRPCClientInstance.Do(func() {
 		rc, e := newRPCClient(host)
@@ -37,14 +37,14 @@ func CreateNodeClient(host string) error {
 			return
 		}
 		ethClient := ethclient.NewClient(rc)
-		cl = &client{ethClient: ethClient}
+		cl = &nodeClient{ethClient: ethClient}
 	})
 	return err
 }
 
 // GetNodeClient returns node's client.
-// Client must be previously created with CreateNodeClient(), in another case function throws panic
-func GetNodeClient() IClient {
+// Client must be previously created with New(), in another case function throws panic
+func GetNodeClient() INodeClient {
 	onceRPCClientInstance.Do(func() {
 		panic("try to get node client before it's creation!")
 	})

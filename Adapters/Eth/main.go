@@ -19,7 +19,7 @@ func main() {
 		log.Fatal("Loading of configuration failed with error:", err)
 	}
 	log.Println(fmt.Sprintf("Eth adapter will be started with configuration %+v", config.Cfg))
-	if err := services.CreateNodeClient(config.Cfg.Node.Host); err != nil {
+	if err := services.New(config.Cfg.Node.Host); err != nil {
 		log.Fatal("Can't create node's client", err)
 	}
 	ctx := context.Background()
