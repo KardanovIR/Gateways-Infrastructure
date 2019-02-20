@@ -4,9 +4,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
+
 	"github.com/GatewaysInfrastructure/Adapters/Eth/config"
 	"github.com/GatewaysInfrastructure/Adapters/Eth/services"
-	"log"
 )
 
 func main() {

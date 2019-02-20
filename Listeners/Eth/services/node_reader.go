@@ -2,11 +2,12 @@ package services
 
 import (
 	"context"
+	"log"
+	"sync"
+
 	"github.com/GatewaysInfrastructure/Listeners/Eth/repositories"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
-	"log"
-	"sync"
 )
 
 type INodeReader interface {

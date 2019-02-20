@@ -1,9 +1,10 @@
 package repositories
 
 import (
-	"github.com/globalsign/mgo"
 	"log"
 	"time"
+
+	"github.com/globalsign/mgo"
 )
 
 type IRepository interface {

@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
+
 	"github.com/GatewaysInfrastructure/Listeners/Eth/config"
 	"github.com/GatewaysInfrastructure/Listeners/Eth/repositories"
 	"github.com/GatewaysInfrastructure/Listeners/Eth/services"
-	"log"
 )
 
 func main() {
