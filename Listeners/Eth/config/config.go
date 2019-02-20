@@ -17,25 +17,33 @@ type Config struct {
 // At first read config from file
 // After that read environment variables
 func LoadConfig(defaultConfigPath string) error {
+	cfg, err := readConfig(defaultConfigPath)
+	if err != nil {
+		return err
+	}
+	Cfg = cfg
+	return validateConfig()
+}
+
+func readConfig(defaultConfigPath string) (*Config, error) {
 	cfg := new(Config)
 
 	// read config from file - it will be default values
 	viper.SetConfigFile(defaultConfigPath)
 	if err := viper.ReadInConfig(); err != nil {
-		return err
+		return nil, err
 	}
 	if err := viper.Unmarshal(cfg); err != nil {
-		return err
+		return nil, err
 	}
 
 	// read parameters from environment variables -> they override default values from file
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	if err := viper.Unmarshal(cfg); err != nil {
-		return err
+		return nil, err
 	}
-	Cfg = cfg
-	return validateConfig()
+	return cfg, nil
 }
 
 func validateConfig() error {

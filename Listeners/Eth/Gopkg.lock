@@ -26,6 +26,14 @@
   revision = "2e60448ffcc6bf78332d1fe590260095f554dd78"
 
 [[projects]]
+  digest = "1:0deddd908b6b4b768cfc272c16ee61e7088a60f7fe2f06c547bd3d8e1f8b8e77"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = ""
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
   digest = "1:4c8155b542180baf7ec43bdcff0eb69aa27bd0c98dcfdc8e3b14a369ddffb3ee"
   name = "github.com/deckarep/golang-set"
   packages = ["."]
@@ -141,6 +149,14 @@
   version = "v1.2.0"
 
 [[projects]]
+  digest = "1:256484dbbcd271f9ecebc6795b2df8cad4c458dd0f5fd82a8c2fa0c29f233411"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = ""
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:bbd14c1159d6b170f77a7dded9558556c3fd2ebcf95dc9c8725440300f1df994"
   name = "github.com/rs/cors"
   packages = ["."]
@@ -198,6 +214,14 @@
   pruneopts = ""
   revision = "6d33b5a963d922d182c91e8a1c88d81fd150cfd4"
   version = "v1.3.1"
+
+[[projects]]
+  digest = "1:381bcbeb112a51493d9d998bbba207a529c73dbb49b3fd789e48c63fac1f192c"
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  pruneopts = ""
+  revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
+  version = "v1.3.0"
 
 [[projects]]
   digest = "1:61c34b9d719c7879c9381dad1db44c645529f49b23285e129a9e5f075eaf3f87"
@@ -283,6 +307,7 @@
     "github.com/ethereum/go-ethereum/rpc",
     "github.com/globalsign/mgo",
     "github.com/spf13/viper",
+    "github.com/stretchr/testify/assert",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
