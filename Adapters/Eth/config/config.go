@@ -10,17 +10,17 @@ import (
 var Cfg *Config
 
 type Config struct {
-	Node NodeConfig `mapstructure:"NODE"`
+	Node Node `mapstructure:"NODE"`
 }
 
-type NodeConfig struct {
+type Node struct {
 	Host string `mapstructure:"HOST"`
 }
 
-// LoadConfig set configuration parameters.
+// Load set configuration parameters.
 // At first read config from file
 // After that read environment variables
-func LoadConfig(defaultConfigPath string) error {
+func Load(defaultConfigPath string) error {
 	cfg := new(Config)
 
 	// read config from file - it will be default values

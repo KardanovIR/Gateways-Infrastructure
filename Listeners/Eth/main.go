@@ -16,7 +16,7 @@ func main() {
 	flag.StringVar(&configPath, "config-path", "./config/config.yml", "A path to config file")
 	flag.Parse()
 
-	if err := config.LoadConfig(configPath); err != nil {
+	if err := config.Load(configPath); err != nil {
 		log.Fatal("Loading of configuration failed with error:", err)
 	}
 	log.Println(fmt.Sprintf("Eth listener will be started with configuration %+v", config.Cfg))

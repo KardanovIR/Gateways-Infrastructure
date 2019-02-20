@@ -10,23 +10,23 @@ import (
 var Cfg *Config
 
 type Config struct {
-	Node NodeConfig `mapstructure:"NODE"`
-	Db   DB         `mapstructure:"DB"`
+	Node Node `mapstructure:"NODE"`
+	Db   DB   `mapstructure:"DB"`
 }
 
-// LoadConfig set configuration parameters.
+// Load set configuration parameters.
 // At first read config from file
 // After that read environment variables
-func LoadConfig(defaultConfigPath string) error {
-	cfg, err := readConfig(defaultConfigPath)
+func Load(defaultConfigPath string) error {
+	cfg, err := read(defaultConfigPath)
 	if err != nil {
 		return err
 	}
 	Cfg = cfg
-	return validateConfig()
+	return validate()
 }
 
-func readConfig(defaultConfigPath string) (*Config, error) {
+func read(defaultConfigPath string) (*Config, error) {
 	cfg := new(Config)
 
 	// read config from file - it will be default values
@@ -47,7 +47,7 @@ func readConfig(defaultConfigPath string) (*Config, error) {
 	return cfg, nil
 }
 
-func validateConfig() error {
+func validate() error {
 	if len(Cfg.Node.Host) == 0 {
 		return errors.New("NODE_HOST parameter is empty")
 	}
