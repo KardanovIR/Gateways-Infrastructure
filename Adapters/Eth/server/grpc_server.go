@@ -7,8 +7,8 @@ import (
 	"net"
 	"sync"
 
-	pb "github.com/Waves/GatewaysInfrastructure/Adapters/Eth/grpc"
-	"github.com/Waves/GatewaysInfrastructure/Adapters/Eth/services"
+	pb "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/grpc"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/services"
 )
 
 type IGrpcServer interface {
