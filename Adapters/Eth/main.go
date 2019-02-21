@@ -4,8 +4,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/GatewaysInfrastructure/Adapters/Eth/config"
-	"github.com/GatewaysInfrastructure/Adapters/Eth/services"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/config"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/server"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/services"
 	"log"
 )
 
@@ -25,4 +26,11 @@ func main() {
 	ctx := context.Background()
 	gas, err := services.GetNodeClient().SuggestGasPrice(ctx)
 	fmt.Println("gas ", gas, "err", err)
+
+	if err := server.New(config.Cfg.Port, services.GetNodeClient()); err != nil {
+		log.Fatal("Can't create grpc server", err)
+	}
+	if err := server.GetGrpsServer().Start(); err != nil {
+		log.Fatal("Can't start grpc server", err)
+	}
 }
