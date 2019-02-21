@@ -1,2 +1,3 @@
 node:
-  host: localhost:60045
+  host: https:localhost:60001
+port: 5001

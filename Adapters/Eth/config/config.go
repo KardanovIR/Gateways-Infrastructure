@@ -10,7 +10,8 @@ import (
 var Cfg *Config
 
 type Config struct {
-	Node Node `mapstructure:"NODE"`
+	Node NodeConfig `mapstructure:"NODE"`
+	Port string     `mapstructure:"PORT"`
 }
 
 type Node struct {
@@ -45,6 +46,9 @@ func Load(defaultConfigPath string) error {
 func validateConfig() error {
 	if len(Cfg.Node.Host) == 0 {
 		return errors.New("NODE_HOST parameter is empty")
+	}
+	if len(Cfg.Port) == 0 {
+		return errors.New("PORT parameter is empty")
 	}
 	return nil
 }
