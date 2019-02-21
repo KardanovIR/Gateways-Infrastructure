@@ -7,13 +7,12 @@ import (
 	"net"
 	"sync"
 
-	pb "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/grpc"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/services"
+	pb "github.com/Waves/GatewaysInfrastructure/Adapters/Eth/grpc"
+	"github.com/Waves/GatewaysInfrastructure/Adapters/Eth/services"
 )
 
 type IGrpcServer interface {
 	GasPrice(ctx context.Context, in *pb.GasPriceRequest) (*pb.GasPriceReply, error)
-	Start() error
 }
 
 type grpcServer struct {
@@ -38,27 +37,29 @@ func (s *grpcServer) GasPrice(ctx context.Context, in *pb.GasPriceRequest) (*pb.
 	return &pb.GasPriceReply{GasPrice: gasPrice.String()}, nil
 }
 
-func (s *grpcServer) Start() error {
-	lis, err := net.Listen("tcp", s.port)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	newServer := grpc.NewServer()
-	pb.RegisterCommonServer(newServer, &grpcServer{})
-	log.Printf("Grpc server registered")
-	if err := newServer.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-		return err
-	}
-	return nil
-}
-
-func New(port string, client services.INodeClient) error {
-	var err error
+func InitAndStart(port string, client services.INodeClient) error {
+	var initErr error
 	onceGrpcServertInstance.Do(func() {
 		server = &grpcServer{nodeClient: client, port: ":" + port}
+
+		lis, err := net.Listen("tcp", ":" + port)
+		if err != nil {
+			log.Fatalf("failed to listen: %v", err)
+			initErr = err
+			return
+		}
+
+		newServer := grpc.NewServer()
+		pb.RegisterCommonServer(newServer, server)
+		log.Printf("Grpc server registered")
+		if err := newServer.Serve(lis); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+			initErr = err
+			return
+		}
 	})
-	return err
+
+	return initErr
 }
 
 func GetGrpsServer() IGrpcServer {
