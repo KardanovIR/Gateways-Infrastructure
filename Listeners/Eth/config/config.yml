@@ -1,0 +1,8 @@
+node:
+  host: localhost:60045
+  startBlock: 0
+  confirmations: 6
+
+db:
+  name: block_db
+  host: localhost:27017
