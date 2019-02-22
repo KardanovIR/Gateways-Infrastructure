@@ -5,13 +5,19 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
+)
+
+const (
+	LogLevelEnvKey  = "LOG_LEVEL"
+	LogLevelDefault = logger.INFO
 )
 
 var Cfg *Config
 
 type Config struct {
-	Node NodeConfig `mapstructure:"NODE"`
-	Port string     `mapstructure:"PORT"`
+	Node Node   `mapstructure:"NODE"`
+	Port string `mapstructure:"PORT"`
 }
 
 type Node struct {
