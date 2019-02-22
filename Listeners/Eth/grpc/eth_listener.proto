@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.listener.eth";
+option java_outer_classname = "EthListenerProto";
+
+package ethListener;
+
+// The common service definition.
+service Common {
+  // Sends a greeting
+  rpc GasPrice (GasPriceRequest) returns (GasPriceReply) {}
+}
+
+// The request message containing the user's name.
+message GasPriceRequest {
+
+}
+
+// The response message containing the greetings
+message GasPriceReply {
+  string gasPrice = 1;
+}
