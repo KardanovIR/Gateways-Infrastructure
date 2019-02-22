@@ -2,12 +2,18 @@ package config
 
 import (
 	"errors"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/logger"
 	"strings"
 
 	"github.com/spf13/viper"
 )
 
 var Cfg *Config
+
+const (
+	LogLevelEnvKey  = "LOG_LEVEL"
+	LogLevelDefault = logger.INFO
+)
 
 type Config struct {
 	Node Node `mapstructure:"NODE"`

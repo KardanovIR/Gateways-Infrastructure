@@ -42,6 +42,7 @@ func New(ctx context.Context, host string) error {
 		ethClient := ethclient.NewClient(rc)
 		cl = &nodeClient{ethClient: ethClient}
 	})
+	log.Errorf("error during initialise node client: %s", err)
 	return err
 }
 

@@ -50,6 +50,7 @@ func initLogger(isDebug bool) (logger.ILogger, error) {
 	if isDebug {
 		level = logger.DEBUG
 	}
+
 	if l, ok := os.LookupEnv(config.LogLevelEnvKey); ok {
 		level = logger.Level(l)
 	}
