@@ -10,3 +10,15 @@ Run :
 Recompile protobuf :
     
     protoc -I grpc/ grpc/eth_listener.proto --go_out=plugins=grpc:grpc
+
+Docker :
+    
+    Build container:
+    
+    docker build --rm -t gateways-eth-listener:latest .
+    
+    Run container
+    docker run --rm -d -p 5001:5001 --env-file=config/dev.env --name gateways-eth-listener gateways-eth-listener:latest
+    
+    Read logs from container
+    docker logs gateways-eth-listener
