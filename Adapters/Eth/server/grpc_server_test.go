@@ -3,13 +3,13 @@ package server
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc"
 	"math/big"
 	"sync"
 	"testing"
 
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
-	"google.golang.org/grpc"
 )
 
 const serverPort = "20001"
