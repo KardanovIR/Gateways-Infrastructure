@@ -2,10 +2,10 @@ package config
 
 import (
 	"errors"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/logger"
 	"strings"
 
 	"github.com/spf13/viper"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/logger"
 )
 
 var Cfg *Config
