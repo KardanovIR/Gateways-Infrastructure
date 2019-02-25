@@ -7,17 +7,25 @@ option java_outer_classname = "EthListenerProto";
 package ethListener;
 
 // The common service definition.
-service Common {
+service Listener {
   // Sends a greeting
-  rpc GasPrice (GasPriceRequest) returns (GasPriceReply) {}
+  rpc AddTask (AddTaskRequest) returns (AddTaskResponse) {}
+  rpc RemoveTask (RemoveTaskRequest) returns (Empty) {}
 }
 
 // The request message containing the user's name.
-message GasPriceRequest {
-
+message AddTaskRequest {
+    string address = 1;
+    string callback = 2;
+    int32 taskType = 3;
 }
 
-// The response message containing the greetings
-message GasPriceReply {
-  string gasPrice = 1;
+message AddTaskResponse {
+    string taskId = 1;
 }
+
+message RemoveTaskRequest {
+    string taskId = 1;
+}
+
+message Empty {}

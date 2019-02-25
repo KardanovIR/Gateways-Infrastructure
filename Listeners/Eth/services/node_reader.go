@@ -2,20 +2,24 @@ package services
 
 import (
 	"context"
-	"sync"
-
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/repositories"
+	"sync"
 )
 
 type INodeReader interface {
+	Start() (err error)
+	Stop()
 }
 
 type nodeReader struct {
-	nodeClient *ethclient.Client
-	rp         repositories.IRepository
+	nodeClient    *ethclient.Client
+	rp            repositories.IRepository
+	conf          *config.Node
+	stopListenBTC chan struct{}
 }
 
 var (
@@ -24,17 +28,17 @@ var (
 )
 
 // New create node's client with connection to eth node
-func New(ctx context.Context, host string, r repositories.IRepository) error {
+func New(ctx context.Context, config config.Node, r repositories.IRepository) error {
 	log := logger.FromContext(ctx)
 	var err error
 	onceNodeClient.Do(func() {
-		rc, e := newRPCClient(log, host)
+		rc, e := newRPCClient(log, config.Host)
 		if e != nil {
 			err = e
 			return
 		}
 		ethClient := ethclient.NewClient(rc)
-		cl = &nodeReader{nodeClient: ethClient, rp: r}
+		cl = &nodeReader{nodeClient: ethClient, rp: r, conf: &config}
 	})
 	log.Errorf("error during initialise node client: %s", err)
 	return err
@@ -58,4 +62,17 @@ func newRPCClient(log logger.ILogger, host string) (*rpc.Client, error) {
 	}
 	log.Info("connected to etherium node successfully")
 	return c, nil
+}
+
+func (service *nodeReader) Start() (err error) {
+	//client := service.nodeClient
+
+	//startBlock := service.conf.StartBlockHeight
+
+	return
+}
+
+func (service *nodeReader) Stop() {
+	service.stopListenBTC <- struct{}{}
+	return
 }

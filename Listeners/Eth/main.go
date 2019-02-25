@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/server"
 	"os"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
@@ -32,13 +33,26 @@ func main() {
 	ctx := context.Background()
 	ctx = logger.ToContext(ctx, log)
 
-	repository, err := repositories.New(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name)
+	err = repositories.New(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name)
 	if err != nil {
 		log.Fatal("Can't create db connection: ", err)
 	}
-	if err := services.New(ctx, config.Cfg.Node.Host, repository); err != nil {
+
+	repository := repositories.GetRepository()
+	if err := services.New(ctx, config.Cfg.Node, repository); err != nil {
 		log.Fatal("Can't create node's client: ", err)
 	}
+
+	if err := server.InitAndStart(ctx, config.Cfg.Port, repository); err != nil {
+		log.Fatal("Can't start grpc server", err)
+	}
+
+	nodeReader := services.GetNodeReader()
+	err = nodeReader.Start()
+	if err != nil {
+		panic(err)
+	}
+	defer nodeReader.Stop()
 }
 
 // initLogger initializes logger: create logger, set logger format: json or text.
