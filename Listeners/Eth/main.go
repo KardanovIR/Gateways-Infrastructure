@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/server"
+	"log"
 	"os"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
@@ -14,6 +15,12 @@ import (
 )
 
 func main() {
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(dir)
+
 	var configPath string
 
 	flag.StringVar(&configPath, "config-path", "./config/config.yml", "A path to config file")
@@ -43,16 +50,16 @@ func main() {
 		log.Fatal("Can't create node's client: ", err)
 	}
 
+	nodeReader := services.GetNodeReader()
+	err = nodeReader.Start(ctx)
+	if err != nil {
+		log.Fatal("Can't start node reader: ", err)
+	}
+	defer nodeReader.Stop(ctx)
+
 	if err := server.InitAndStart(ctx, config.Cfg.Port, repository); err != nil {
 		log.Fatal("Can't start grpc server", err)
 	}
-
-	nodeReader := services.GetNodeReader()
-	err = nodeReader.Start()
-	if err != nil {
-		panic(err)
-	}
-	defer nodeReader.Stop()
 }
 
 // initLogger initializes logger: create logger, set logger format: json or text.

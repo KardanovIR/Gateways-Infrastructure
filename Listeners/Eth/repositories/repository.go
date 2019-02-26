@@ -18,6 +18,7 @@ const (
 type IRepository interface {
 	PutTask(ctx context.Context, task models.Task) (string, error)
 	RemoveTask(ctx context.Context, id string) error
+	FindByAddress(ctx context.Context, ticker string, addresses string) (tasks []models.Task, err error)
 }
 
 type repository struct {
@@ -98,6 +99,24 @@ func (rep *repository) RemoveTask(ctx context.Context, id string) (err error) {
 	}
 
 	return nil
+}
+
+func (rep *repository) FindByAddress(ctx context.Context, ticker string, addresses string) (tasks []models.Task, err error) {
+	log := logger.FromContext(ctx)
+	log.Info("RemoveTask")
+	rep.refreshSession()
+
+	var addrsSlice []string
+	for a := range addresses {
+		addrsSlice = append(addrsSlice, a)
+	}
+	err = rep.tasksC.Find(bson.M{
+		"ad": bson.M{
+			"$in": addrsSlice,
+		},
+	}).All(&tasks)
+
+	return
 }
 
 func (rep *repository) refreshSession() {
