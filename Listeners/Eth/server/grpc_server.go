@@ -32,8 +32,8 @@ func (s *grpcServer) AddTask(ctx context.Context, in *pb.AddTaskRequest) (*pb.Ad
 	log.Info("AddTask")
 
 	var newTask = models.Task{
-		EthereumAddress: in.Address,
-		CallbackUrl:     in.Callback,
+		Address:  in.Address,
+		Callback: models.Callback{in.CallbackUrl, models.CallbackType(in.TaskType), nil},
 	}
 
 	var id, err = s.rp.PutTask(ctx, newTask)

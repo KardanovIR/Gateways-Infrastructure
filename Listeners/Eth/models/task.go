@@ -6,24 +6,17 @@ import (
 )
 
 type Task struct {
-	Id              bson.ObjectId   `json:"id" bson:"_id,omitempty"`
-	CreatedAt       time.Time       `json:"createdAt" bson:"createdAt"`
-	UpdatedAt       time.Time       `json:"updatedAt" bson:"updatedAt"`
-	Address 		string          `json:"address" bson:"address"`
-	CallbackUrl     string          `json:"callbackUrl" bson:"callbackUrl"`
-	Type            TaskType        `json:"taskType" bson:"taskType"`
-	BlockchainType	BlockchainType	`json:"blockchainType" bson:"blockchainType"`
+	Id             bson.ObjectId `json:"id" bson:"_id,omitempty"`
+	CreatedAt      time.Time     `json:"createdAt" bson:"createdAt"`
+	UpdatedAt      time.Time     `json:"updatedAt" bson:"updatedAt"`
+	Address        string        `json:"address" bson:"address"`
+	Callback       Callback      `json:"callback" bson:"callback"`
+	Type           TaskType      `json:"taskType" bson:"taskType"`
+	BlockchainType ChainType     `json:"blockchainType" bson:"blockchainType"`
 }
 
-type TaskType int
-
-const (
-	Permanent TaskType = iota + 1
-	OneTime
-)
-
-type BlockchainType string
-
-const (
-	Ethereum BlockchainType = "Ethereum"
-)
+type Callback struct {
+	Url  string                 `json:"url" bson:"url"`
+	Type CallbackType           `json:"callbackType" bson:"callbackType"`
+	Data map[string]interface{} `json:"data" bson:"-"`
+}

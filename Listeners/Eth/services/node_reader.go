@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/repositories"
 	"math/big"
 	"sync"
@@ -19,10 +20,11 @@ type INodeReader interface {
 }
 
 type nodeReader struct {
-	nodeClient    *ethclient.Client
-	rp            repositories.IRepository
-	conf          *config.Node
-	stopListenBTC chan struct{}
+	nodeClient *ethclient.Client
+	rp         repositories.IRepository
+	rc         IRestClient
+	conf       *config.Node
+	stopListen chan struct{}
 }
 
 var (
@@ -31,17 +33,18 @@ var (
 )
 
 // New create node's client with connection to eth node
-func New(ctx context.Context, config config.Node, r repositories.IRepository) error {
+func New(ctx context.Context, config *config.Node, rc IRestClient, rp repositories.IRepository) error {
 	log := logger.FromContext(ctx)
 	var err error
 	onceNodeClient.Do(func() {
-		rc, e := newRPCClient(log, config.Host)
+		rpcc, e := newRPCClient(log, config.Host)
 		if e != nil {
+			log.Errorf("error during initialise rpc client: %s", e)
 			err = e
 			return
 		}
-		ethClient := ethclient.NewClient(rc)
-		cl = &nodeReader{nodeClient: ethClient, rp: r, conf: &config}
+		ethClient := ethclient.NewClient(rpcc)
+		cl = &nodeReader{nodeClient: ethClient, rc: rc, rp: rp, conf: config}
 	})
 
 	if err != nil {
@@ -76,26 +79,25 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 	log := logger.FromContext(ctx)
 	client := service.nodeClient
 
-	startBlock := new(big.Int)
-	startBlock.SetString(service.conf.StartBlockHeight, 10)
-
 	confirmations := new(big.Int)
 	confirmations.SetString(service.conf.Confirmations, 10)
 
 	//to do add saving chainState
 	//example below
-	//chainState, errorChainState := service.dbConn.GetChainState(service.conf.Ticker)
-	//if errorChainState == nil && chainState != nil {
-	//	if (*chainState).LastBlock > startBlock {
-	//		service.conf.BTCConfig.StartBlockHeight = chainState.LastBlock
-	//	}
-	//}
+	chainState, errorChainState := service.rp.GetLastChainState(ctx, models.ChainType(service.conf.ChainType))
+	if errorChainState == nil && chainState != nil {
+		if (*chainState).LastBlock > service.conf.StartBlockHeight {
+			service.conf.StartBlockHeight = chainState.LastBlock
+		}
+	}
+
+	startBlock := big.NewInt(service.conf.StartBlockHeight)
 
 	log.Infof("Start listening ETH from %d block.", startBlock)
 	go func() {
 		for {
 			select {
-			case <-service.stopListenBTC:
+			case <-service.stopListen:
 				log.Infof("Stop listening ETH.")
 				return
 			default:
@@ -136,11 +138,26 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 
 			err = service.processBlock(ctx, block)
 			if err != nil {
-				log.Infof("processBTCBlock(%s) error: %s", startBlock, err)
+				log.Errorf("processBTCBlock(%s) error: %s", startBlock, err)
 				log.Infof("Waiting a half minute.")
 				time.Sleep(30 * time.Second)
 				continue
 			}
+
+			if chainState == nil {
+				chainState = new(models.ChainState)
+				chainState.ChainType = models.ChainType(service.conf.ChainType)
+			}
+
+			chainState.LastBlock = block.Number().Int64() + 1
+			chainState.Timestamp = time.Now()
+
+			err = service.rp.PutChainState(ctx, *chainState)
+			if err != nil {
+				log.Errorf("Updating chainState for %s error: %s", service.conf.ChainType, err)
+			}
+
+			startBlock = big.NewInt(chainState.LastBlock)
 		}
 
 	}()
@@ -152,7 +169,7 @@ func (service *nodeReader) Stop(ctx context.Context) {
 	log := logger.FromContext(ctx)
 	log.Info("Stop listening ETH.")
 
-	service.stopListenBTC <- struct{}{}
+	service.stopListen <- struct{}{}
 	return
 }
 
@@ -163,97 +180,48 @@ func (service *nodeReader) processBlock(ctx context.Context, block *types.Block)
 	txs := block.Transactions()
 
 	for _, tx := range txs {
-		outAddresses := tx.To().Hex()
+		outAddresses := tx.To()
 
-		task, err := service.rp.FindByAddress(ctx, service.conf.Ticker, outAddresses)
-		if err != nil {
-			return err
-		}
-
-		if len(task) == 0 {
-			log.Infof("-> tx %s has no transfers, will be skipped.", tx.Hash())
+		if outAddresses == nil {
+			log.Infof("nil address", err)
 			continue
 		}
 
-		log.Infof("-> tx %s has %d transafers, start processing...", tx.Hash(), len(task))
+		tasks, err := service.rp.FindByAddress(ctx, models.ChainType(service.conf.ChainType), outAddresses.Hex())
+		if err != nil {
+			log.Errorf("error: %s", err)
+			return err
+		}
 
-	//	for _, wallet := range wallets {
-	//		log.Printf("->   Start processing transfer on registered wallet %s ...", wallet.Address)
-	//		tx, err := service.newIncomingTrasaction(block, btcTx, wallet.Address, outAddresses[wallet.Address])
-	//		if err != nil {
-	//			log.Printf("->   Error: creating incoming tx %s for wallet %s: %s", btcTx.Txid, wallet.Address, err)
-	//			continue
-	//		}
-	//
-	//		oldTx, err := service.dbConn.FindFirstIncomingTx(tx.Currency, tx.TransactionId, tx.AddressString)
-	//		if err != nil {
-	//			log.Printf("->   Error: searching incoming tx %s for wallet %s: %s", btcTx.Txid, wallet.Address, err)
-	//			continue
-	//		}
-	//
-	//		if oldTx != nil {
-	//			// tx.Id = oldTx.Id // transaction will be updated in PutIncomingTx...
-	//			// but it was already been converted. So updation must be prevented:
-	//			log.Printf("->   Error: tx %s for %s wallet %s HAS ALREADY BEEN ADDED", btcTx.Txid, service.conf.Ticker, wallet.Address)
-	//			continue
-	//		}
-	//
-	//		err = service.dbConn.PutIncomingTx(*tx)
-	//		if err != nil {
-	//			log.Printf("->   Error: inserting incoming tx %s for wallet %s: %s", btcTx.Txid, wallet.Address, err)
-	//			continue
-	//		}
-	//
-	//		log.Printf("->   Transfer %g %s to %s has been registered!", outAddresses[wallet.Address], service.conf.Ticker, wallet.Address)
-	//	}
-	//
+		if len(tasks) == 0 {
+			log.Infof("-> tx %s has no task, will be skipped.", tx.Hash().String())
+			continue
+		}
+
+		log.Infof("-> tx %s has %d transafers, start processing...", tx.Hash().String(), len(tasks))
+
+		for _, task := range tasks {
+			log.Infof("->   Start processing transfer on registered wallet %s ...", task.Address)
+			_, err := service.rc.RequestCallback(ctx, task.Callback, task.Callback.Data)
+			//block, btcTx, wallet.Address, outAddresses[wallet.Address])
+			if err != nil {
+				log.Errorf("->   Error: creating incoming tx %s for wallet %s: %s", tx.Hash().String(), task.Address, err)
+				continue
+			}
+
+			switch task.Type {
+			case models.OneTime:
+				err := service.rp.RemoveTask(ctx, task.Id.String())
+				if err != nil {
+					log.Errorf("->   Error: removing task %s", err)
+					return err
+				}
+			}
+
+			log.Infof("->   Transfer %s to %s has been registered!", service.conf.ChainType, task.Address)
+		}
+
 	}
 
-	//log.Printf("Block %d has been finished", block.Height)
-	//
-	//chainState, err := service.dbConn.GetChainState(service.conf.Ticker)
-	//if err != nil {
-	//	log.Printf("Getting chainstate for %s error: %s", service.conf.Ticker, err)
-	//	return
-	//}
-	//
-	//if chainState == nil {
-	//	chainState = new(models.ChainState)
-	//	chainState.ChainType = service.conf.Ticker
-	//}
-	//
-	//chainState.LastBlock = int64(block.Height) + 1
-	//chainState.Timestamp = time.Now()
-	//
-	//err = service.dbConn.PutChainState(*chainState)
-	//if err != nil {
-	//	log.Printf("Updating chainstate for %s error: %s", service.conf.Ticker, err)
-	//}
-	//
-	//service.conf.BTCConfig.StartBlockHeight = chainState.LastBlock
-
 	return
 }
-
-func collectToAddressesFromTx(txs []*types.Transaction) (addresses map[string]float64) {
-	addresses = map[string]float64{}
-	//for tx := range txs {
-	//	if len(tx) == 0 {
-	//		// log.Printf("tx %s: Skipped zero out-address", tx.Txid)
-	//		continue
-	//	}
-	//	if len(out.ScriptPubKey.Addresses) > 1 {
-	//		log.Printf("tx %s: Skipped multi-address out-address:", tx.Txid)
-	//		for _, addr := range out.ScriptPubKey.Addresses {
-	//			fmt.Printf("\t%s", addr)
-	//		}
-	//		continue
-	//	}
-	//
-	//	address := out.ScriptPubKey.Addresses[0]
-	//	value := out.Value
-	//	addresses[address] = value
-	//}
-	return
-}
-

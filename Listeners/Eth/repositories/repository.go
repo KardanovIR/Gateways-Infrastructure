@@ -12,19 +12,23 @@ import (
 )
 
 const (
-	Ctasks = "tasks"
+	Ctasks      = "tasks"
+	CChainState = "chainStates"
 )
 
 type IRepository interface {
 	PutTask(ctx context.Context, task models.Task) (string, error)
 	RemoveTask(ctx context.Context, id string) error
-	FindByAddress(ctx context.Context, ticker string, addresses string) (tasks []models.Task, err error)
+	FindByAddress(ctx context.Context, ticket models.ChainType, addresses string) (tasks []models.Task, err error)
+	GetLastChainState(ctx context.Context, chainType models.ChainType) (chainState *models.ChainState, err error)
+	PutChainState(ctx context.Context, state models.ChainState) (err error)
 }
 
 type repository struct {
-	session *mgo.Session
-	tasksC  *mgo.Collection
-	dbName  string
+	session     *mgo.Session
+	tasksC      *mgo.Collection
+	chainStateC *mgo.Collection
+	dbName      string
 }
 
 var (
@@ -53,7 +57,11 @@ func New(ctx context.Context, url, dbName string) error {
 			} else {
 				var db = conn.DB(dbName)
 				log.Infof("Connected successfully to MongoDB at %s", url)
-				rep = &repository{session: conn, tasksC: db.C(Ctasks), dbName: dbName}
+				rep = &repository{
+					session:     conn,
+					tasksC:      db.C(Ctasks),
+					chainStateC: db.C(CChainState),
+					dbName:      dbName}
 			}
 		}
 	})
@@ -101,24 +109,51 @@ func (rep *repository) RemoveTask(ctx context.Context, id string) (err error) {
 	return nil
 }
 
-func (rep *repository) FindByAddress(ctx context.Context, ticker string, addresses string) (tasks []models.Task, err error) {
+func (rep *repository) FindByAddress(ctx context.Context, ticket models.ChainType, addresses string) (tasks []models.Task, err error) {
 	log := logger.FromContext(ctx)
-	log.Info("RemoveTask")
+	log.Infof("FindByAddress %s", addresses)
 	rep.refreshSession()
 
-	var addrsSlice []string
-	for a := range addresses {
-		addrsSlice = append(addrsSlice, a)
-	}
 	err = rep.tasksC.Find(bson.M{
-		"ad": bson.M{
-			"$in": addrsSlice,
-		},
+		"address":        addresses,
+		"blockchainType": ticket,
 	}).All(&tasks)
+	if err != nil {
+		log.Errorf("Finding task in DB fails: %s", err)
+		return nil, err
+	}
 
 	return
 }
 
+func (rep *repository) GetLastChainState(ctx context.Context, chainType models.ChainType) (chainState *models.ChainState, err error) {
+	log := logger.FromContext(ctx)
+	log.Info("GetLastChainState")
+	rep.refreshSession()
+
+	err = rep.chainStateC.Find(bson.M{"timestamp": -1, "chaintype": chainType}).One(&chainState)
+	if err != nil {
+		log.Errorf("Getting lastChainState from DB fails: %s", err)
+	}
+	return
+}
+
+func (rep *repository) PutChainState(ctx context.Context, state models.ChainState) (err error) {
+	log := logger.FromContext(ctx)
+	log.Info("PutChainState")
+	rep.refreshSession()
+
+	if string(state.Id) == "" {
+		state.Id = bson.NewObjectId()
+		err = rep.chainStateC.Insert(state)
+		return
+	}
+
+	_, err = rep.chainStateC.UpsertId(state.Id, state)
+
+	return
+
+}
 func (rep *repository) refreshSession() {
 	rep.session.Refresh()
 	// todo: maybe this is overhead

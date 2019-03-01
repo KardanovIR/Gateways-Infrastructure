@@ -420,9 +420,11 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/ethereum/go-ethereum/core/types",
     "github.com/ethereum/go-ethereum/ethclient",
     "github.com/ethereum/go-ethereum/rpc",
     "github.com/globalsign/mgo",
+    "github.com/globalsign/mgo/bson",
     "github.com/golang/protobuf/proto",
     "github.com/spf13/viper",
     "github.com/stretchr/testify/assert",

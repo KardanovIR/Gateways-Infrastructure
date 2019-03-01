@@ -16,8 +16,9 @@ service Listener {
 // The request message containing the user's name.
 message AddTaskRequest {
     string address = 1;
-    string callback = 2;
-    int32 taskType = 3;
+    string callbackType = 2;
+    string callbackUrl = 3;
+    string taskType = 4;
 }
 
 message AddTaskResponse {

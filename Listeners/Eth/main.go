@@ -45,12 +45,16 @@ func main() {
 		log.Fatal("Can't create db connection: ", err)
 	}
 
-	repository := repositories.GetRepository()
-	if err := services.New(ctx, config.Cfg.Node, repository); err != nil {
-		log.Fatal("Can't create node's client: ", err)
+	if err := services.NewRestClient(ctx); err != nil {
+		log.Fatal("Can't create rest client: ", err)
 	}
 
+	repository := repositories.GetRepository()
+	if err := services.New(ctx, &config.Cfg.Node, services.GetRestClient(), repository); err != nil {
+		log.Fatal("Can't create node's client: ", err)
+	}
 	nodeReader := services.GetNodeReader()
+
 	err = nodeReader.Start(ctx)
 	if err != nil {
 		log.Fatal("Can't start node reader: ", err)
