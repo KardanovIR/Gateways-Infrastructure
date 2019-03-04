@@ -20,100 +20,209 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 // The request message containing the user's name.
-type GasPriceRequest struct {
+type AddTaskRequest struct {
+	Address              string   `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	CallbackType         string   `protobuf:"bytes,2,opt,name=callbackType,proto3" json:"callbackType,omitempty"`
+	CallbackUrl          string   `protobuf:"bytes,3,opt,name=callbackUrl,proto3" json:"callbackUrl,omitempty"`
+	TaskType             string   `protobuf:"bytes,4,opt,name=taskType,proto3" json:"taskType,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GasPriceRequest) Reset()         { *m = GasPriceRequest{} }
-func (m *GasPriceRequest) String() string { return proto.CompactTextString(m) }
-func (*GasPriceRequest) ProtoMessage()    {}
-func (*GasPriceRequest) Descriptor() ([]byte, []int) {
+func (m *AddTaskRequest) Reset()         { *m = AddTaskRequest{} }
+func (m *AddTaskRequest) String() string { return proto.CompactTextString(m) }
+func (*AddTaskRequest) ProtoMessage()    {}
+func (*AddTaskRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_c10215c3e6fc0276, []int{0}
 }
 
-func (m *GasPriceRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GasPriceRequest.Unmarshal(m, b)
+func (m *AddTaskRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddTaskRequest.Unmarshal(m, b)
 }
-func (m *GasPriceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GasPriceRequest.Marshal(b, m, deterministic)
+func (m *AddTaskRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddTaskRequest.Marshal(b, m, deterministic)
 }
-func (m *GasPriceRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GasPriceRequest.Merge(m, src)
+func (m *AddTaskRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddTaskRequest.Merge(m, src)
 }
-func (m *GasPriceRequest) XXX_Size() int {
-	return xxx_messageInfo_GasPriceRequest.Size(m)
+func (m *AddTaskRequest) XXX_Size() int {
+	return xxx_messageInfo_AddTaskRequest.Size(m)
 }
-func (m *GasPriceRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_GasPriceRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GasPriceRequest proto.InternalMessageInfo
-
-// The response message containing the greetings
-type GasPriceReply struct {
-	GasPrice             string   `protobuf:"bytes,1,opt,name=gasPrice,proto3" json:"gasPrice,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+func (m *AddTaskRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddTaskRequest.DiscardUnknown(m)
 }
 
-func (m *GasPriceReply) Reset()         { *m = GasPriceReply{} }
-func (m *GasPriceReply) String() string { return proto.CompactTextString(m) }
-func (*GasPriceReply) ProtoMessage()    {}
-func (*GasPriceReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c10215c3e6fc0276, []int{1}
-}
+var xxx_messageInfo_AddTaskRequest proto.InternalMessageInfo
 
-func (m *GasPriceReply) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GasPriceReply.Unmarshal(m, b)
-}
-func (m *GasPriceReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GasPriceReply.Marshal(b, m, deterministic)
-}
-func (m *GasPriceReply) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GasPriceReply.Merge(m, src)
-}
-func (m *GasPriceReply) XXX_Size() int {
-	return xxx_messageInfo_GasPriceReply.Size(m)
-}
-func (m *GasPriceReply) XXX_DiscardUnknown() {
-	xxx_messageInfo_GasPriceReply.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GasPriceReply proto.InternalMessageInfo
-
-func (m *GasPriceReply) GetGasPrice() string {
+func (m *AddTaskRequest) GetAddress() string {
 	if m != nil {
-		return m.GasPrice
+		return m.Address
 	}
 	return ""
 }
 
+func (m *AddTaskRequest) GetCallbackType() string {
+	if m != nil {
+		return m.CallbackType
+	}
+	return ""
+}
+
+func (m *AddTaskRequest) GetCallbackUrl() string {
+	if m != nil {
+		return m.CallbackUrl
+	}
+	return ""
+}
+
+func (m *AddTaskRequest) GetTaskType() string {
+	if m != nil {
+		return m.TaskType
+	}
+	return ""
+}
+
+type AddTaskResponse struct {
+	TaskId               string   `protobuf:"bytes,1,opt,name=taskId,proto3" json:"taskId,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AddTaskResponse) Reset()         { *m = AddTaskResponse{} }
+func (m *AddTaskResponse) String() string { return proto.CompactTextString(m) }
+func (*AddTaskResponse) ProtoMessage()    {}
+func (*AddTaskResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c10215c3e6fc0276, []int{1}
+}
+
+func (m *AddTaskResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddTaskResponse.Unmarshal(m, b)
+}
+func (m *AddTaskResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddTaskResponse.Marshal(b, m, deterministic)
+}
+func (m *AddTaskResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddTaskResponse.Merge(m, src)
+}
+func (m *AddTaskResponse) XXX_Size() int {
+	return xxx_messageInfo_AddTaskResponse.Size(m)
+}
+func (m *AddTaskResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddTaskResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddTaskResponse proto.InternalMessageInfo
+
+func (m *AddTaskResponse) GetTaskId() string {
+	if m != nil {
+		return m.TaskId
+	}
+	return ""
+}
+
+type RemoveTaskRequest struct {
+	TaskId               string   `protobuf:"bytes,1,opt,name=taskId,proto3" json:"taskId,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *RemoveTaskRequest) Reset()         { *m = RemoveTaskRequest{} }
+func (m *RemoveTaskRequest) String() string { return proto.CompactTextString(m) }
+func (*RemoveTaskRequest) ProtoMessage()    {}
+func (*RemoveTaskRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c10215c3e6fc0276, []int{2}
+}
+
+func (m *RemoveTaskRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RemoveTaskRequest.Unmarshal(m, b)
+}
+func (m *RemoveTaskRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RemoveTaskRequest.Marshal(b, m, deterministic)
+}
+func (m *RemoveTaskRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveTaskRequest.Merge(m, src)
+}
+func (m *RemoveTaskRequest) XXX_Size() int {
+	return xxx_messageInfo_RemoveTaskRequest.Size(m)
+}
+func (m *RemoveTaskRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveTaskRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RemoveTaskRequest proto.InternalMessageInfo
+
+func (m *RemoveTaskRequest) GetTaskId() string {
+	if m != nil {
+		return m.TaskId
+	}
+	return ""
+}
+
+type Empty struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Empty) Reset()         { *m = Empty{} }
+func (m *Empty) String() string { return proto.CompactTextString(m) }
+func (*Empty) ProtoMessage()    {}
+func (*Empty) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c10215c3e6fc0276, []int{3}
+}
+
+func (m *Empty) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Empty.Unmarshal(m, b)
+}
+func (m *Empty) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Empty.Marshal(b, m, deterministic)
+}
+func (m *Empty) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Empty.Merge(m, src)
+}
+func (m *Empty) XXX_Size() int {
+	return xxx_messageInfo_Empty.Size(m)
+}
+func (m *Empty) XXX_DiscardUnknown() {
+	xxx_messageInfo_Empty.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Empty proto.InternalMessageInfo
+
 func init() {
-	proto.RegisterType((*GasPriceRequest)(nil), "ethListener.GasPriceRequest")
-	proto.RegisterType((*GasPriceReply)(nil), "ethListener.GasPriceReply")
+	proto.RegisterType((*AddTaskRequest)(nil), "ethListener.AddTaskRequest")
+	proto.RegisterType((*AddTaskResponse)(nil), "ethListener.AddTaskResponse")
+	proto.RegisterType((*RemoveTaskRequest)(nil), "ethListener.RemoveTaskRequest")
+	proto.RegisterType((*Empty)(nil), "ethListener.Empty")
 }
 
 func init() { proto.RegisterFile("eth_listener.proto", fileDescriptor_c10215c3e6fc0276) }
 
 var fileDescriptor_c10215c3e6fc0276 = []byte{
-	// 162 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x4a, 0x2d, 0xc9, 0x88,
-	0xcf, 0xc9, 0x2c, 0x2e, 0x49, 0xcd, 0x4b, 0x2d, 0xd2, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2,
-	0x4e, 0x2d, 0xc9, 0xf0, 0x81, 0x0a, 0x29, 0x09, 0x72, 0xf1, 0xbb, 0x27, 0x16, 0x07, 0x14, 0x65,
-	0x26, 0xa7, 0x06, 0xa5, 0x16, 0x96, 0xa6, 0x16, 0x97, 0x28, 0x69, 0x73, 0xf1, 0x22, 0x84, 0x0a,
-	0x72, 0x2a, 0x85, 0xa4, 0xb8, 0x38, 0xd2, 0xa1, 0x02, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0x9c, 0x41,
-	0x70, 0xbe, 0x51, 0x00, 0x17, 0x9b, 0x73, 0x7e, 0x6e, 0x6e, 0x7e, 0x9e, 0x90, 0x1b, 0x17, 0x07,
-	0x4c, 0x9b, 0x90, 0x8c, 0x1e, 0x92, 0x1d, 0x7a, 0x68, 0x16, 0x48, 0x49, 0xe1, 0x90, 0x2d, 0xc8,
-	0xa9, 0x54, 0x62, 0x70, 0xd2, 0xe2, 0x12, 0xc9, 0xcc, 0xd7, 0x4b, 0x2f, 0x2a, 0x48, 0xd6, 0x83,
-	0x3b, 0x3c, 0xb5, 0x24, 0xc3, 0x49, 0xc0, 0x15, 0xa1, 0x29, 0x00, 0xe4, 0x91, 0x00, 0xc6, 0x24,
-	0x36, 0xb0, 0x8f, 0x8c, 0x01, 0x01, 0x00, 0x00, 0xff, 0xff, 0xd1, 0x2e, 0x19, 0x4e, 0xe7, 0x00,
-	0x00, 0x00,
+	// 269 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x91, 0xcb, 0x4a, 0xc3, 0x40,
+	0x14, 0x86, 0x1b, 0x2f, 0x4d, 0x3d, 0x15, 0x2f, 0x07, 0x91, 0x10, 0x45, 0xca, 0xac, 0xbc, 0xc0,
+	0x2c, 0xf4, 0x09, 0x0c, 0x54, 0x10, 0x5c, 0x94, 0x50, 0xd7, 0x32, 0xcd, 0x1c, 0x4c, 0x69, 0xda,
+	0x19, 0x67, 0x46, 0xa1, 0xef, 0xe0, 0xda, 0xe7, 0x95, 0x4e, 0x93, 0x34, 0x41, 0xbb, 0xfc, 0x2f,
+	0x24, 0xdf, 0x9c, 0x1f, 0x90, 0x5c, 0xfe, 0x56, 0x4c, 0xad, 0xa3, 0x05, 0x19, 0xae, 0x8d, 0x72,
+	0x0a, 0xfb, 0xe4, 0xf2, 0x97, 0xd2, 0x62, 0xdf, 0x01, 0x1c, 0x3d, 0x4a, 0x39, 0x16, 0x76, 0x96,
+	0xd2, 0xc7, 0x27, 0x59, 0x87, 0x11, 0x84, 0x42, 0x4a, 0x43, 0xd6, 0x46, 0xc1, 0x20, 0xb8, 0x3e,
+	0x48, 0x2b, 0x89, 0x0c, 0x0e, 0x33, 0x51, 0x14, 0x13, 0x91, 0xcd, 0xc6, 0x4b, 0x4d, 0xd1, 0x8e,
+	0x8f, 0x5b, 0x1e, 0x0e, 0xa0, 0x5f, 0xe9, 0x57, 0x53, 0x44, 0xbb, 0xbe, 0xd2, 0xb4, 0x30, 0x86,
+	0x9e, 0x13, 0x76, 0xfd, 0x85, 0x3d, 0x1f, 0xd7, 0x9a, 0xdd, 0xc0, 0x71, 0x4d, 0x63, 0xb5, 0x5a,
+	0x58, 0xc2, 0x73, 0xe8, 0xae, 0xe2, 0x67, 0x59, 0xd2, 0x94, 0x8a, 0xdd, 0xc1, 0x69, 0x4a, 0x73,
+	0xf5, 0x45, 0x4d, 0xf6, 0x6d, 0xe5, 0x10, 0xf6, 0x87, 0x73, 0xed, 0x96, 0xf7, 0x3f, 0x01, 0xf4,
+	0xaa, 0xc7, 0xe3, 0x13, 0x84, 0xe5, 0xdf, 0xf0, 0x82, 0x37, 0xae, 0xc2, 0xdb, 0x17, 0x89, 0x2f,
+	0xff, 0x0f, 0xd7, 0x80, 0xac, 0x83, 0x09, 0xc0, 0x06, 0x05, 0xaf, 0x5a, 0xed, 0x3f, 0x8c, 0x31,
+	0xb6, 0x72, 0x8f, 0xc5, 0x3a, 0xc9, 0x2d, 0x9c, 0x4d, 0x15, 0x7f, 0x37, 0x3a, 0xe3, 0xf5, 0x5e,
+	0xe4, 0xf2, 0xe4, 0x64, 0xb8, 0x29, 0x8f, 0x56, 0xfb, 0x8d, 0x82, 0x49, 0xd7, 0x0f, 0xf9, 0xf0,
+	0x1b, 0x00, 0x00, 0xff, 0xff, 0x10, 0x23, 0x5e, 0xb2, 0xde, 0x01, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -124,66 +233,99 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// CommonClient is the client API for Common service.
+// ListenerClient is the client API for Listener service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type CommonClient interface {
+type ListenerClient interface {
 	// Sends a greeting
-	GasPrice(ctx context.Context, in *GasPriceRequest, opts ...grpc.CallOption) (*GasPriceReply, error)
+	AddTask(ctx context.Context, in *AddTaskRequest, opts ...grpc.CallOption) (*AddTaskResponse, error)
+	RemoveTask(ctx context.Context, in *RemoveTaskRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
-type commonClient struct {
+type listenerClient struct {
 	cc *grpc.ClientConn
 }
 
-func NewCommonClient(cc *grpc.ClientConn) CommonClient {
-	return &commonClient{cc}
+func NewListenerClient(cc *grpc.ClientConn) ListenerClient {
+	return &listenerClient{cc}
 }
 
-func (c *commonClient) GasPrice(ctx context.Context, in *GasPriceRequest, opts ...grpc.CallOption) (*GasPriceReply, error) {
-	out := new(GasPriceReply)
-	err := c.cc.Invoke(ctx, "/ethListener.Common/GasPrice", in, out, opts...)
+func (c *listenerClient) AddTask(ctx context.Context, in *AddTaskRequest, opts ...grpc.CallOption) (*AddTaskResponse, error) {
+	out := new(AddTaskResponse)
+	err := c.cc.Invoke(ctx, "/ethListener.Listener/AddTask", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// CommonServer is the server API for Common service.
-type CommonServer interface {
+func (c *listenerClient) RemoveTask(ctx context.Context, in *RemoveTaskRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/ethListener.Listener/RemoveTask", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ListenerServer is the server API for Listener service.
+type ListenerServer interface {
 	// Sends a greeting
-	GasPrice(context.Context, *GasPriceRequest) (*GasPriceReply, error)
+	AddTask(context.Context, *AddTaskRequest) (*AddTaskResponse, error)
+	RemoveTask(context.Context, *RemoveTaskRequest) (*Empty, error)
 }
 
-func RegisterCommonServer(s *grpc.Server, srv CommonServer) {
-	s.RegisterService(&_Common_serviceDesc, srv)
+func RegisterListenerServer(s *grpc.Server, srv ListenerServer) {
+	s.RegisterService(&_Listener_serviceDesc, srv)
 }
 
-func _Common_GasPrice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GasPriceRequest)
+func _Listener_AddTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddTaskRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CommonServer).GasPrice(ctx, in)
+		return srv.(ListenerServer).AddTask(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ethListener.Common/GasPrice",
+		FullMethod: "/ethListener.Listener/AddTask",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CommonServer).GasPrice(ctx, req.(*GasPriceRequest))
+		return srv.(ListenerServer).AddTask(ctx, req.(*AddTaskRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _Common_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "ethListener.Common",
-	HandlerType: (*CommonServer)(nil),
+func _Listener_RemoveTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveTaskRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ListenerServer).RemoveTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ethListener.Listener/RemoveTask",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ListenerServer).RemoveTask(ctx, req.(*RemoveTaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _Listener_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "ethListener.Listener",
+	HandlerType: (*ListenerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GasPrice",
-			Handler:    _Common_GasPrice_Handler,
+			MethodName: "AddTask",
+			Handler:    _Listener_AddTask_Handler,
+		},
+		{
+			MethodName: "RemoveTask",
+			Handler:    _Listener_RemoveTask_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

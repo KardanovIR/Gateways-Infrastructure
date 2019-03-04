@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/server"
 	"os"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
@@ -32,12 +33,29 @@ func main() {
 	ctx := context.Background()
 	ctx = logger.ToContext(ctx, log)
 
-	repository, err := repositories.New(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name)
+	err = repositories.New(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name)
 	if err != nil {
 		log.Fatal("Can't create db connection: ", err)
 	}
-	if err := services.New(ctx, config.Cfg.Node.Host, repository); err != nil {
+
+	if err := services.NewRestClient(ctx); err != nil {
+		log.Fatal("Can't create rest client: ", err)
+	}
+
+	repository := repositories.GetRepository()
+	if err := services.New(ctx, &config.Cfg.Node, services.GetRestClient(), repository); err != nil {
 		log.Fatal("Can't create node's client: ", err)
+	}
+	nodeReader := services.GetNodeReader()
+
+	err = nodeReader.Start(ctx)
+	if err != nil {
+		log.Fatal("Can't start node reader: ", err)
+	}
+	defer nodeReader.Stop(ctx)
+
+	if err := server.InitAndStart(ctx, config.Cfg.Port, repository); err != nil {
+		log.Fatal("Can't start grpc server", err)
 	}
 }
 

@@ -25,6 +25,7 @@ func TestReadWithEnvVariables(t *testing.T) {
 	_ = os.Setenv("NODE_STARTBLOCK", "7239023")
 	_ = os.Setenv("NODE_CONFIRMATIONS", "6")
 	_ = os.Setenv("DB_NAME", "block_db_test_env")
+	_ = os.Setenv("PORT", "5001")
 	path := filepath.Join("testdata", "config_test.yml")
 	cfg, err := read(path)
 	if err != nil {

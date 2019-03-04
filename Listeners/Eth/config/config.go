@@ -16,8 +16,9 @@ const (
 )
 
 type Config struct {
-	Node Node `mapstructure:"NODE"`
-	Db   DB   `mapstructure:"DB"`
+	Node Node   `mapstructure:"NODE"`
+	Db   DB     `mapstructure:"DB"`
+	Port string `mapstructure:"PORT"`
 }
 
 // Load set configuration parameters.
