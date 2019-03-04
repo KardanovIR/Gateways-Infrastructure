@@ -37,7 +37,7 @@ var (
 
 func GetRepository() IRepository {
 	onceRepository.Do(func() {
-		panic("try to get node reader before it's creation!")
+		panic("try to get repository before it's creation!")
 	})
 	return rep
 }

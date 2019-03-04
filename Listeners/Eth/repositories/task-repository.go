@@ -33,13 +33,13 @@ func (rep *repository) RemoveTask(ctx context.Context, id string) (err error) {
 	log.Info("RemoveTask")
 	rep.refreshSession()
 
-	if string(id) == "" {
+	if string(id) != "" {
 		var objectId = bson.ObjectId(id)
 		err = rep.tasksC.Remove(bson.M{
 			"_id": objectId,
 		})
 		if err != nil {
-			log.Errorf("Inserting task to DB fails: %s", err)
+			log.Errorf("Removing task to DB fails: %s", err)
 			return err
 		}
 		return nil

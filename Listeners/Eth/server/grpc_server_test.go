@@ -37,7 +37,6 @@ func TestGrpcServerAddTask(t *testing.T) {
 	if reply.TaskId != addedTaskId {
 		t.Fail()
 	}
-	fmt.Println(reply.String())
 }
 
 func TestGrpcServerRemoveTask(t *testing.T) {

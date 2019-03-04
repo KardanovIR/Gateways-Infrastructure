@@ -40,7 +40,7 @@ func NewRestClient(ctx context.Context) error {
 	})
 
 	if err != nil {
-		log.Errorf("error during initialise node client: %s", err)
+		log.Errorf("error during initialise rest client: %s", err)
 		return err
 	}
 
@@ -51,7 +51,7 @@ func NewRestClient(ctx context.Context) error {
 // Client must be previously created with New(), in another case function throws panic
 func GetRestClient() IRestClient {
 	onceRestClient.Do(func() {
-		panic("try to get node reader before it's creation!")
+		panic("try to get rest client before it's creation!")
 	})
 	return rc
 }

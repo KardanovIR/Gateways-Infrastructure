@@ -2,6 +2,10 @@ package services
 
 import (
 	"context"
+	"math/big"
+	"sync"
+	"time"
+	
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
@@ -9,9 +13,6 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/repositories"
-	"math/big"
-	"sync"
-	"time"
 )
 
 type INodeReader interface {
@@ -139,7 +140,7 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 			err = service.processBlock(ctx, block)
 			if err != nil {
 				log.Errorf("processBTCBlock(%s) error: %s", startBlock, err)
-				log.Infof("Waiting a half minute.")
+				log.Debugf("Waiting a half minute.")
 				time.Sleep(30 * time.Second)
 				continue
 			}

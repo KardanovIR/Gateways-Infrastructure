@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/server"
-	"log"
 	"os"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
@@ -15,12 +14,6 @@ import (
 )
 
 func main() {
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(dir)
-
 	var configPath string
 
 	flag.StringVar(&configPath, "config-path", "./config/config.yml", "A path to config file")
