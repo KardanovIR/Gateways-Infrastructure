@@ -152,7 +152,7 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 			chainState.LastBlock = block.Number().Int64() + 1
 			chainState.Timestamp = time.Now()
 
-			err = service.rp.PutChainState(ctx, *chainState)
+			*chainState, err = service.rp.PutChainState(ctx, *chainState)
 			if err != nil {
 				log.Errorf("Updating chainState for %s error: %s", service.conf.ChainType, err)
 			}
