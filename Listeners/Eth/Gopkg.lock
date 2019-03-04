@@ -180,14 +180,6 @@
   version = "v1.0"
 
 [[projects]]
-  digest = "1:9665a593c0199c193341b8b110e31b19c899923711fc70bde2c2f3eb2d337526"
-  name = "github.com/rs/xhandler"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "d9d9599b6aaf6a058cb7b1f48291ded2cbd13390"
-  version = "v1.0"
-
-[[projects]]
   digest = "1:3e39bafd6c2f4bf3c76c3bfd16a2e09e016510ad5db90dc02b88e2f565d6d595"
   name = "github.com/spf13/afero"
   packages = [
@@ -239,7 +231,7 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:685fdfea42d825ebd39ee0994354b46c374cf2c2b2d97a41a8dee1807c6a9b62"
+  digest = "1:5b180f17d5bc50b765f4dcf0d126c72979531cbbd7f7929bf3edd87fb801ea2d"
   name = "github.com/syndtr/goleveldb"
   packages = [
     "leveldb",
@@ -257,14 +249,6 @@
   ]
   pruneopts = "UT"
   revision = "b001fa50d6b27f3f0bb175a87d0cb55426d0a0ae"
-
-[[projects]]
-  branch = "master"
-  digest = "1:874250b2ebfb551a9f4a99637e0ffd93c46940209d6f402af7daacdc009b5e10"
-  name = "github.com/wavesplatform/GatewaysInfrastructure"
-  packages = ["Adapters/Eth/logger"]
-  pruneopts = "UT"
-  revision = "17a8f237a22dc33074da45c3ad7fff563c7681a3"
 
 [[projects]]
   digest = "1:777e729b475d3895c7229552aa10076f0d177daf37c0a72258006d046d329960"
@@ -309,7 +293,6 @@
   digest = "1:fbb0ef3cbe401b91d1d02d8a9a2e8a1d6a5c5cad9f4b48be81b155f2a7fbcda0"
   name = "golang.org/x/net"
   packages = [
-    "context",
     "http/httpguts",
     "http2",
     "http2/hpack",
@@ -325,9 +308,12 @@
   branch = "master"
   digest = "1:7a8067e267a25694dd7bdde6e5016053a3f61bb7141448bf8e0025a84eb7d11c"
   name = "golang.org/x/sys"
-  packages = ["unix"]
+  packages = [
+    "cpu",
+    "unix",
+  ]
   pruneopts = "UT"
-  revision = "a9d3bda3a223baa6bba6ef412cb273f0fd163c05"
+  revision = "c2f5717e611cf8e89a852a41081355194d80c943"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -428,7 +414,6 @@
     "github.com/golang/protobuf/proto",
     "github.com/spf13/viper",
     "github.com/stretchr/testify/assert",
-    "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger",
     "go.uber.org/zap",
     "go.uber.org/zap/zapcore",
     "google.golang.org/grpc",

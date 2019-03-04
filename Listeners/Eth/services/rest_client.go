@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/models"
 	"io/ioutil"
 	"net/http"
