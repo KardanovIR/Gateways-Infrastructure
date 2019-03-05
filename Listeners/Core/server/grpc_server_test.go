@@ -6,9 +6,9 @@ import (
 	"sync"
 	"testing"
 
-	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/grpc"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/models"
+	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/grpc"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 	"google.golang.org/grpc"
 )
 

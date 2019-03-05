@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 )
 
 type IRestClient interface {

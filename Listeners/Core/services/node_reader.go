@@ -9,10 +9,10 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/models"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/repositories"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/config"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
 )
 
 type INodeReader interface {

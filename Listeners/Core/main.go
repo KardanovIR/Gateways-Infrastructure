@@ -4,13 +4,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/server"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/server"
 	"os"
 
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/repositories"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/services"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/config"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
 )
 
 func main() {
