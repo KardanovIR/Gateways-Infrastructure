@@ -2,15 +2,16 @@ package server
 
 import (
 	"context"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/models"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/repositories"
 	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"sync"
 
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/repositories"
 )
 
 type IGrpcServer interface {
@@ -40,7 +41,7 @@ func (s *grpcServer) AddTask(ctx context.Context, in *pb.AddTaskRequest) (*pb.Ad
 	var newTask = models.Task{
 		Address:        in.Address,
 		Callback:       models.Callback{in.CallbackUrl, models.CallbackType(in.CallbackType), nil},
-		BlockchainType: models.Ethereum,
+		BlockchainType: config.Cfg.Node.ChainType,
 		Type:           models.TaskType(taskType),
 	}
 
