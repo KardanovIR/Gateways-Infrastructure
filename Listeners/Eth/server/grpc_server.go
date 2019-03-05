@@ -2,14 +2,16 @@ package server
 
 import (
 	"context"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/models"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/repositories"
 	"google.golang.org/grpc"
 	"net"
+	"strconv"
 	"sync"
 
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/repositories"
 )
 
 type IGrpcServer interface {
@@ -29,14 +31,21 @@ var (
 
 func (s *grpcServer) AddTask(ctx context.Context, in *pb.AddTaskRequest) (*pb.AddTaskResponse, error) {
 	log := logger.FromContext(ctx)
-	log.Info("AddTask")
+	log.Infof("AddTask %+v", in)
 
+	taskType, err := strconv.Atoi(in.TaskType)
+	if err != nil {
+		log.Errorf("Wrong task type %s: %s", in.TaskType, err)
+		return nil, err
+	}
 	var newTask = models.Task{
-		Address:  in.Address,
-		Callback: models.Callback{in.CallbackUrl, models.CallbackType(in.TaskType), nil},
+		Address:        in.Address,
+		Callback:       models.Callback{in.CallbackUrl, models.CallbackType(in.CallbackType), nil},
+		BlockchainType: config.Cfg.Node.ChainType,
+		Type:           models.TaskType(taskType),
 	}
 
-	var id, err = s.rp.PutTask(ctx, newTask)
+	id, err := s.rp.PutTask(ctx, newTask)
 	if err != nil {
 		log.Errorf("Creating task fails: %s", err)
 		return nil, err

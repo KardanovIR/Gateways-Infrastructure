@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"sync"
 	"time"
-	
+
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
@@ -203,7 +203,7 @@ func (service *nodeReader) processBlock(ctx context.Context, block *types.Block)
 
 		for _, task := range tasks {
 			log.Infof("->   Start processing transfer on registered wallet %s ...", task.Address)
-			_, err := service.rc.RequestCallback(ctx, task.Callback, task.Callback.Data)
+			err := service.rc.RequestCallback(ctx, task.Callback, task.Callback.Data)
 			//block, btcTx, wallet.Address, outAddresses[wallet.Address])
 			if err != nil {
 				log.Errorf("->   Error: creating incoming tx %s for wallet %s: %s", tx.Hash().String(), task.Address, err)
@@ -212,7 +212,7 @@ func (service *nodeReader) processBlock(ctx context.Context, block *types.Block)
 
 			switch task.Type {
 			case models.OneTime:
-				err := service.rp.RemoveTask(ctx, task.Id.String())
+				err := service.rp.RemoveTask(ctx, string(task.Id))
 				if err != nil {
 					log.Errorf("->   Error: removing task %s", err)
 					return err

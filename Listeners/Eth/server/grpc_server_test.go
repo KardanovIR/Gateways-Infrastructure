@@ -89,6 +89,6 @@ func (n *repoMock) GetLastChainState(ctx context.Context, chainType models.Chain
 	return new(models.ChainState), nil
 }
 
-func (n *repoMock) PutChainState(ctx context.Context, state models.ChainState) (err error) {
-	return nil
+func (n *repoMock) PutChainState(ctx context.Context, state models.ChainState) (newState models.ChainState, err error) {
+	return models.ChainState{}, nil
 }

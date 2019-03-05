@@ -64,5 +64,8 @@ func validate() error {
 	if len(Cfg.Db.Name) == 0 {
 		return errors.New("DB_NAME parameter is empty")
 	}
+	if len(Cfg.Node.ChainType) == 0 {
+		return errors.New("CHAIN parameter is empty")
+	}
 	return nil
 }

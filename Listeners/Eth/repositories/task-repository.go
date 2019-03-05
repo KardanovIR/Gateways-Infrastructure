@@ -9,7 +9,7 @@ import (
 
 func (rep *repository) PutTask(ctx context.Context, task models.Task) (id string, err error) {
 	log := logger.FromContext(ctx)
-	log.Info("InsertTask")
+	log.Infof("InsertTask %+v", task)
 
 	rep.refreshSession()
 
@@ -64,4 +64,3 @@ func (rep *repository) FindByAddress(ctx context.Context, ticket models.ChainTyp
 
 	return
 }
-
