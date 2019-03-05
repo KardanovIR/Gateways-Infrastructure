@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
-	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/grpc"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/models"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/repositories"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/config"
+	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/grpc"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
 )
 
 type IGrpcServer interface {

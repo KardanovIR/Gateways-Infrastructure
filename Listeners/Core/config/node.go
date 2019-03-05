@@ -1,6 +1,6 @@
 package config
 
-import "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/models"
+import "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 
 type Node struct {
 	Host             string           `mapstructure:"HOST"`

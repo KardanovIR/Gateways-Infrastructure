@@ -6,7 +6,7 @@ Run :
     
     Parameters:
        -config-path     path to config, by default "./config/config.yml"
-       -config-path=./Listeners/Eth/config/config.yml for debug in JetBrains Goland
+       -config-path=./Listeners/Core/config/config.yml for debug in JetBrains Goland
        
 Recompile protobuf :
     

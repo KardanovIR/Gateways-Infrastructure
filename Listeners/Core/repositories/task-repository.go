@@ -3,8 +3,8 @@ package repositories
 import (
 	"context"
 	"github.com/globalsign/mgo/bson"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 )
 
 func (rep *repository) PutTask(ctx context.Context, task models.Task) (id string, err error) {

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/globalsign/mgo"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 )
 
 const (
