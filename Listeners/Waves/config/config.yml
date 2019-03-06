@@ -1,0 +1,10 @@
+node:
+  host: https://nodes.wavesplatform.com
+  startBlock: 5142270
+  confirmations: 6
+  chain: ETH
+
+db:
+  name: block_db
+  host: localhost:27017
+port: 5001
