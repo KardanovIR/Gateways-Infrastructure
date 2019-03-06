@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.adapter.waves";
+option java_outer_classname = "WavesAdapterProto";
+
+package wavesAdapter;
+
+// The common service definition.
+service Common {
+  // Sends a greeting
+  rpc GetLastBlockHeight (BlockRequest) returns (BlockReply) {}
+}
+
+// The request message containing the user's name.
+message BlockRequest {
+
+}
+
+// The response message containing the greetings
+message BlockReply {
+  string block = 1;
+}

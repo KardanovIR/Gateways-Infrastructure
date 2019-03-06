@@ -34,7 +34,7 @@ var (
 	onceNodeClient sync.Once
 )
 
-// New create node's client with connection to eth node
+// New create node's client with connection to Waves node
 func New(ctx context.Context, config *config.Node, rc IRestClient, rp repositories.IRepository) error {
 	log := logger.FromContext(ctx)
 	var err error
@@ -90,17 +90,17 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 
 	startBlock := big.NewInt(service.conf.StartBlockHeight)
 
-	log.Infof("Start listening ETH from %d block.", startBlock)
+	log.Infof("Start listening Waves from %d block.", startBlock)
 	go func() {
 		for {
 			select {
 			case <-service.stopListen:
-				log.Infof("Stop listening ETH.")
+				log.Infof("Stop listening Waves.")
 				return
 			default:
 			}
 
-			log.Infof("Process ETH block %d", startBlock)
+			log.Infof("Process Waves block %d", startBlock)
 
 			block, _, err := client.Blocks.At(ctx, startBlock.Uint64())
 			if err != nil {
@@ -154,7 +154,7 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 
 func (service *nodeReader) Stop(ctx context.Context) {
 	log := logger.FromContext(ctx)
-	log.Info("Stop listening ETH.")
+	log.Info("Stop listening Waves.")
 
 	service.stopListen <- struct{}{}
 	return
