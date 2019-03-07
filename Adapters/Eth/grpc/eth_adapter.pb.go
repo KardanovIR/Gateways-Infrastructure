@@ -33,7 +33,7 @@ func (m *GasPriceRequest) Reset()         { *m = GasPriceRequest{} }
 func (m *GasPriceRequest) String() string { return proto.CompactTextString(m) }
 func (*GasPriceRequest) ProtoMessage()    {}
 func (*GasPriceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cc5170b1544d27bc, []int{0}
+	return fileDescriptor_1a3043ca784e1536, []int{0}
 }
 
 func (m *GasPriceRequest) XXX_Unmarshal(b []byte) error {
@@ -54,6 +54,62 @@ func (m *GasPriceRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GasPriceRequest proto.InternalMessageInfo
 
+// The request message for raw transaction creation
+type RawTransactionRequest struct {
+	AddressFrom          string   `protobuf:"bytes,1,opt,name=addressFrom,proto3" json:"addressFrom,omitempty"`
+	AddressTo            string   `protobuf:"bytes,2,opt,name=addressTo,proto3" json:"addressTo,omitempty"`
+	Amount               string   `protobuf:"bytes,3,opt,name=amount,proto3" json:"amount,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *RawTransactionRequest) Reset()         { *m = RawTransactionRequest{} }
+func (m *RawTransactionRequest) String() string { return proto.CompactTextString(m) }
+func (*RawTransactionRequest) ProtoMessage()    {}
+func (*RawTransactionRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1a3043ca784e1536, []int{1}
+}
+
+func (m *RawTransactionRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RawTransactionRequest.Unmarshal(m, b)
+}
+func (m *RawTransactionRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RawTransactionRequest.Marshal(b, m, deterministic)
+}
+func (m *RawTransactionRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RawTransactionRequest.Merge(m, src)
+}
+func (m *RawTransactionRequest) XXX_Size() int {
+	return xxx_messageInfo_RawTransactionRequest.Size(m)
+}
+func (m *RawTransactionRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_RawTransactionRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RawTransactionRequest proto.InternalMessageInfo
+
+func (m *RawTransactionRequest) GetAddressFrom() string {
+	if m != nil {
+		return m.AddressFrom
+	}
+	return ""
+}
+
+func (m *RawTransactionRequest) GetAddressTo() string {
+	if m != nil {
+		return m.AddressTo
+	}
+	return ""
+}
+
+func (m *RawTransactionRequest) GetAmount() string {
+	if m != nil {
+		return m.Amount
+	}
+	return ""
+}
+
 // The response message containing the greetings
 type GasPriceReply struct {
 	GasPrice             string   `protobuf:"bytes,1,opt,name=gasPrice,proto3" json:"gasPrice,omitempty"`
@@ -66,7 +122,7 @@ func (m *GasPriceReply) Reset()         { *m = GasPriceReply{} }
 func (m *GasPriceReply) String() string { return proto.CompactTextString(m) }
 func (*GasPriceReply) ProtoMessage()    {}
 func (*GasPriceReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cc5170b1544d27bc, []int{1}
+	return fileDescriptor_1a3043ca784e1536, []int{2}
 }
 
 func (m *GasPriceReply) XXX_Unmarshal(b []byte) error {
@@ -94,25 +150,74 @@ func (m *GasPriceReply) GetGasPrice() string {
 	return ""
 }
 
-func init() {
-	proto.RegisterType((*GasPriceRequest)(nil), "ethAdapter.GasPriceRequest")
-	proto.RegisterType((*GasPriceReply)(nil), "ethAdapter.GasPriceReply")
+// The response message containing raw transaction
+type RawTransactionReply struct {
+	Tx                   string   `protobuf:"bytes,1,opt,name=tx,proto3" json:"tx,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func init() { proto.RegisterFile("eth_adapter.proto", fileDescriptor_cc5170b1544d27bc) }
+func (m *RawTransactionReply) Reset()         { *m = RawTransactionReply{} }
+func (m *RawTransactionReply) String() string { return proto.CompactTextString(m) }
+func (*RawTransactionReply) ProtoMessage()    {}
+func (*RawTransactionReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1a3043ca784e1536, []int{3}
+}
 
-var fileDescriptor_cc5170b1544d27bc = []byte{
-	// 156 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x48, 0x2d, 0xc9, 0x70,
-	0x4c, 0x49, 0x2c, 0x28, 0x49, 0x2d, 0xd2, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x42, 0x88,
-	0x28, 0x09, 0x72, 0xf1, 0xbb, 0x27, 0x16, 0x07, 0x14, 0x65, 0x26, 0xa7, 0x06, 0xa5, 0x16, 0x96,
-	0xa6, 0x16, 0x97, 0x28, 0x69, 0x73, 0xf1, 0x22, 0x84, 0x0a, 0x72, 0x2a, 0x85, 0xa4, 0xb8, 0x38,
-	0xd2, 0xa1, 0x02, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0x9c, 0x41, 0x70, 0xbe, 0x91, 0x1f, 0x17, 0x9b,
-	0x73, 0x7e, 0x6e, 0x6e, 0x7e, 0x9e, 0x90, 0x0b, 0x17, 0x07, 0x4c, 0x9b, 0x90, 0xb4, 0x1e, 0x92,
-	0xa5, 0x68, 0xe6, 0x4b, 0x49, 0x62, 0x97, 0x2c, 0xc8, 0xa9, 0x54, 0x62, 0x70, 0xd2, 0xe0, 0x12,
-	0xce, 0xcc, 0xd7, 0x4b, 0x2f, 0x2a, 0x48, 0xd6, 0x4b, 0x84, 0x2a, 0x49, 0x2d, 0xc9, 0x70, 0xe2,
-	0x77, 0x85, 0x6b, 0x09, 0x00, 0xf9, 0x21, 0x80, 0x31, 0x89, 0x0d, 0xec, 0x19, 0x63, 0x40, 0x00,
-	0x00, 0x00, 0xff, 0xff, 0x65, 0xcd, 0x07, 0xa3, 0xe0, 0x00, 0x00, 0x00,
+func (m *RawTransactionReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RawTransactionReply.Unmarshal(m, b)
+}
+func (m *RawTransactionReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RawTransactionReply.Marshal(b, m, deterministic)
+}
+func (m *RawTransactionReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RawTransactionReply.Merge(m, src)
+}
+func (m *RawTransactionReply) XXX_Size() int {
+	return xxx_messageInfo_RawTransactionReply.Size(m)
+}
+func (m *RawTransactionReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_RawTransactionReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RawTransactionReply proto.InternalMessageInfo
+
+func (m *RawTransactionReply) GetTx() string {
+	if m != nil {
+		return m.Tx
+	}
+	return ""
+}
+
+func init() {
+	proto.RegisterType((*GasPriceRequest)(nil), "ethAdapter.GasPriceRequest")
+	proto.RegisterType((*RawTransactionRequest)(nil), "ethAdapter.RawTransactionRequest")
+	proto.RegisterType((*GasPriceReply)(nil), "ethAdapter.GasPriceReply")
+	proto.RegisterType((*RawTransactionReply)(nil), "ethAdapter.RawTransactionReply")
+}
+
+func init() { proto.RegisterFile("eth_adapter.proto", fileDescriptor_1a3043ca784e1536) }
+
+var fileDescriptor_1a3043ca784e1536 = []byte{
+	// 267 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x51, 0x4d, 0x4b, 0xc3, 0x40,
+	0x10, 0x35, 0x11, 0x42, 0x3b, 0xa2, 0x25, 0x5b, 0x94, 0x18, 0x05, 0xeb, 0x82, 0x50, 0x10, 0xf6,
+	0xa0, 0xbf, 0xc0, 0xfa, 0xd1, 0x6b, 0x08, 0xbd, 0x78, 0x92, 0x35, 0x59, 0x9a, 0x40, 0x93, 0x59,
+	0x77, 0xa7, 0xd8, 0xfe, 0x24, 0xff, 0xa5, 0x34, 0x6e, 0x9b, 0x5a, 0x4a, 0x8f, 0xef, 0xbd, 0x79,
+	0xf3, 0xf5, 0x20, 0x54, 0x54, 0x7c, 0xc8, 0x5c, 0x6a, 0x52, 0x46, 0x68, 0x83, 0x84, 0x0c, 0x14,
+	0x15, 0x4f, 0x7f, 0x0c, 0x0f, 0xa1, 0x37, 0x96, 0x36, 0x31, 0x65, 0xa6, 0x52, 0xf5, 0x35, 0x57,
+	0x96, 0x38, 0xc2, 0x79, 0x2a, 0xbf, 0x27, 0x46, 0xd6, 0x56, 0x66, 0x54, 0x62, 0xed, 0x04, 0x36,
+	0x80, 0x13, 0x99, 0xe7, 0x46, 0x59, 0xfb, 0x66, 0xb0, 0x8a, 0xbc, 0x81, 0x37, 0xec, 0xa6, 0xdb,
+	0x14, 0xbb, 0x86, 0xae, 0x83, 0x13, 0x8c, 0xfc, 0x46, 0x6f, 0x09, 0x76, 0x01, 0x81, 0xac, 0x70,
+	0x5e, 0x53, 0x74, 0xdc, 0x48, 0x0e, 0xf1, 0x7b, 0x38, 0x6d, 0x77, 0xd0, 0xb3, 0x25, 0x8b, 0xa1,
+	0x33, 0x75, 0x84, 0x9b, 0xb2, 0xc1, 0xfc, 0x0e, 0xfa, 0xbb, 0xdb, 0xad, 0x2c, 0x67, 0xe0, 0xd3,
+	0xc2, 0x15, 0xfb, 0xb4, 0x78, 0xf8, 0xf1, 0x20, 0x78, 0xc6, 0xaa, 0xc2, 0x9a, 0xbd, 0x40, 0x67,
+	0xdd, 0x9e, 0x5d, 0x89, 0xf6, 0x76, 0xb1, 0x73, 0x78, 0x7c, 0xb9, 0x5f, 0xd4, 0xb3, 0x25, 0x3f,
+	0x62, 0xef, 0x10, 0x8e, 0x15, 0xfd, 0x1f, 0xcd, 0x6e, 0xb7, 0x1d, 0x7b, 0x9f, 0x16, 0xdf, 0x1c,
+	0x2a, 0x69, 0x5a, 0x8f, 0x86, 0xd0, 0x2f, 0x51, 0x4c, 0x8d, 0xce, 0xc4, 0x3a, 0x28, 0x45, 0xc5,
+	0xa8, 0xf7, 0xba, 0x31, 0x26, 0xab, 0xdc, 0x12, 0xef, 0x33, 0x68, 0x02, 0x7c, 0xfc, 0x0d, 0x00,
+	0x00, 0xff, 0xff, 0x1b, 0x73, 0x3f, 0xb1, 0xd5, 0x01, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -127,8 +232,10 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type CommonClient interface {
-	// Sends a greeting
+	// Get suggested gas price
 	GasPrice(ctx context.Context, in *GasPriceRequest, opts ...grpc.CallOption) (*GasPriceReply, error)
+	// request to create raw transaction
+	GetRawTransaction(ctx context.Context, in *RawTransactionRequest, opts ...grpc.CallOption) (*RawTransactionReply, error)
 }
 
 type commonClient struct {
@@ -148,10 +255,21 @@ func (c *commonClient) GasPrice(ctx context.Context, in *GasPriceRequest, opts .
 	return out, nil
 }
 
+func (c *commonClient) GetRawTransaction(ctx context.Context, in *RawTransactionRequest, opts ...grpc.CallOption) (*RawTransactionReply, error) {
+	out := new(RawTransactionReply)
+	err := c.cc.Invoke(ctx, "/ethAdapter.Common/GetRawTransaction", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CommonServer is the server API for Common service.
 type CommonServer interface {
-	// Sends a greeting
+	// Get suggested gas price
 	GasPrice(context.Context, *GasPriceRequest) (*GasPriceReply, error)
+	// request to create raw transaction
+	GetRawTransaction(context.Context, *RawTransactionRequest) (*RawTransactionReply, error)
 }
 
 func RegisterCommonServer(s *grpc.Server, srv CommonServer) {
@@ -176,6 +294,24 @@ func _Common_GasPrice_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Common_GetRawTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RawTransactionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServer).GetRawTransaction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ethAdapter.Common/GetRawTransaction",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServer).GetRawTransaction(ctx, req.(*RawTransactionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Common_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "ethAdapter.Common",
 	HandlerType: (*CommonServer)(nil),
@@ -183,6 +319,10 @@ var _Common_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GasPrice",
 			Handler:    _Common_GasPrice_Handler,
+		},
+		{
+			MethodName: "GetRawTransaction",
+			Handler:    _Common_GetRawTransaction_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

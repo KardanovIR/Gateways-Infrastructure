@@ -8,8 +8,10 @@ package ethAdapter;
 
 // The common service definition.
 service Common {
-  // Sends a greeting
+  // Get suggested gas price
   rpc GasPrice (GasPriceRequest) returns (GasPriceReply) {}
+  // request to create raw transaction
+  rpc GetRawTransaction (RawTransactionRequest) returns (RawTransactionReply) {}
 }
 
 // The request message containing the user's name.
@@ -17,7 +19,19 @@ message GasPriceRequest {
 
 }
 
+// The request message for raw transaction creation
+message RawTransactionRequest {
+    string addressFrom = 1;
+    string addressTo = 2;
+    string amount = 3;
+}
+
 // The response message containing the greetings
 message GasPriceReply {
   string gasPrice = 1;
+}
+
+// The response message containing raw transaction
+message RawTransactionReply {
+  string tx = 1;
 }
