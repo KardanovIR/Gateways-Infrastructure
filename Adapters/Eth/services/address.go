@@ -20,7 +20,7 @@ func (cl *nodeClient) GenerateAddress(ctx context.Context) (publicAddress string
 	prKeyHex := hex.EncodeToString(crypto.FromECDSA(prkey))
 	addr := crypto.PubkeyToAddress(prkey.PublicKey)
 	publicAddress = addr.Hex()
-	log.Infof("Private hex %s, public address %s", prKeyHex, publicAddress)
+	log.Debugf("Private hex %s, public address %s", prKeyHex, publicAddress)
 	cl.privateKeys[publicAddress] = prkey
 	return
 }

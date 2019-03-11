@@ -14,11 +14,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e04d59357facebaa211f1db0533d58cda9b49ad12c755b3ac30a67cd4a6d291b"
+  digest = "1:0ff3be56cec5888cbc8efb6e195bc530ea74f43af177c196360bf33896d50f66"
   name = "github.com/aristanetworks/goarista"
   packages = ["monotime"]
   pruneopts = ""
-  revision = "c1e4b37418775d8f5e0c0c1a68766d321b32d6ca"
+  revision = "e9fb69a13f453f6b1270463959e8ca986a527beb"
 
 [[projects]]
   branch = "master"
@@ -29,6 +29,14 @@
   revision = "306aecffea325e97f513b3ff0cf7895a5310651d"
 
 [[projects]]
+  digest = "1:0deddd908b6b4b768cfc272c16ee61e7088a60f7fe2f06c547bd3d8e1f8b8e77"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = ""
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
   digest = "1:aaeffbff5bd24654cb4c190ed75d6c7b57b4f5d6741914c1a7a6bb7447e756c5"
   name = "github.com/deckarep/golang-set"
   packages = ["."]
@@ -37,7 +45,7 @@
   version = "v1.7.1"
 
 [[projects]]
-  digest = "1:ef56a889da489cd51a892c658b59d85ec60c7a9fe33846ef5951dd68270b7b99"
+  digest = "1:49b5451a4ce27b50393cc0d4c6fdd9cf7fa148ee4c0dd9c1d6c515b232427022"
   name = "github.com/ethereum/go-ethereum"
   packages = [
     ".",
@@ -60,8 +68,8 @@
     "trie",
   ]
   pruneopts = ""
-  revision = "7fa3509e2eaf1a4ebc12344590e5699406690f15"
-  version = "v1.8.22"
+  revision = "c942700427557e3ff6de3aaf6b916e2f056c1ec2"
+  version = "v1.8.23"
 
 [[projects]]
   digest = "1:eb53021a8aa3f599d29c7102e65026242bdedce998a54837dc67f14b6a97c5fd"
@@ -80,7 +88,7 @@
   version = "v1.8.0"
 
 [[projects]]
-  digest = "1:3dd078fda7500c341bc26cfbc6c6a34614f295a2457149fc1045cab767cbcf18"
+  digest = "1:d3d38150b6d77b2aad42a9e105170538b6563518993d43df78a1add6e31cce62"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -90,16 +98,16 @@
     "ptypes/timestamp",
   ]
   pruneopts = ""
-  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
-  version = "v1.2.0"
+  revision = "c823c79ea1570fb5ff454033735a8e68575d1d0f"
+  version = "v1.3.0"
 
 [[projects]]
-  branch = "master"
   digest = "1:6a6322a15aa8e99bd156fbba0aae4e5d67b4bb05251d860b348a45dfdcba9cce"
   name = "github.com/golang/snappy"
   packages = ["."]
   pruneopts = ""
   revision = "2a8bb927dd31d8daada140a5d09578521ce5c36a"
+  version = "v0.0.1"
 
 [[projects]]
   digest = "1:d14365c51dd1d34d5c79833ec91413bfbb166be978724f15701e17080dc06dec"
@@ -145,6 +153,14 @@
   version = "v1.2.0"
 
 [[projects]]
+  digest = "1:256484dbbcd271f9ecebc6795b2df8cad4c458dd0f5fd82a8c2fa0c29f233411"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = ""
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:5f47c69f85311c4dc292be6cc995a0a3fe8337a6ce38ef4f71e5b7efd5ad42e0"
   name = "github.com/rs/cors"
   packages = ["."]
@@ -172,12 +188,12 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:9ceffa4ab5f7195ecf18b3a7fff90c837a9ed5e22e66d18069e4bccfe1f52aa0"
+  digest = "1:cc15ae4fbdb02ce31f3392361a70ac041f4f02e0485de8ffac92bd8033e3d26e"
   name = "github.com/spf13/jwalterweatherman"
   packages = ["."]
   pruneopts = ""
-  revision = "4a4406e478ca629068e7768fc33f3f044173c0a6"
-  version = "v1.0.0"
+  revision = "94f6ae3ed3bceceafa716478c5fbf8d29ca601a1"
+  version = "v1.1.0"
 
 [[projects]]
   digest = "1:cbaf13cdbfef0e4734ed8a7504f57fe893d471d62a35b982bf6fb3f036449a66"
@@ -204,8 +220,7 @@
   version = "v1.3.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:5688f484c89ee5d989f9a124c2154acf7962a8e137c851f16d15958dca4fff2c"
+  digest = "1:0a9834d471916f392c608d4f13225444d47b6b7a0378dce1aef683d83711179f"
   name = "github.com/syndtr/goleveldb"
   packages = [
     "leveldb",
@@ -222,7 +237,8 @@
     "leveldb/util",
   ]
   pruneopts = ""
-  revision = "2f17a3356c6616cbfc4ae4c38147dc062a68fb0e"
+  revision = "9d007e481048296f09f59bd19bb7ae584563cd95"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:74f86c458e82e1c4efbab95233e0cf51b7cc02dc03193be9f62cd81224e10401"
@@ -257,15 +273,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5462386895a322b94a79a5de7314310edbd5f4d15f851ae032f146b2c951b3de"
+  digest = "1:f1282b7b8f47533e585be65217b076a5fa31c8b78aa2a3bd353e2bf5dcd8ce2e"
   name = "golang.org/x/crypto"
   packages = ["sha3"]
   pruneopts = ""
-  revision = "74369b46fc6756741c016591724fd1cb8e26845f"
+  revision = "c2843e01d9a2bc60bb26ad24e09734fdc2d9ec58"
 
 [[projects]]
   branch = "master"
-  digest = "1:4f7cbb08d72e1163302e2d21415200a7bc281653f5f34eda8a15c0da11a337b0"
+  digest = "1:adfcbf2794c07c5ae1fb51e19c909d614094a11bac3d05c9f157d022c10128b5"
   name = "golang.org/x/net"
   packages = [
     "http/httpguts",
@@ -277,15 +293,18 @@
     "websocket",
   ]
   pruneopts = ""
-  revision = "3a22650c66bd7f4fb6d1e8072ffd7b75c8a27898"
+  revision = "56fb01167e7d1e1d17dd87993d34c963f4356e87"
 
 [[projects]]
   branch = "master"
-  digest = "1:34c712936a39a1a1ce8e02a30f177de243baca31b5a8a372f61bffc71e517e5a"
+  digest = "1:dd444162b5f02f1fee86207d1c963790e7a5f8d857c1f2665a75332cb1a511f0"
   name = "golang.org/x/sys"
-  packages = ["unix"]
+  packages = [
+    "cpu",
+    "unix",
+  ]
   pruneopts = ""
-  revision = "153ac476189d567564fda94622d7a8c0fb338f6b"
+  revision = "10058d7d4faa7dd5ef860cbd31af00903076e7b8"
 
 [[projects]]
   digest = "1:5acd3512b047305d49e8763eef7ba423901e85d5dd2fd1e71778a0ea8de10bd4"
@@ -312,14 +331,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:58cab6380ee63ac4d983ff73b8f6aab7ab6d0cf8dc82550641017fb8e6a0940e"
+  digest = "1:6a8803e2481c92e20f9fc654b8ddfbd5a2a802c0454d0bc5b7a018b218282205"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = ""
-  revision = "082222b4a5c572e33e82ee9162d1352c7cf38682"
+  revision = "5fe7a883aa19554f42890211544aa549836af7b7"
 
 [[projects]]
-  digest = "1:39d4d828b87d58d114fdc211f0638f32dcae84019fe17d6b48f9b697f4b60213"
+  digest = "1:b6c17b0c657f047118ae59b358950b28515914512cf3de02388cc42e33a92520"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -355,8 +374,8 @@
     "tap",
   ]
   pruneopts = ""
-  revision = "a02b0774206b209466313a0b525d2c738fe407eb"
-  version = "v1.18.0"
+  revision = "2fdaae294f38ed9a121193c51ec99fecd3b13eb7"
+  version = "v1.19.0"
 
 [[projects]]
   branch = "v2"
@@ -378,6 +397,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/ethereum/go-ethereum",
     "github.com/ethereum/go-ethereum/common",
     "github.com/ethereum/go-ethereum/core/types",
     "github.com/ethereum/go-ethereum/crypto",

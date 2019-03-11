@@ -3,12 +3,12 @@ package services
 import (
 	"context"
 	"encoding/hex"
+	"github.com/stretchr/testify/assert"
 	"math/big"
 	"testing"
 	"time"
 
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/magiconair/properties/assert"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/models"
@@ -38,12 +38,10 @@ func TestNodeClient_Transactions(t *testing.T) {
 		log.Error(err)
 		t.Fail()
 	}
-	pk, err := crypto.HexToECDSA(privateKey)
-	if err != nil {
+	if err := SetKeyPair(address, privateKey); err != nil {
 		log.Error(err)
 		t.Fail()
 	}
-	cl.(*nodeClient).privateKeys[address] = pk
 	// start test
 	amount, _ := new(big.Int).SetString("100000000000000", 10)
 
@@ -172,6 +170,5 @@ func TestNodeClient_Transactions(t *testing.T) {
 			log.Error("back money transaction in pending status yet!! %s ", txId2)
 			t.Fail()
 		}
-
 	}
 }

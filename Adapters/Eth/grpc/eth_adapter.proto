@@ -8,15 +8,67 @@ package ethAdapter;
 
 // The common service definition.
 service Common {
-  // Get suggested gas price
-  rpc GasPrice (GasPriceRequest) returns (GasPriceReply) {}
-  // request to create raw transaction
-  rpc GetRawTransaction (RawTransactionRequest) returns (RawTransactionReply) {}
+    // Get suggested gas price
+    rpc GasPrice (GasPriceRequest) returns (GasPriceReply) {
+    }
+    // request to create raw transaction
+    rpc GetRawTransaction (RawTransactionRequest) returns (RawTransactionReply) {
+    }
+    // Get suggested transaction's fee
+    rpc SuggestFee (EmptyRequest) returns (SuggestFeeReply) {
+    }
+    // Get account's next nonce
+    rpc GetNextNonce (AddressRequest) returns (GetNextNonceReply) {
+    }
+    // Get account's balance
+    rpc GetBalance (AddressRequest) returns (GetBalanceReply) {
+    }
+    // Generate address
+    rpc GenerateAddress (EmptyRequest) returns (GenerateAddressReply) {
+    }
+    // Validate address
+    rpc ValidateAddress (AddressRequest) returns (ValidateAddressReply) {
+    }
+    // Sing transaction
+    rpc SignTransaction (SignTransactionRequest) returns (SignTransactionReply) {
+    }
+    // Send transaction
+    rpc SendTransaction (SendTransactionRequest) returns (SendTransactionReply) {
+    }
+    // Get transaction status
+    rpc GetTransactionStatus (GetTransactionStatusRequest) returns (GetTransactionStatusReply) {
+    }
 }
 
-// The request message containing the user's name.
+// The request message for getting suggested gas price
 message GasPriceRequest {
 
+}
+
+// The request message for getting information by account address
+message AddressRequest {
+    string address = 1;
+}
+
+// empty request message
+message EmptyRequest {
+
+}
+
+// The request message for singing transaction
+message SignTransactionRequest {
+    string senderAddress = 1;
+    bytes tx = 2;
+}
+
+// The request message for singing transaction
+message SendTransactionRequest {
+    bytes tx = 1;
+}
+
+// The request message for getting transaction's status containing tx hash
+message GetTransactionStatusRequest {
+    string txHash = 1;
 }
 
 // The request message for raw transaction creation
@@ -26,12 +78,50 @@ message RawTransactionRequest {
     string amount = 3;
 }
 
-// The response message containing the greetings
+// The response message containing the suggested gas price
 message GasPriceReply {
-  string gasPrice = 1;
+    string gasPrice = 1;
 }
 
 // The response message containing raw transaction
 message RawTransactionReply {
-  string tx = 1;
+    bytes tx = 1;
+}
+
+// The response message containing suggested transaction's fee
+message SuggestFeeReply {
+    string fee = 1;
+}
+
+// The response message containing account's next nonce
+message GetNextNonceReply {
+    int64 nonce = 1;
+}
+
+// The response message containing account's balance
+message GetBalanceReply {
+    string balance = 1;
+}
+
+// The response message containing generated address
+message GenerateAddressReply {
+    string address = 1;
+}
+
+// The response message containing result of address's validation
+message ValidateAddressReply {
+    bool valid = 1;
+}
+
+// The response message containing signed transaction
+message SignTransactionReply {
+    bytes tx = 1;
+}
+// The response message containing transaction's txHash
+message SendTransactionReply {
+    string txHash = 1;
+}
+// The response message containing transaction's status: UNKNOWN, PENDING, SUCCESS
+message GetTransactionStatusReply {
+    string status = 1;
 }
