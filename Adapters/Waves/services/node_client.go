@@ -2,10 +2,13 @@ package services
 
 import (
 	"context"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
-	"github.com/wavesplatform/gowaves/pkg/client"
+	"net/http"
 	"strconv"
 	"sync"
+	"time"
+
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
+	"github.com/wavesplatform/gowaves/pkg/client"
 )
 
 type INodeClient interface {
@@ -18,11 +21,11 @@ type nodeClient struct {
 
 func (cl *nodeClient) GetLastBlockHeight(ctx context.Context) (string, error) {
 	log := logger.FromContext(ctx)
-	log.Debug("call service method 'SuggestGasPrice'")
+	log.Debug("call service method 'GetLastBlockHeight'")
 
 	lastBlock, _, err := cl.nodeClient.Blocks.Last(ctx)
 	if err != nil {
-		log.Errorf("connect to Waves node fails: %s", err)
+		log.Errorf("get last block fails: %s", err)
 		return "", err
 	}
 	return strconv.FormatUint(lastBlock.Height, 10), nil
@@ -38,17 +41,18 @@ func New(ctx context.Context, host string) error {
 	log := logger.FromContext(ctx)
 	var err error
 	onceRPCClientInstance.Do(func() {
-		wavesClient, e := client.NewClient()
-
+		wavesClient, e := client.NewClient(client.Options{
+			Client:  &http.Client{Timeout: 30 * time.Second},
+			BaseUrl: host,
+		})
 		if e != nil {
-			log.Errorf("error during initialise rpc client: %s", e)
+			log.Errorf("error during initialise waves client: %s", e)
 			err = e
 			return
 		}
 
 		cl = &nodeClient{nodeClient: wavesClient}
 	})
-	log.Errorf("error during initialise node client: %s", err)
 	return err
 }
 

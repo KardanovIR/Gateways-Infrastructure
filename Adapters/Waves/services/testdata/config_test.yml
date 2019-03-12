@@ -1,0 +1,4 @@
+node:
+  host: https://pool.testnet.wavesnodes.com/
+port: 5010
+
