@@ -1,10 +1,10 @@
 node:
   host: https://nodes.wavesplatform.com
-  startBlock: 1432700
+  startBlock: 1434080
   confirmations: 6
   chain: WAVES
 
 db:
-  name: block_db
+  name: block_db_test
   host: localhost:27017
-port: 5001
+port: 5002

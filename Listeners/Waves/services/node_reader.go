@@ -2,8 +2,7 @@ package services
 
 import (
 	"context"
-	"github.com/wavesplatform/gowaves/pkg/client"
-	"github.com/wavesplatform/gowaves/pkg/proto"
+	"errors"
 	"math/big"
 	"net/http"
 	"strconv"
@@ -14,6 +13,9 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/repositories"
+	"github.com/wavesplatform/gowaves/pkg/client"
+	"github.com/wavesplatform/gowaves/pkg/crypto"
+	"github.com/wavesplatform/gowaves/pkg/proto"
 )
 
 type INodeReader interface {
@@ -50,7 +52,7 @@ func New(ctx context.Context, config *config.Node, rc IRestClient, rp repositori
 			return
 		}
 
-		cl = &nodeReader{nodeClient: wavesClient, rc: rc, rp: rp, conf: config}
+		cl = &nodeReader{nodeClient: wavesClient, rc: rc, rp: rp, conf: config, stopListen: make(chan struct{})}
 	})
 
 	if err != nil {
@@ -105,28 +107,28 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 			block, _, err := client.Blocks.At(ctx, startBlock.Uint64())
 			if err != nil {
 				log.Errorf("BlockByNumber(%d) error: %s", startBlock, err)
-				time.Sleep(15 * time.Second)
+				time.Sleep(30 * time.Second)
 				continue
 			}
 
 			lastBlock, _, err := client.Blocks.Last(ctx)
 			if err != nil {
-				log.Errorf("HeaderByNumber error: %s", err)
+				log.Errorf("Last block error: %s", err)
 				time.Sleep(15 * time.Second)
 				continue
 			}
 
 			log.Infof("Current block (%d), start block %d", lastBlock.Height, block.Height)
 			if block.Height > (lastBlock.Height - confirmations) {
-				log.Infof("Confirmations of %d < %d. Waiting a minute...", startBlock, service.conf.Confirmations)
+				log.Debugf("Confirmations of %d < %d. Waiting a minute...", startBlock, service.conf.Confirmations)
 				time.Sleep(time.Minute)
 				continue
 			}
 
 			err = service.processBlock(ctx, block)
 			if err != nil {
-				log.Errorf("processBTCBlock(%s) error: %s", startBlock, err)
-				log.Debugf("Waiting a half minute.")
+				log.Errorf("processBlock(%s) error: %s", startBlock, err)
+				log.Debug("Waiting a half minute.")
 				time.Sleep(30 * time.Second)
 				continue
 			}
@@ -146,7 +148,6 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 
 			startBlock = big.NewInt(chainState.LastBlock)
 		}
-
 	}()
 
 	return
@@ -165,39 +166,96 @@ func (service *nodeReader) processBlock(ctx context.Context, block *client.Block
 
 	log.Infof("Start processing transactions of block %d...", block.Height)
 	txs := block.Transactions
-
-
-	for i, rawTx := range []proto.Transaction(txs) {
-		//var scheme byte
-		//var address crypto.PublicKey
+	for _, rawTx := range txs {
 		switch t := rawTx.(type) {
 		case *proto.TransferV1:
-			log.Debugf("%d: TransferV1: %v", i, t)
+			log.Debugf("parse transaction type %d ('TransferV1'). ID %s", proto.TransferTransaction, t.ID)
 			tt := *t
-			if tt.AmountAsset.Present || tt.FeeAsset.Present {
-
-				//u, err := data.FromTransferV1(scheme, tt, address)
-				//if err != nil {
-				//	return err
-				//}
-				//_ = u
+			var assetId crypto.Digest
+			if tt.AmountAsset.Present {
+				assetId = tt.AmountAsset.ID
 			}
-
+			if err := service.executeTasks(ctx, tt.Amount, tt.Recipient, assetId); err != nil {
+				return err
+			}
 		case *proto.TransferV2:
-			log.Debugf("%d: TransferV2: %v", i, t)
+			log.Debugf("parse transaction type %d ('TransferV2'). ID %s", proto.TransferTransaction, t.ID)
 			tt := *t
-			if tt.AmountAsset.Present || tt.FeeAsset.Present {
-				//u, err := data.FromTransferV2(scheme, tt, address)
-				//if err != nil {
-				//	return err
-				//}
-				//_=u
+			var assetId crypto.Digest
+			if tt.AmountAsset.Present {
+				assetId = tt.AmountAsset.ID
+			}
+			if err := service.executeTasks(ctx, tt.Amount, tt.Recipient, assetId); err != nil {
+				return err
+			}
+		case *proto.MassTransferV1:
+			log.Debugf("parse transaction type %d ('MassTransferTransaction'). ID %s", proto.MassTransferTransaction, t.ID)
+			tt := *t
+			var assetId crypto.Digest
+			if tt.Asset.Present {
+				assetId = tt.Asset.ID
+			}
+			for _, transfer := range tt.Transfers {
+				if err := service.executeTasks(ctx, transfer.Amount, transfer.Recipient, assetId); err != nil {
+					return err
+				}
+			}
+		case *proto.Payment:
+			// payment is only for waves transfer
+			log.Debugf("parse transaction type %d ('Payment'). ID %s", proto.PaymentTransaction, t.ID)
+			tt := *t
+			if err := service.executeTasksForRecipient(ctx, tt.Amount, tt.Recipient.String(), crypto.Digest{}); err != nil {
+				return err
+			}
+		default:
+			log.Debugf("not interesting transaction type for id %+v", t)
+		}
+	}
+	return
+}
+
+func (service *nodeReader) executeTasks(ctx context.Context, amount uint64, recipient proto.Recipient,
+	assetId crypto.Digest) error {
+	if recipient.Address != nil {
+		address := recipient.Address.String()
+		return service.executeTasksForRecipient(ctx, amount, address, assetId)
+	}
+	if recipient.Alias != nil {
+		alias := recipient.Alias.Alias
+		return service.executeTasksForRecipient(ctx, amount, alias, assetId)
+	}
+	return errors.New("haven't recipient address")
+}
+
+func (service *nodeReader) executeTasksForRecipient(ctx context.Context, amount uint64, recipient string,
+	assetId crypto.Digest) (err error) {
+
+	log := logger.FromContext(ctx)
+	tasks, err := service.rp.FindByAddress(ctx, models.ChainType(service.conf.ChainType), recipient)
+	if err != nil {
+		log.Errorf("error: %s", err)
+		return err
+	}
+	if len(tasks) == 0 {
+		return nil
+	}
+	log.Infof("address %s has %d tasks, start processing...", recipient, len(tasks))
+	for _, task := range tasks {
+		log.Debugf("Start processing incoming transfer on registered address %s ...", task.Address)
+		err = service.rc.RequestCallback(ctx, task.Callback, task.Callback.Data)
+		if err != nil {
+			log.Errorf("Error while processing incoming transfer for address %s. %s", recipient, err)
+			continue
+		}
+		switch task.Type {
+		case models.OneTime:
+			err := service.rp.RemoveTask(ctx, string(task.Id))
+			if err != nil {
+				log.Errorf("Error: removing task %s", err)
+				return err
 			}
 		}
-
-
-
+		log.Debugf("Incoming transfer in %s to %s has been registered!", service.conf.ChainType, task.Address)
 	}
-
-	return
+	return nil
 }

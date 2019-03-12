@@ -47,7 +47,7 @@ func New(ctx context.Context, url, dbName string) error {
 	var initErr error
 	onceRepository.Do(func() {
 		for i := 1; i < 6; i++ {
-			log.Debug("Attempt %d to connect to MongoDB at %s", i, url)
+			log.Debugf("Attempt %d to connect to MongoDB at %s", i, url)
 			conn, err := mgo.Dial(url)
 			if err != nil {
 				log.Errorf("Failed to connect to MongoDB at %s: %v", url, err)
@@ -61,6 +61,7 @@ func New(ctx context.Context, url, dbName string) error {
 					tasksC:      db.C(Ctasks),
 					chainStateC: db.C(CChainState),
 					dbName:      dbName}
+				break
 			}
 		}
 	})
