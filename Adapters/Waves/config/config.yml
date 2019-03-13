@@ -1,0 +1,3 @@
+node:
+  host: https://nodes.wavesplatform.com
+port: 5001

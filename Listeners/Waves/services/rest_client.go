@@ -31,7 +31,7 @@ var (
 	onceRestClient sync.Once
 )
 
-// New create node's client with connection to eth node
+// New create node's client with connection to Waves node
 func NewRestClient(ctx context.Context) error {
 	log := logger.FromContext(ctx)
 	var err error

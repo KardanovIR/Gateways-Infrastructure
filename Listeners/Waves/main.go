@@ -29,7 +29,7 @@ func main() {
 	if err := config.Load(configPath); err != nil {
 		log.Fatal("Loading of configuration failed with error:", err)
 	}
-	log.Infof(fmt.Sprintf("Eth listener will be started with configuration %+v", config.Cfg))
+	log.Infof(fmt.Sprintf("Waves listener will be started with configuration %+v", config.Cfg))
 	ctx := context.Background()
 	ctx = logger.ToContext(ctx, log)
 
