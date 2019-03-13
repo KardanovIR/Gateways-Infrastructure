@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/models"
 	"google.golang.org/grpc"
 	"math/big"
 	"sync"
@@ -55,4 +56,36 @@ type nodeClientMock struct {
 
 func (n *nodeClientMock) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
 	return new(big.Int).SetInt64(3), nil
+}
+
+func (n *nodeClientMock) SuggestFee(ctx context.Context) (*big.Int, error) {
+	return nil, nil
+}
+
+func (n *nodeClientMock) GetBalance(ctx context.Context, address string) (*big.Int, error) {
+	return nil, nil
+}
+func (n *nodeClientMock) GetNextNonce(ctx context.Context, address string) (uint64, error) {
+	return 0, nil
+}
+
+func (n *nodeClientMock) GenerateAddress(ctx context.Context) (publicAddress string, err error) {
+	return "", nil
+}
+func (n *nodeClientMock) IsAddressValid(ctx context.Context, address string) bool {
+	return true
+}
+
+func (n *nodeClientMock) CreateRawTransaction(ctx context.Context, addressFrom string, addressTo string,
+	amount *big.Int) ([]byte, error) {
+	return nil, nil
+}
+func (n *nodeClientMock) SignTransaction(ctx context.Context, senderAddr string, rlpTx []byte) ([]byte, error) {
+	return nil, nil
+}
+func (n *nodeClientMock) SendTransaction(ctx context.Context, rlpTx []byte) (txHash string, err error) {
+	return "", nil
+}
+func (n *nodeClientMock) GetTxStatusByTxID(ctx context.Context, txID string) (models.TxStatus, error) {
+	return "", nil
 }

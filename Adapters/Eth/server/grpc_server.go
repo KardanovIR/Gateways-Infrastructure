@@ -11,32 +11,15 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/services"
 )
 
-type IGrpcServer interface {
-	GasPrice(ctx context.Context, in *pb.GasPriceRequest) (*pb.GasPriceReply, error)
-}
-
 type grpcServer struct {
 	port       string
 	nodeClient services.INodeClient
 }
 
 var (
-	server                  IGrpcServer
+	server                  pb.CommonServer
 	onceGrpcServertInstance sync.Once
 )
-
-func (s *grpcServer) GasPrice(ctx context.Context, in *pb.GasPriceRequest) (*pb.GasPriceReply, error) {
-	log := logger.FromContext(ctx)
-	log.Info("GasPrice")
-
-	var gasPrice, err = s.nodeClient.SuggestGasPrice(ctx)
-	if err != nil {
-		log.Errorf("connect to etherium node fails: %s", err)
-		return nil, err
-	}
-
-	return &pb.GasPriceReply{GasPrice: gasPrice.String()}, nil
-}
 
 func InitAndStart(ctx context.Context, port string, client services.INodeClient) error {
 	log := logger.FromContext(ctx)
@@ -62,11 +45,4 @@ func InitAndStart(ctx context.Context, port string, client services.INodeClient)
 	})
 
 	return initErr
-}
-
-func GetGrpsServer() IGrpcServer {
-	onceGrpcServertInstance.Do(func() {
-		panic("try to get grpc server before it's creation!")
-	})
-	return server
 }
