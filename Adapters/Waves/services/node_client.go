@@ -7,16 +7,24 @@ import (
 	"sync"
 	"time"
 
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/models"
 	"github.com/wavesplatform/gowaves/pkg/client"
+	"github.com/wavesplatform/gowaves/pkg/crypto"
 )
 
 type INodeClient interface {
+	GenerateAddress(ctx context.Context) (publicAddress string, err error)
+	ValidateAddress(ctx context.Context, address string) (bool, error)
 	GetLastBlockHeight(ctx context.Context) (string, error)
 }
 
 type nodeClient struct {
 	nodeClient *client.Client
+	chainID    models.NetworkType
+	// private keys for addresses
+	privateKeys map[string]crypto.SecretKey
 }
 
 func (cl *nodeClient) GetLastBlockHeight(ctx context.Context) (string, error) {
@@ -37,13 +45,13 @@ var (
 )
 
 // New create node's client with connection to Waves node
-func New(ctx context.Context, host string) error {
+func New(ctx context.Context, conf config.Node) error {
 	log := logger.FromContext(ctx)
 	var err error
 	onceRPCClientInstance.Do(func() {
 		wavesClient, e := client.NewClient(client.Options{
 			Client:  &http.Client{Timeout: 30 * time.Second},
-			BaseUrl: host,
+			BaseUrl: conf.Host,
 		})
 		if e != nil {
 			log.Errorf("error during initialise waves client: %s", e)
@@ -51,7 +59,7 @@ func New(ctx context.Context, host string) error {
 			return
 		}
 
-		cl = &nodeClient{nodeClient: wavesClient}
+		cl = &nodeClient{nodeClient: wavesClient, chainID: conf.ChainID, privateKeys: make(map[string]crypto.SecretKey)}
 	})
 	return err
 }

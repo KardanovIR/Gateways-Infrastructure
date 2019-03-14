@@ -3,13 +3,12 @@
 
 package wavesAdapter
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
-
 import (
-	context "golang.org/x/net/context"
+	context "context"
+	fmt "fmt"
+	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
+	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -21,9 +20,9 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-// The request message containing the user's name.
+// The request message for getting last block
 type BlockRequest struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -34,16 +33,17 @@ func (m *BlockRequest) Reset()         { *m = BlockRequest{} }
 func (m *BlockRequest) String() string { return proto.CompactTextString(m) }
 func (*BlockRequest) ProtoMessage()    {}
 func (*BlockRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_waves_adapter_326fbd1a0b059866, []int{0}
+	return fileDescriptor_5065a9543fabcab5, []int{0}
 }
+
 func (m *BlockRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BlockRequest.Unmarshal(m, b)
 }
 func (m *BlockRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BlockRequest.Marshal(b, m, deterministic)
 }
-func (dst *BlockRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BlockRequest.Merge(dst, src)
+func (m *BlockRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BlockRequest.Merge(m, src)
 }
 func (m *BlockRequest) XXX_Size() int {
 	return xxx_messageInfo_BlockRequest.Size(m)
@@ -54,7 +54,7 @@ func (m *BlockRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_BlockRequest proto.InternalMessageInfo
 
-// The response message containing the greetings
+// The response message containing last block number
 type BlockReply struct {
 	Block                string   `protobuf:"bytes,1,opt,name=block,proto3" json:"block,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -66,16 +66,17 @@ func (m *BlockReply) Reset()         { *m = BlockReply{} }
 func (m *BlockReply) String() string { return proto.CompactTextString(m) }
 func (*BlockReply) ProtoMessage()    {}
 func (*BlockReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_waves_adapter_326fbd1a0b059866, []int{1}
+	return fileDescriptor_5065a9543fabcab5, []int{1}
 }
+
 func (m *BlockReply) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BlockReply.Unmarshal(m, b)
 }
 func (m *BlockReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BlockReply.Marshal(b, m, deterministic)
 }
-func (dst *BlockReply) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BlockReply.Merge(dst, src)
+func (m *BlockReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BlockReply.Merge(m, src)
 }
 func (m *BlockReply) XXX_Size() int {
 	return xxx_messageInfo_BlockReply.Size(m)
@@ -93,9 +94,189 @@ func (m *BlockReply) GetBlock() string {
 	return ""
 }
 
+// The request message for getting information by account address
+type AddressRequest struct {
+	Address              string   `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AddressRequest) Reset()         { *m = AddressRequest{} }
+func (m *AddressRequest) String() string { return proto.CompactTextString(m) }
+func (*AddressRequest) ProtoMessage()    {}
+func (*AddressRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{2}
+}
+
+func (m *AddressRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddressRequest.Unmarshal(m, b)
+}
+func (m *AddressRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddressRequest.Marshal(b, m, deterministic)
+}
+func (m *AddressRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddressRequest.Merge(m, src)
+}
+func (m *AddressRequest) XXX_Size() int {
+	return xxx_messageInfo_AddressRequest.Size(m)
+}
+func (m *AddressRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddressRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddressRequest proto.InternalMessageInfo
+
+func (m *AddressRequest) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+// empty request message
+type EmptyRequest struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *EmptyRequest) Reset()         { *m = EmptyRequest{} }
+func (m *EmptyRequest) String() string { return proto.CompactTextString(m) }
+func (*EmptyRequest) ProtoMessage()    {}
+func (*EmptyRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{3}
+}
+
+func (m *EmptyRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_EmptyRequest.Unmarshal(m, b)
+}
+func (m *EmptyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_EmptyRequest.Marshal(b, m, deterministic)
+}
+func (m *EmptyRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EmptyRequest.Merge(m, src)
+}
+func (m *EmptyRequest) XXX_Size() int {
+	return xxx_messageInfo_EmptyRequest.Size(m)
+}
+func (m *EmptyRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_EmptyRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EmptyRequest proto.InternalMessageInfo
+
+// The response message containing generated address
+type GenerateAddressReply struct {
+	Address              string   `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GenerateAddressReply) Reset()         { *m = GenerateAddressReply{} }
+func (m *GenerateAddressReply) String() string { return proto.CompactTextString(m) }
+func (*GenerateAddressReply) ProtoMessage()    {}
+func (*GenerateAddressReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{4}
+}
+
+func (m *GenerateAddressReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GenerateAddressReply.Unmarshal(m, b)
+}
+func (m *GenerateAddressReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GenerateAddressReply.Marshal(b, m, deterministic)
+}
+func (m *GenerateAddressReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GenerateAddressReply.Merge(m, src)
+}
+func (m *GenerateAddressReply) XXX_Size() int {
+	return xxx_messageInfo_GenerateAddressReply.Size(m)
+}
+func (m *GenerateAddressReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_GenerateAddressReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GenerateAddressReply proto.InternalMessageInfo
+
+func (m *GenerateAddressReply) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+// The response message containing result of address's validation
+type ValidateAddressReply struct {
+	Valid                bool     `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ValidateAddressReply) Reset()         { *m = ValidateAddressReply{} }
+func (m *ValidateAddressReply) String() string { return proto.CompactTextString(m) }
+func (*ValidateAddressReply) ProtoMessage()    {}
+func (*ValidateAddressReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{5}
+}
+
+func (m *ValidateAddressReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ValidateAddressReply.Unmarshal(m, b)
+}
+func (m *ValidateAddressReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ValidateAddressReply.Marshal(b, m, deterministic)
+}
+func (m *ValidateAddressReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ValidateAddressReply.Merge(m, src)
+}
+func (m *ValidateAddressReply) XXX_Size() int {
+	return xxx_messageInfo_ValidateAddressReply.Size(m)
+}
+func (m *ValidateAddressReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_ValidateAddressReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ValidateAddressReply proto.InternalMessageInfo
+
+func (m *ValidateAddressReply) GetValid() bool {
+	if m != nil {
+		return m.Valid
+	}
+	return false
+}
+
 func init() {
 	proto.RegisterType((*BlockRequest)(nil), "wavesAdapter.BlockRequest")
 	proto.RegisterType((*BlockReply)(nil), "wavesAdapter.BlockReply")
+	proto.RegisterType((*AddressRequest)(nil), "wavesAdapter.AddressRequest")
+	proto.RegisterType((*EmptyRequest)(nil), "wavesAdapter.EmptyRequest")
+	proto.RegisterType((*GenerateAddressReply)(nil), "wavesAdapter.GenerateAddressReply")
+	proto.RegisterType((*ValidateAddressReply)(nil), "wavesAdapter.ValidateAddressReply")
+}
+
+func init() { proto.RegisterFile("waves_adapter.proto", fileDescriptor_5065a9543fabcab5) }
+
+var fileDescriptor_5065a9543fabcab5 = []byte{
+	// 281 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x52, 0x41, 0x4b, 0xf3, 0x40,
+	0x10, 0x4d, 0x3e, 0x68, 0x3f, 0x1d, 0x4a, 0x8b, 0x6b, 0x84, 0x10, 0x3c, 0xc8, 0x9e, 0x44, 0x4a,
+	0x10, 0xfd, 0x05, 0x8d, 0x48, 0x3d, 0xf4, 0x50, 0x22, 0xea, 0x51, 0xb6, 0xcd, 0x50, 0x83, 0x49,
+	0x77, 0xdd, 0x5d, 0x2b, 0xb9, 0xfa, 0xcb, 0x65, 0x37, 0x89, 0x24, 0x4b, 0x3c, 0xbe, 0x37, 0xf3,
+	0xde, 0xee, 0x9b, 0x19, 0x38, 0xfd, 0x62, 0x07, 0x54, 0xaf, 0x2c, 0x63, 0x42, 0xa3, 0x8c, 0x85,
+	0xe4, 0x9a, 0x93, 0x89, 0x25, 0x17, 0x35, 0x47, 0xa7, 0x30, 0x49, 0x0a, 0xbe, 0x7d, 0x4f, 0xf1,
+	0xe3, 0x13, 0x95, 0xa6, 0x14, 0xa0, 0xc1, 0xa2, 0xa8, 0x48, 0x00, 0xa3, 0x8d, 0x41, 0xa1, 0x7f,
+	0xe1, 0x5f, 0x1e, 0xa7, 0x35, 0xa0, 0x57, 0x30, 0x5d, 0x64, 0x99, 0x44, 0xa5, 0x1a, 0x15, 0x09,
+	0xe1, 0x3f, 0xab, 0x99, 0xa6, 0xb3, 0x85, 0xc6, 0xff, 0xbe, 0x14, 0xba, 0x6a, 0xfd, 0xaf, 0x21,
+	0x58, 0xe2, 0x1e, 0x25, 0xd3, 0xf8, 0xeb, 0x61, 0x5e, 0xfa, 0xdb, 0x61, 0x0e, 0xc1, 0x33, 0x2b,
+	0xf2, 0xcc, 0x55, 0x04, 0x30, 0x3a, 0x18, 0xde, 0xf6, 0x1f, 0xa5, 0x35, 0xb8, 0xf9, 0xfe, 0x07,
+	0xe3, 0x3b, 0x5e, 0x96, 0x7c, 0x4f, 0x56, 0x40, 0x96, 0xa8, 0x57, 0x4c, 0x69, 0x9b, 0xe8, 0x01,
+	0xf3, 0xdd, 0x9b, 0x26, 0x51, 0xdc, 0xcd, 0x1f, 0x77, 0xc3, 0x47, 0xe1, 0x60, 0x4d, 0x14, 0x15,
+	0xf5, 0xc8, 0x23, 0xcc, 0x9c, 0x8f, 0xbb, 0x56, 0xdd, 0x9c, 0x11, 0xed, 0xd7, 0x86, 0x32, 0x53,
+	0x8f, 0x3c, 0xc1, 0xcc, 0xc9, 0x46, 0xce, 0xfb, 0xc2, 0xfe, 0xa0, 0x5d, 0xdb, 0xa1, 0xc1, 0x50,
+	0x2f, 0x99, 0xc3, 0x59, 0xce, 0xe3, 0x9d, 0x14, 0xdb, 0xb8, 0xdd, 0xbd, 0x95, 0x25, 0x27, 0x2f,
+	0x1d, 0xf5, 0xda, 0x9c, 0xc3, 0xda, 0xdf, 0x8c, 0xed, 0x5d, 0xdc, 0xfe, 0x04, 0x00, 0x00, 0xff,
+	0xff, 0xe9, 0xaa, 0xa3, 0x87, 0x2e, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -110,8 +291,12 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type CommonClient interface {
-	// Sends a greeting
+	// getting last block
 	GetLastBlockHeight(ctx context.Context, in *BlockRequest, opts ...grpc.CallOption) (*BlockReply, error)
+	// Generate address
+	GenerateAddress(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*GenerateAddressReply, error)
+	// Validate address
+	ValidateAddress(ctx context.Context, in *AddressRequest, opts ...grpc.CallOption) (*ValidateAddressReply, error)
 }
 
 type commonClient struct {
@@ -131,10 +316,32 @@ func (c *commonClient) GetLastBlockHeight(ctx context.Context, in *BlockRequest,
 	return out, nil
 }
 
+func (c *commonClient) GenerateAddress(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*GenerateAddressReply, error) {
+	out := new(GenerateAddressReply)
+	err := c.cc.Invoke(ctx, "/wavesAdapter.Common/GenerateAddress", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonClient) ValidateAddress(ctx context.Context, in *AddressRequest, opts ...grpc.CallOption) (*ValidateAddressReply, error) {
+	out := new(ValidateAddressReply)
+	err := c.cc.Invoke(ctx, "/wavesAdapter.Common/ValidateAddress", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CommonServer is the server API for Common service.
 type CommonServer interface {
-	// Sends a greeting
+	// getting last block
 	GetLastBlockHeight(context.Context, *BlockRequest) (*BlockReply, error)
+	// Generate address
+	GenerateAddress(context.Context, *EmptyRequest) (*GenerateAddressReply, error)
+	// Validate address
+	ValidateAddress(context.Context, *AddressRequest) (*ValidateAddressReply, error)
 }
 
 func RegisterCommonServer(s *grpc.Server, srv CommonServer) {
@@ -159,6 +366,42 @@ func _Common_GetLastBlockHeight_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Common_GenerateAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServer).GenerateAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wavesAdapter.Common/GenerateAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServer).GenerateAddress(ctx, req.(*EmptyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Common_ValidateAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServer).ValidateAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wavesAdapter.Common/ValidateAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServer).ValidateAddress(ctx, req.(*AddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Common_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "wavesAdapter.Common",
 	HandlerType: (*CommonServer)(nil),
@@ -167,24 +410,15 @@ var _Common_serviceDesc = grpc.ServiceDesc{
 			MethodName: "GetLastBlockHeight",
 			Handler:    _Common_GetLastBlockHeight_Handler,
 		},
+		{
+			MethodName: "GenerateAddress",
+			Handler:    _Common_GenerateAddress_Handler,
+		},
+		{
+			MethodName: "ValidateAddress",
+			Handler:    _Common_ValidateAddress_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "waves_adapter.proto",
-}
-
-func init() { proto.RegisterFile("waves_adapter.proto", fileDescriptor_waves_adapter_326fbd1a0b059866) }
-
-var fileDescriptor_waves_adapter_326fbd1a0b059866 = []byte{
-	// 171 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x2e, 0x4f, 0x2c, 0x4b,
-	0x2d, 0x8e, 0x4f, 0x4c, 0x49, 0x2c, 0x28, 0x49, 0x2d, 0xd2, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17,
-	0xe2, 0x01, 0x0b, 0x3a, 0x42, 0xc4, 0x94, 0xf8, 0xb8, 0x78, 0x9c, 0x72, 0xf2, 0x93, 0xb3, 0x83,
-	0x52, 0x0b, 0x4b, 0x53, 0x8b, 0x4b, 0x94, 0x94, 0xb8, 0xb8, 0xa0, 0xfc, 0x82, 0x9c, 0x4a, 0x21,
-	0x11, 0x2e, 0xd6, 0x24, 0x10, 0x4f, 0x82, 0x51, 0x81, 0x51, 0x83, 0x33, 0x08, 0xc2, 0x31, 0x0a,
-	0xe3, 0x62, 0x73, 0xce, 0xcf, 0xcd, 0xcd, 0xcf, 0x13, 0xf2, 0xe1, 0x12, 0x72, 0x4f, 0x2d, 0xf1,
-	0x49, 0x2c, 0x2e, 0x01, 0x6b, 0xf2, 0x48, 0xcd, 0x4c, 0xcf, 0x28, 0x11, 0x92, 0xd2, 0x43, 0xb6,
-	0x42, 0x0f, 0xd9, 0x7c, 0x29, 0x09, 0xac, 0x72, 0x05, 0x39, 0x95, 0x4a, 0x0c, 0x4e, 0x3a, 0x5c,
-	0xa2, 0x99, 0xf9, 0x7a, 0xe9, 0x45, 0x05, 0xc9, 0x7a, 0x30, 0x27, 0x83, 0x15, 0x3b, 0x09, 0x86,
-	0x23, 0xe9, 0x09, 0x00, 0xf9, 0x22, 0x80, 0x31, 0x89, 0x0d, 0xec, 0x1d, 0x63, 0x40, 0x00, 0x00,
-	0x00, 0xff, 0xff, 0x66, 0xce, 0x4b, 0x51, 0xe5, 0x00, 0x00, 0x00,
 }

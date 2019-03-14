@@ -2,26 +2,17 @@ package services
 
 import (
 	"context"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/config"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
 	"strconv"
 	"testing"
+
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/config"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
 )
 
 func TestNodeClient(t *testing.T) {
-	ctx := context.Background()
+	ctx, _ := beforeTest()
 	// setup
-	log, _ := logger.Init(false, logger.DEBUG)
-	err := config.Load("./testdata/config_test.yml")
-	if err != nil {
-		log.Error(err)
-		t.Fail()
-	}
-	err = New(ctx, config.Cfg.Node.Host)
-	if err != nil {
-		log.Error(err)
-		t.Fail()
-	}
+
 	block, err := GetNodeClient().GetLastBlockHeight(ctx)
 	if err != nil {
 		t.Fail()
@@ -30,4 +21,17 @@ func TestNodeClient(t *testing.T) {
 	if bl < 533148 {
 		t.Fail()
 	}
+}
+
+func beforeTest() (context.Context, logger.ILogger) {
+	ctx := context.Background()
+	log, _ := logger.Init(false, logger.DEBUG)
+	err := config.Load("./testdata/config_test.yml")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := New(ctx, config.Cfg.Node); err != nil {
+		log.Fatal("can't create node's client: ", err)
+	}
+	return ctx, log
 }

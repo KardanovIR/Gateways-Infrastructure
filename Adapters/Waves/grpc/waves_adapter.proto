@@ -8,16 +8,42 @@ package wavesAdapter;
 
 // The common service definition.
 service Common {
-  // Sends a greeting
-  rpc GetLastBlockHeight (BlockRequest) returns (BlockReply) {}
+    // getting last block
+    rpc GetLastBlockHeight (BlockRequest) returns (BlockReply) {
+    }
+    // Generate address
+    rpc GenerateAddress (EmptyRequest) returns (GenerateAddressReply) {
+    }
+    // Validate address
+    rpc ValidateAddress (AddressRequest) returns (ValidateAddressReply) {
+    }
 }
 
-// The request message containing the user's name.
+// The request message for getting last block
 message BlockRequest {
 
 }
 
-// The response message containing the greetings
+// The response message containing last block number
 message BlockReply {
-  string block = 1;
+    string block = 1;
+}
+
+// The request message for getting information by account address
+message AddressRequest {
+    string address = 1;
+}
+
+// empty request message
+message EmptyRequest {
+
+}
+// The response message containing generated address
+message GenerateAddressReply {
+    string address = 1;
+}
+
+// The response message containing result of address's validation
+message ValidateAddressReply {
+    bool valid = 1;
 }

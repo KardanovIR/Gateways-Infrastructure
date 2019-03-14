@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/viper"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/models"
 )
 
 const (
@@ -21,7 +22,8 @@ type Config struct {
 }
 
 type Node struct {
-	Host string `mapstructure:"HOST"`
+	Host    string             `mapstructure:"HOST"`
+	ChainID models.NetworkType `mapstructure:"CHAINID"`
 }
 
 // Load set configuration parameters.
