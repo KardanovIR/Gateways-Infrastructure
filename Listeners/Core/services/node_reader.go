@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"math/big"
+	"strings"
 	"sync"
 	"time"
 
@@ -45,7 +46,7 @@ func New(ctx context.Context, config *config.Node, rc IRestClient, rp repositori
 			return
 		}
 		ethClient := ethclient.NewClient(rpcc)
-		cl = &nodeReader{nodeClient: ethClient, rc: rc, rp: rp, conf: config}
+		cl = &nodeReader{nodeClient: ethClient, rc: rc, rp: rp, conf: config, stopListen: make(chan struct{})}
 	})
 
 	if err != nil {
@@ -184,11 +185,12 @@ func (service *nodeReader) processBlock(ctx context.Context, block *types.Block)
 		outAddresses := tx.To()
 
 		if outAddresses == nil {
-			log.Infof("nil address", err)
+			log.Debugf("nil address", err)
 			continue
 		}
 
-		tasks, err := service.rp.FindByAddress(ctx, models.ChainType(service.conf.ChainType), outAddresses.Hex())
+		var adr=strings.ToLower(outAddresses.String())
+		tasks, err := service.rp.FindByAddress(ctx, models.ChainType(service.conf.ChainType), adr)
 		if err != nil {
 			log.Errorf("error: %s", err)
 			return err
