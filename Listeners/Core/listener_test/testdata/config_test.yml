@@ -1,0 +1,10 @@
+node:
+  host: https://ropsten.infura.io/v3/165e981477d146ecb702fce1ffbef166
+  startBlock: 5202062
+  confirmations: 6
+  chain: ETH
+
+db:
+  name: block_db
+  host: localhost:27017
+port: 5001
