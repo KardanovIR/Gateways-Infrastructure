@@ -31,7 +31,7 @@ func main() {
 	ctx := context.Background()
 	ctx = logger.ToContext(ctx, log)
 
-	if err := services.New(ctx, config.Cfg.Node.Host); err != nil {
+	if err := services.New(ctx, config.Cfg.Node); err != nil {
 		log.Fatal("can't create node's client: ", err)
 	}
 

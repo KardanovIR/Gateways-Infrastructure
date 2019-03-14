@@ -13,6 +13,8 @@ import (
 
 type IGrpcServer interface {
 	GetLastBlockHeight(ctx context.Context, in *pb.BlockRequest) (*pb.BlockReply, error)
+	GenerateAddress(ctx context.Context, in *pb.EmptyRequest) (*pb.GenerateAddressReply, error)
+	ValidateAddress(ctx context.Context, in *pb.AddressRequest) (*pb.ValidateAddressReply, error)
 }
 
 type grpcServer struct {
@@ -27,15 +29,38 @@ var (
 
 func (s *grpcServer) GetLastBlockHeight(ctx context.Context, in *pb.BlockRequest) (*pb.BlockReply, error) {
 	log := logger.FromContext(ctx)
-	log.Info("GasPrice")
+	log.Info("GetLastBlockHeight")
 
 	var blockHeight, err = s.nodeClient.GetLastBlockHeight(ctx)
 	if err != nil {
-		log.Errorf("connect to waves node fails: %s", err)
+		log.Errorf("get last block height fails: %s", err)
 		return nil, err
 	}
 
 	return &pb.BlockReply{Block: blockHeight}, nil
+}
+
+// Generate address
+func (s *grpcServer) GenerateAddress(ctx context.Context, in *pb.EmptyRequest) (*pb.GenerateAddressReply, error) {
+	log := logger.FromContext(ctx)
+	log.Info("GenerateAddress")
+	var address, err = s.nodeClient.GenerateAddress(ctx)
+	if err != nil {
+		log.Errorf("generate address fails: %s", err)
+		return nil, err
+	}
+	return &pb.GenerateAddressReply{Address: address}, nil
+}
+
+// Validate address
+func (s *grpcServer) ValidateAddress(ctx context.Context, in *pb.AddressRequest) (*pb.ValidateAddressReply, error) {
+	log := logger.FromContext(ctx)
+	log.Infof("ValidateAddress %s", in.Address)
+	var ok, err = s.nodeClient.ValidateAddress(ctx, in.Address)
+	if err != nil {
+		log.Debugf("validate address fails: %s", err)
+	}
+	return &pb.ValidateAddressReply{Valid: ok}, nil
 }
 
 func InitAndStart(ctx context.Context, port string, client services.INodeClient) error {
