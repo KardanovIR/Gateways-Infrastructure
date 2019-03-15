@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/magiconair/properties/assert"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/models"
 	"github.com/wavesplatform/gowaves/pkg/proto"
 )
 
@@ -32,4 +33,21 @@ func TestNodeClient_CreateRawTxBySendersPublicKey(t *testing.T) {
 		log.Error(err)
 		t.Fail()
 	}
+}
+
+func TestNodeClient_GetTransactionStatus(t *testing.T) {
+	ctx, log := beforeTest()
+	// send to incorrect address -> must fails
+	st, err := GetNodeClient().GetTransactionStatus(ctx, "4xjtyGErZ528b39aNrhBqoTq9RYQnZreEaP4QfbTMFjG")
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	assert.Equal(t, st, models.TxStatusSuccess)
+	st2, err := GetNodeClient().GetTransactionStatus(ctx, "24XscwjpC113ijAzQkTaUJFpumQA7XWtUVydBhBxtWMv")
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	assert.Equal(t, st2, models.TxStatusUnKnown)
 }

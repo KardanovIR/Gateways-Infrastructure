@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/models"
 	"github.com/wavesplatform/gowaves/pkg/crypto"
 	"github.com/wavesplatform/gowaves/pkg/proto"
 )
@@ -147,4 +148,20 @@ func (cl *nodeClient) GetTransactionByTxId(ctx context.Context, txId string) ([]
 		log.Error("can't marshall binary", err)
 	}
 	return b, nil
+}
+
+func (cl *nodeClient) GetTransactionStatus(ctx context.Context, txId string) (models.TxStatus, error) {
+	log := logger.FromContext(ctx)
+	log.Infof("call service method 'GetTransactionStatus' for txID %s", txId)
+	id, err := crypto.NewDigestFromBase58(txId)
+	unTr, _, err := cl.nodeClient.Transactions.UnconfirmedInfo(ctx, id)
+	if err == nil && unTr != nil {
+		return models.TxStatusPending, nil
+	}
+	_, _, err = cl.nodeClient.Transactions.Info(ctx, id)
+	if err != nil {
+		log.Errorf("getting tx %s fails: %s", id, err)
+		return models.TxStatusUnKnown, nil
+	}
+	return models.TxStatusSuccess, nil
 }

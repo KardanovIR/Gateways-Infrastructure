@@ -166,6 +166,86 @@ func (m *EmptyRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EmptyRequest proto.InternalMessageInfo
 
+// The response message containing transaction's fee
+type FeeReply struct {
+	Fee                  string   `protobuf:"bytes,1,opt,name=fee,proto3" json:"fee,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *FeeReply) Reset()         { *m = FeeReply{} }
+func (m *FeeReply) String() string { return proto.CompactTextString(m) }
+func (*FeeReply) ProtoMessage()    {}
+func (*FeeReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{4}
+}
+
+func (m *FeeReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_FeeReply.Unmarshal(m, b)
+}
+func (m *FeeReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_FeeReply.Marshal(b, m, deterministic)
+}
+func (m *FeeReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_FeeReply.Merge(m, src)
+}
+func (m *FeeReply) XXX_Size() int {
+	return xxx_messageInfo_FeeReply.Size(m)
+}
+func (m *FeeReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_FeeReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_FeeReply proto.InternalMessageInfo
+
+func (m *FeeReply) GetFee() string {
+	if m != nil {
+		return m.Fee
+	}
+	return ""
+}
+
+// The response message containing account's balance
+type GetBalanceReply struct {
+	Balance              string   `protobuf:"bytes,1,opt,name=balance,proto3" json:"balance,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetBalanceReply) Reset()         { *m = GetBalanceReply{} }
+func (m *GetBalanceReply) String() string { return proto.CompactTextString(m) }
+func (*GetBalanceReply) ProtoMessage()    {}
+func (*GetBalanceReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{5}
+}
+
+func (m *GetBalanceReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetBalanceReply.Unmarshal(m, b)
+}
+func (m *GetBalanceReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetBalanceReply.Marshal(b, m, deterministic)
+}
+func (m *GetBalanceReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetBalanceReply.Merge(m, src)
+}
+func (m *GetBalanceReply) XXX_Size() int {
+	return xxx_messageInfo_GetBalanceReply.Size(m)
+}
+func (m *GetBalanceReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetBalanceReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetBalanceReply proto.InternalMessageInfo
+
+func (m *GetBalanceReply) GetBalance() string {
+	if m != nil {
+		return m.Balance
+	}
+	return ""
+}
+
 // The response message containing generated address
 type GenerateAddressReply struct {
 	Address              string   `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
@@ -178,7 +258,7 @@ func (m *GenerateAddressReply) Reset()         { *m = GenerateAddressReply{} }
 func (m *GenerateAddressReply) String() string { return proto.CompactTextString(m) }
 func (*GenerateAddressReply) ProtoMessage()    {}
 func (*GenerateAddressReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5065a9543fabcab5, []int{4}
+	return fileDescriptor_5065a9543fabcab5, []int{6}
 }
 
 func (m *GenerateAddressReply) XXX_Unmarshal(b []byte) error {
@@ -218,7 +298,7 @@ func (m *ValidateAddressReply) Reset()         { *m = ValidateAddressReply{} }
 func (m *ValidateAddressReply) String() string { return proto.CompactTextString(m) }
 func (*ValidateAddressReply) ProtoMessage()    {}
 func (*ValidateAddressReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5065a9543fabcab5, []int{5}
+	return fileDescriptor_5065a9543fabcab5, []int{7}
 }
 
 func (m *ValidateAddressReply) XXX_Unmarshal(b []byte) error {
@@ -246,37 +326,524 @@ func (m *ValidateAddressReply) GetValid() bool {
 	return false
 }
 
+// The request message for raw transaction creation
+type RawTransactionBySendersAddressRequest struct {
+	AddressFrom          string   `protobuf:"bytes,1,opt,name=addressFrom,proto3" json:"addressFrom,omitempty"`
+	AddressTo            string   `protobuf:"bytes,2,opt,name=addressTo,proto3" json:"addressTo,omitempty"`
+	Amount               string   `protobuf:"bytes,3,opt,name=amount,proto3" json:"amount,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *RawTransactionBySendersAddressRequest) Reset()         { *m = RawTransactionBySendersAddressRequest{} }
+func (m *RawTransactionBySendersAddressRequest) String() string { return proto.CompactTextString(m) }
+func (*RawTransactionBySendersAddressRequest) ProtoMessage()    {}
+func (*RawTransactionBySendersAddressRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{8}
+}
+
+func (m *RawTransactionBySendersAddressRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RawTransactionBySendersAddressRequest.Unmarshal(m, b)
+}
+func (m *RawTransactionBySendersAddressRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RawTransactionBySendersAddressRequest.Marshal(b, m, deterministic)
+}
+func (m *RawTransactionBySendersAddressRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RawTransactionBySendersAddressRequest.Merge(m, src)
+}
+func (m *RawTransactionBySendersAddressRequest) XXX_Size() int {
+	return xxx_messageInfo_RawTransactionBySendersAddressRequest.Size(m)
+}
+func (m *RawTransactionBySendersAddressRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_RawTransactionBySendersAddressRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RawTransactionBySendersAddressRequest proto.InternalMessageInfo
+
+func (m *RawTransactionBySendersAddressRequest) GetAddressFrom() string {
+	if m != nil {
+		return m.AddressFrom
+	}
+	return ""
+}
+
+func (m *RawTransactionBySendersAddressRequest) GetAddressTo() string {
+	if m != nil {
+		return m.AddressTo
+	}
+	return ""
+}
+
+func (m *RawTransactionBySendersAddressRequest) GetAmount() string {
+	if m != nil {
+		return m.Amount
+	}
+	return ""
+}
+
+// The request message for raw transaction creation
+type RawTransactionBySendersPublicKeyRequest struct {
+	SendersPublicKey     string   `protobuf:"bytes,1,opt,name=sendersPublicKey,proto3" json:"sendersPublicKey,omitempty"`
+	AddressTo            string   `protobuf:"bytes,2,opt,name=addressTo,proto3" json:"addressTo,omitempty"`
+	Amount               string   `protobuf:"bytes,3,opt,name=amount,proto3" json:"amount,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *RawTransactionBySendersPublicKeyRequest) Reset() {
+	*m = RawTransactionBySendersPublicKeyRequest{}
+}
+func (m *RawTransactionBySendersPublicKeyRequest) String() string { return proto.CompactTextString(m) }
+func (*RawTransactionBySendersPublicKeyRequest) ProtoMessage()    {}
+func (*RawTransactionBySendersPublicKeyRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{9}
+}
+
+func (m *RawTransactionBySendersPublicKeyRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RawTransactionBySendersPublicKeyRequest.Unmarshal(m, b)
+}
+func (m *RawTransactionBySendersPublicKeyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RawTransactionBySendersPublicKeyRequest.Marshal(b, m, deterministic)
+}
+func (m *RawTransactionBySendersPublicKeyRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RawTransactionBySendersPublicKeyRequest.Merge(m, src)
+}
+func (m *RawTransactionBySendersPublicKeyRequest) XXX_Size() int {
+	return xxx_messageInfo_RawTransactionBySendersPublicKeyRequest.Size(m)
+}
+func (m *RawTransactionBySendersPublicKeyRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_RawTransactionBySendersPublicKeyRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RawTransactionBySendersPublicKeyRequest proto.InternalMessageInfo
+
+func (m *RawTransactionBySendersPublicKeyRequest) GetSendersPublicKey() string {
+	if m != nil {
+		return m.SendersPublicKey
+	}
+	return ""
+}
+
+func (m *RawTransactionBySendersPublicKeyRequest) GetAddressTo() string {
+	if m != nil {
+		return m.AddressTo
+	}
+	return ""
+}
+
+func (m *RawTransactionBySendersPublicKeyRequest) GetAmount() string {
+	if m != nil {
+		return m.Amount
+	}
+	return ""
+}
+
+// The response message containing raw transaction
+type RawTransactionReply struct {
+	Tx                   []byte   `protobuf:"bytes,1,opt,name=tx,proto3" json:"tx,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *RawTransactionReply) Reset()         { *m = RawTransactionReply{} }
+func (m *RawTransactionReply) String() string { return proto.CompactTextString(m) }
+func (*RawTransactionReply) ProtoMessage()    {}
+func (*RawTransactionReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{10}
+}
+
+func (m *RawTransactionReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RawTransactionReply.Unmarshal(m, b)
+}
+func (m *RawTransactionReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RawTransactionReply.Marshal(b, m, deterministic)
+}
+func (m *RawTransactionReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RawTransactionReply.Merge(m, src)
+}
+func (m *RawTransactionReply) XXX_Size() int {
+	return xxx_messageInfo_RawTransactionReply.Size(m)
+}
+func (m *RawTransactionReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_RawTransactionReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RawTransactionReply proto.InternalMessageInfo
+
+func (m *RawTransactionReply) GetTx() []byte {
+	if m != nil {
+		return m.Tx
+	}
+	return nil
+}
+
+// The request message for singing transaction
+type SignTransactionRequest struct {
+	SenderAddress        string   `protobuf:"bytes,1,opt,name=senderAddress,proto3" json:"senderAddress,omitempty"`
+	Tx                   []byte   `protobuf:"bytes,2,opt,name=tx,proto3" json:"tx,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SignTransactionRequest) Reset()         { *m = SignTransactionRequest{} }
+func (m *SignTransactionRequest) String() string { return proto.CompactTextString(m) }
+func (*SignTransactionRequest) ProtoMessage()    {}
+func (*SignTransactionRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{11}
+}
+
+func (m *SignTransactionRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SignTransactionRequest.Unmarshal(m, b)
+}
+func (m *SignTransactionRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SignTransactionRequest.Marshal(b, m, deterministic)
+}
+func (m *SignTransactionRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SignTransactionRequest.Merge(m, src)
+}
+func (m *SignTransactionRequest) XXX_Size() int {
+	return xxx_messageInfo_SignTransactionRequest.Size(m)
+}
+func (m *SignTransactionRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_SignTransactionRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SignTransactionRequest proto.InternalMessageInfo
+
+func (m *SignTransactionRequest) GetSenderAddress() string {
+	if m != nil {
+		return m.SenderAddress
+	}
+	return ""
+}
+
+func (m *SignTransactionRequest) GetTx() []byte {
+	if m != nil {
+		return m.Tx
+	}
+	return nil
+}
+
+// The request message for singing transaction by private key in parameters
+type SignTransactionBySecretKeyRequest struct {
+	SenderSecretKey      string   `protobuf:"bytes,1,opt,name=senderSecretKey,proto3" json:"senderSecretKey,omitempty"`
+	Tx                   []byte   `protobuf:"bytes,2,opt,name=tx,proto3" json:"tx,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SignTransactionBySecretKeyRequest) Reset()         { *m = SignTransactionBySecretKeyRequest{} }
+func (m *SignTransactionBySecretKeyRequest) String() string { return proto.CompactTextString(m) }
+func (*SignTransactionBySecretKeyRequest) ProtoMessage()    {}
+func (*SignTransactionBySecretKeyRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{12}
+}
+
+func (m *SignTransactionBySecretKeyRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SignTransactionBySecretKeyRequest.Unmarshal(m, b)
+}
+func (m *SignTransactionBySecretKeyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SignTransactionBySecretKeyRequest.Marshal(b, m, deterministic)
+}
+func (m *SignTransactionBySecretKeyRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SignTransactionBySecretKeyRequest.Merge(m, src)
+}
+func (m *SignTransactionBySecretKeyRequest) XXX_Size() int {
+	return xxx_messageInfo_SignTransactionBySecretKeyRequest.Size(m)
+}
+func (m *SignTransactionBySecretKeyRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_SignTransactionBySecretKeyRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SignTransactionBySecretKeyRequest proto.InternalMessageInfo
+
+func (m *SignTransactionBySecretKeyRequest) GetSenderSecretKey() string {
+	if m != nil {
+		return m.SenderSecretKey
+	}
+	return ""
+}
+
+func (m *SignTransactionBySecretKeyRequest) GetTx() []byte {
+	if m != nil {
+		return m.Tx
+	}
+	return nil
+}
+
+// The response message containing signed transaction
+type SignTransactionReply struct {
+	Tx                   []byte   `protobuf:"bytes,1,opt,name=tx,proto3" json:"tx,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SignTransactionReply) Reset()         { *m = SignTransactionReply{} }
+func (m *SignTransactionReply) String() string { return proto.CompactTextString(m) }
+func (*SignTransactionReply) ProtoMessage()    {}
+func (*SignTransactionReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{13}
+}
+
+func (m *SignTransactionReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SignTransactionReply.Unmarshal(m, b)
+}
+func (m *SignTransactionReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SignTransactionReply.Marshal(b, m, deterministic)
+}
+func (m *SignTransactionReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SignTransactionReply.Merge(m, src)
+}
+func (m *SignTransactionReply) XXX_Size() int {
+	return xxx_messageInfo_SignTransactionReply.Size(m)
+}
+func (m *SignTransactionReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_SignTransactionReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SignTransactionReply proto.InternalMessageInfo
+
+func (m *SignTransactionReply) GetTx() []byte {
+	if m != nil {
+		return m.Tx
+	}
+	return nil
+}
+
+// The request message for singing transaction
+type SendTransactionRequest struct {
+	Tx                   []byte   `protobuf:"bytes,1,opt,name=tx,proto3" json:"tx,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SendTransactionRequest) Reset()         { *m = SendTransactionRequest{} }
+func (m *SendTransactionRequest) String() string { return proto.CompactTextString(m) }
+func (*SendTransactionRequest) ProtoMessage()    {}
+func (*SendTransactionRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{14}
+}
+
+func (m *SendTransactionRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SendTransactionRequest.Unmarshal(m, b)
+}
+func (m *SendTransactionRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SendTransactionRequest.Marshal(b, m, deterministic)
+}
+func (m *SendTransactionRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SendTransactionRequest.Merge(m, src)
+}
+func (m *SendTransactionRequest) XXX_Size() int {
+	return xxx_messageInfo_SendTransactionRequest.Size(m)
+}
+func (m *SendTransactionRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_SendTransactionRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SendTransactionRequest proto.InternalMessageInfo
+
+func (m *SendTransactionRequest) GetTx() []byte {
+	if m != nil {
+		return m.Tx
+	}
+	return nil
+}
+
+// The response message containing transaction's id
+type SendTransactionReply struct {
+	TxId                 string   `protobuf:"bytes,1,opt,name=txId,proto3" json:"txId,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SendTransactionReply) Reset()         { *m = SendTransactionReply{} }
+func (m *SendTransactionReply) String() string { return proto.CompactTextString(m) }
+func (*SendTransactionReply) ProtoMessage()    {}
+func (*SendTransactionReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{15}
+}
+
+func (m *SendTransactionReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SendTransactionReply.Unmarshal(m, b)
+}
+func (m *SendTransactionReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SendTransactionReply.Marshal(b, m, deterministic)
+}
+func (m *SendTransactionReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SendTransactionReply.Merge(m, src)
+}
+func (m *SendTransactionReply) XXX_Size() int {
+	return xxx_messageInfo_SendTransactionReply.Size(m)
+}
+func (m *SendTransactionReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_SendTransactionReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SendTransactionReply proto.InternalMessageInfo
+
+func (m *SendTransactionReply) GetTxId() string {
+	if m != nil {
+		return m.TxId
+	}
+	return ""
+}
+
+// The request message for getting transaction's status containing tx id
+type GetTransactionStatusRequest struct {
+	TxId                 string   `protobuf:"bytes,1,opt,name=txId,proto3" json:"txId,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetTransactionStatusRequest) Reset()         { *m = GetTransactionStatusRequest{} }
+func (m *GetTransactionStatusRequest) String() string { return proto.CompactTextString(m) }
+func (*GetTransactionStatusRequest) ProtoMessage()    {}
+func (*GetTransactionStatusRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{16}
+}
+
+func (m *GetTransactionStatusRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetTransactionStatusRequest.Unmarshal(m, b)
+}
+func (m *GetTransactionStatusRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetTransactionStatusRequest.Marshal(b, m, deterministic)
+}
+func (m *GetTransactionStatusRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetTransactionStatusRequest.Merge(m, src)
+}
+func (m *GetTransactionStatusRequest) XXX_Size() int {
+	return xxx_messageInfo_GetTransactionStatusRequest.Size(m)
+}
+func (m *GetTransactionStatusRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetTransactionStatusRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetTransactionStatusRequest proto.InternalMessageInfo
+
+func (m *GetTransactionStatusRequest) GetTxId() string {
+	if m != nil {
+		return m.TxId
+	}
+	return ""
+}
+
+// The response message containing transaction's status: UNKNOWN, PENDING, SUCCESS
+type GetTransactionStatusReply struct {
+	Status               string   `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetTransactionStatusReply) Reset()         { *m = GetTransactionStatusReply{} }
+func (m *GetTransactionStatusReply) String() string { return proto.CompactTextString(m) }
+func (*GetTransactionStatusReply) ProtoMessage()    {}
+func (*GetTransactionStatusReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5065a9543fabcab5, []int{17}
+}
+
+func (m *GetTransactionStatusReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetTransactionStatusReply.Unmarshal(m, b)
+}
+func (m *GetTransactionStatusReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetTransactionStatusReply.Marshal(b, m, deterministic)
+}
+func (m *GetTransactionStatusReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetTransactionStatusReply.Merge(m, src)
+}
+func (m *GetTransactionStatusReply) XXX_Size() int {
+	return xxx_messageInfo_GetTransactionStatusReply.Size(m)
+}
+func (m *GetTransactionStatusReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetTransactionStatusReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetTransactionStatusReply proto.InternalMessageInfo
+
+func (m *GetTransactionStatusReply) GetStatus() string {
+	if m != nil {
+		return m.Status
+	}
+	return ""
+}
+
 func init() {
 	proto.RegisterType((*BlockRequest)(nil), "wavesAdapter.BlockRequest")
 	proto.RegisterType((*BlockReply)(nil), "wavesAdapter.BlockReply")
 	proto.RegisterType((*AddressRequest)(nil), "wavesAdapter.AddressRequest")
 	proto.RegisterType((*EmptyRequest)(nil), "wavesAdapter.EmptyRequest")
+	proto.RegisterType((*FeeReply)(nil), "wavesAdapter.FeeReply")
+	proto.RegisterType((*GetBalanceReply)(nil), "wavesAdapter.GetBalanceReply")
 	proto.RegisterType((*GenerateAddressReply)(nil), "wavesAdapter.GenerateAddressReply")
 	proto.RegisterType((*ValidateAddressReply)(nil), "wavesAdapter.ValidateAddressReply")
+	proto.RegisterType((*RawTransactionBySendersAddressRequest)(nil), "wavesAdapter.RawTransactionBySendersAddressRequest")
+	proto.RegisterType((*RawTransactionBySendersPublicKeyRequest)(nil), "wavesAdapter.RawTransactionBySendersPublicKeyRequest")
+	proto.RegisterType((*RawTransactionReply)(nil), "wavesAdapter.RawTransactionReply")
+	proto.RegisterType((*SignTransactionRequest)(nil), "wavesAdapter.SignTransactionRequest")
+	proto.RegisterType((*SignTransactionBySecretKeyRequest)(nil), "wavesAdapter.SignTransactionBySecretKeyRequest")
+	proto.RegisterType((*SignTransactionReply)(nil), "wavesAdapter.SignTransactionReply")
+	proto.RegisterType((*SendTransactionRequest)(nil), "wavesAdapter.SendTransactionRequest")
+	proto.RegisterType((*SendTransactionReply)(nil), "wavesAdapter.SendTransactionReply")
+	proto.RegisterType((*GetTransactionStatusRequest)(nil), "wavesAdapter.GetTransactionStatusRequest")
+	proto.RegisterType((*GetTransactionStatusReply)(nil), "wavesAdapter.GetTransactionStatusReply")
 }
 
 func init() { proto.RegisterFile("waves_adapter.proto", fileDescriptor_5065a9543fabcab5) }
 
 var fileDescriptor_5065a9543fabcab5 = []byte{
-	// 281 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x52, 0x41, 0x4b, 0xf3, 0x40,
-	0x10, 0x4d, 0x3e, 0x68, 0x3f, 0x1d, 0x4a, 0x8b, 0x6b, 0x84, 0x10, 0x3c, 0xc8, 0x9e, 0x44, 0x4a,
-	0x10, 0xfd, 0x05, 0x8d, 0x48, 0x3d, 0xf4, 0x50, 0x22, 0xea, 0x51, 0xb6, 0xcd, 0x50, 0x83, 0x49,
-	0x77, 0xdd, 0x5d, 0x2b, 0xb9, 0xfa, 0xcb, 0x65, 0x37, 0x89, 0x24, 0x4b, 0x3c, 0xbe, 0x37, 0xf3,
-	0xde, 0xee, 0x9b, 0x19, 0x38, 0xfd, 0x62, 0x07, 0x54, 0xaf, 0x2c, 0x63, 0x42, 0xa3, 0x8c, 0x85,
-	0xe4, 0x9a, 0x93, 0x89, 0x25, 0x17, 0x35, 0x47, 0xa7, 0x30, 0x49, 0x0a, 0xbe, 0x7d, 0x4f, 0xf1,
-	0xe3, 0x13, 0x95, 0xa6, 0x14, 0xa0, 0xc1, 0xa2, 0xa8, 0x48, 0x00, 0xa3, 0x8d, 0x41, 0xa1, 0x7f,
-	0xe1, 0x5f, 0x1e, 0xa7, 0x35, 0xa0, 0x57, 0x30, 0x5d, 0x64, 0x99, 0x44, 0xa5, 0x1a, 0x15, 0x09,
-	0xe1, 0x3f, 0xab, 0x99, 0xa6, 0xb3, 0x85, 0xc6, 0xff, 0xbe, 0x14, 0xba, 0x6a, 0xfd, 0xaf, 0x21,
-	0x58, 0xe2, 0x1e, 0x25, 0xd3, 0xf8, 0xeb, 0x61, 0x5e, 0xfa, 0xdb, 0x61, 0x0e, 0xc1, 0x33, 0x2b,
-	0xf2, 0xcc, 0x55, 0x04, 0x30, 0x3a, 0x18, 0xde, 0xf6, 0x1f, 0xa5, 0x35, 0xb8, 0xf9, 0xfe, 0x07,
-	0xe3, 0x3b, 0x5e, 0x96, 0x7c, 0x4f, 0x56, 0x40, 0x96, 0xa8, 0x57, 0x4c, 0x69, 0x9b, 0xe8, 0x01,
-	0xf3, 0xdd, 0x9b, 0x26, 0x51, 0xdc, 0xcd, 0x1f, 0x77, 0xc3, 0x47, 0xe1, 0x60, 0x4d, 0x14, 0x15,
-	0xf5, 0xc8, 0x23, 0xcc, 0x9c, 0x8f, 0xbb, 0x56, 0xdd, 0x9c, 0x11, 0xed, 0xd7, 0x86, 0x32, 0x53,
-	0x8f, 0x3c, 0xc1, 0xcc, 0xc9, 0x46, 0xce, 0xfb, 0xc2, 0xfe, 0xa0, 0x5d, 0xdb, 0xa1, 0xc1, 0x50,
-	0x2f, 0x99, 0xc3, 0x59, 0xce, 0xe3, 0x9d, 0x14, 0xdb, 0xb8, 0xdd, 0xbd, 0x95, 0x25, 0x27, 0x2f,
-	0x1d, 0xf5, 0xda, 0x9c, 0xc3, 0xda, 0xdf, 0x8c, 0xed, 0x5d, 0xdc, 0xfe, 0x04, 0x00, 0x00, 0xff,
-	0xff, 0xe9, 0xaa, 0xa3, 0x87, 0x2e, 0x02, 0x00, 0x00,
+	// 679 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x56, 0x5d, 0x6f, 0xd3, 0x3c,
+	0x14, 0x4e, 0xbb, 0x77, 0xdd, 0x76, 0xde, 0xb1, 0x0e, 0x2f, 0x54, 0x21, 0x0c, 0x69, 0x33, 0x1b,
+	0x1b, 0x63, 0x2a, 0x1f, 0x13, 0x57, 0x5c, 0xb5, 0x88, 0x16, 0xb4, 0x09, 0x55, 0xed, 0x80, 0xab,
+	0x09, 0xb9, 0x89, 0x29, 0x11, 0x69, 0x12, 0x12, 0x77, 0x6b, 0x2f, 0x10, 0xe2, 0x9a, 0x3f, 0xc3,
+	0x4f, 0x44, 0x4e, 0x9c, 0x36, 0x76, 0xd2, 0x52, 0x71, 0x97, 0xf3, 0xf5, 0x9c, 0xe7, 0x38, 0x39,
+	0x4f, 0x0c, 0x3b, 0x37, 0xe4, 0x9a, 0x46, 0x9f, 0x88, 0x4d, 0x02, 0x46, 0xc3, 0x7a, 0x10, 0xfa,
+	0xcc, 0x47, 0x9b, 0xb1, 0xb3, 0x91, 0xf8, 0xf0, 0x16, 0x6c, 0x36, 0x5d, 0xdf, 0xfa, 0xda, 0xa5,
+	0xdf, 0x46, 0x34, 0x62, 0x18, 0x03, 0x08, 0x3b, 0x70, 0x27, 0x48, 0x87, 0xd5, 0x3e, 0xb7, 0x8c,
+	0xd2, 0x5e, 0xe9, 0x78, 0xa3, 0x9b, 0x18, 0xf8, 0x04, 0xb6, 0x1a, 0xb6, 0x1d, 0xd2, 0x28, 0x12,
+	0x55, 0xc8, 0x80, 0x35, 0x92, 0x78, 0x44, 0x66, 0x6a, 0x72, 0xfc, 0xd7, 0xc3, 0x80, 0x4d, 0x52,
+	0xfc, 0x5d, 0x58, 0x6f, 0x51, 0x9a, 0xa0, 0x6f, 0xc3, 0xca, 0x67, 0x4a, 0x45, 0x05, 0x7f, 0xc4,
+	0x8f, 0xa1, 0xda, 0xa6, 0xac, 0x49, 0x5c, 0xe2, 0x59, 0x22, 0xc9, 0x80, 0xb5, 0x7e, 0x62, 0xa7,
+	0xd0, 0xc2, 0xc4, 0x4f, 0x41, 0x6f, 0x53, 0x8f, 0x86, 0x84, 0xd1, 0x29, 0x1d, 0x51, 0x31, 0x87,
+	0xcc, 0x29, 0xe8, 0x1f, 0x88, 0xeb, 0xd8, 0x6a, 0x85, 0x0e, 0xab, 0xd7, 0xdc, 0x1f, 0xe7, 0xaf,
+	0x77, 0x13, 0x03, 0xff, 0x80, 0xc3, 0x2e, 0xb9, 0xb9, 0x0c, 0x89, 0x17, 0x11, 0x8b, 0x39, 0xbe,
+	0xd7, 0x9c, 0xf4, 0xa8, 0x67, 0xd3, 0x30, 0x52, 0xa6, 0xdf, 0x83, 0xff, 0x45, 0x87, 0x56, 0xe8,
+	0x0f, 0x45, 0xd3, 0xac, 0x0b, 0xed, 0xc2, 0x86, 0x30, 0x2f, 0x7d, 0xa3, 0x1c, 0xc7, 0x67, 0x0e,
+	0x54, 0x83, 0x0a, 0x19, 0xfa, 0x23, 0x8f, 0x19, 0x2b, 0x71, 0x48, 0x58, 0xf8, 0x57, 0x09, 0x8e,
+	0xe6, 0x30, 0xe8, 0x8c, 0xfa, 0xae, 0x63, 0x9d, 0xd3, 0xf4, 0x5c, 0xd1, 0x09, 0x6c, 0x47, 0x4a,
+	0x48, 0x10, 0xc9, 0xf9, 0xff, 0x91, 0xcd, 0x21, 0xec, 0xc8, 0x64, 0x92, 0xb3, 0xdb, 0x82, 0x32,
+	0x1b, 0xc7, 0xad, 0x36, 0xbb, 0x65, 0x36, 0xc6, 0xef, 0xa0, 0xd6, 0x73, 0x06, 0x9e, 0x94, 0x97,
+	0x50, 0x3c, 0x80, 0x5b, 0x09, 0x95, 0x86, 0xf4, 0x76, 0x64, 0xa7, 0xc0, 0x2b, 0x4f, 0xf1, 0xae,
+	0x60, 0x5f, 0xc1, 0xe3, 0x87, 0x60, 0x85, 0x94, 0x65, 0xa6, 0x3f, 0x86, 0x6a, 0x82, 0x32, 0x8d,
+	0x08, 0x70, 0xd5, 0x9d, 0x83, 0x7f, 0x08, 0x7a, 0x8e, 0x6e, 0xd1, 0x58, 0xc7, 0x50, 0xe3, 0x47,
+	0x5f, 0x30, 0x96, 0x9a, 0x79, 0x02, 0x7a, 0x2e, 0x93, 0x23, 0x22, 0xf8, 0x8f, 0x8d, 0xdf, 0xda,
+	0x82, 0x58, 0xfc, 0x8c, 0x9f, 0xc1, 0xbd, 0x36, 0x65, 0x99, 0xd4, 0x1e, 0x23, 0x6c, 0x34, 0xfd,
+	0xb0, 0x8a, 0x4a, 0xce, 0xe0, 0x6e, 0x71, 0x09, 0xef, 0x51, 0x83, 0x4a, 0x14, 0x9b, 0xa2, 0x44,
+	0x58, 0xcf, 0x7f, 0xaf, 0x43, 0xe5, 0x95, 0x3f, 0x1c, 0xfa, 0x1e, 0xba, 0x00, 0xd4, 0xa6, 0xec,
+	0x82, 0x44, 0x2c, 0xde, 0xf3, 0x37, 0xd4, 0x19, 0x7c, 0x61, 0xc8, 0xac, 0x67, 0x55, 0xa1, 0x9e,
+	0x95, 0x04, 0xd3, 0x28, 0x8c, 0x05, 0xee, 0x04, 0x6b, 0xa8, 0xc7, 0x17, 0x56, 0xda, 0x41, 0x15,
+	0x2a, 0xbb, 0xfd, 0x26, 0x96, 0x63, 0x45, 0xeb, 0x8b, 0x35, 0xf4, 0x1e, 0xaa, 0xca, 0x9a, 0xa2,
+	0x5d, 0xb9, 0x50, 0x5e, 0x40, 0x15, 0xb6, 0x68, 0xc7, 0xb1, 0x86, 0x5e, 0xc2, 0x4a, 0x8b, 0xd2,
+	0x85, 0xfc, 0x6a, 0x72, 0x2c, 0x55, 0x2a, 0xac, 0xa1, 0x73, 0x80, 0x99, 0x32, 0xfd, 0x85, 0xce,
+	0x7d, 0x75, 0x4a, 0x49, 0xd1, 0xb0, 0x86, 0xbe, 0xc3, 0x7e, 0x9b, 0xb2, 0xc5, 0xe2, 0x82, 0xce,
+	0x64, 0x94, 0xa5, 0xa4, 0xc8, 0xdc, 0x5f, 0x54, 0x94, 0xb6, 0xff, 0x59, 0x82, 0x07, 0xf3, 0xfb,
+	0xcf, 0x74, 0xe2, 0xc5, 0x52, 0x0c, 0x54, 0x29, 0x5a, 0x8e, 0xc3, 0x15, 0x54, 0x95, 0xbd, 0x43,
+	0x07, 0x72, 0x5d, 0xb1, 0x8a, 0xa8, 0xef, 0xba, 0x68, 0x79, 0xb1, 0x86, 0x22, 0x30, 0xe7, 0xab,
+	0x06, 0x7a, 0xb2, 0x10, 0x23, 0xaf, 0x2f, 0x4b, 0x36, 0xe5, 0x33, 0xc9, 0x9b, 0x9f, 0x9b, 0xa9,
+	0x50, 0x42, 0x72, 0xf0, 0x05, 0xf2, 0x81, 0x35, 0xe4, 0xf2, 0xff, 0x5d, 0x7e, 0xf3, 0xd1, 0xa3,
+	0xdc, 0xe7, 0x36, 0x4f, 0x50, 0xcc, 0xa3, 0x65, 0x52, 0xe3, 0x6e, 0xcd, 0x53, 0xb8, 0xe3, 0xf8,
+	0xf5, 0x41, 0x18, 0x58, 0xf5, 0xf4, 0xfe, 0x10, 0xd7, 0x36, 0x6f, 0x7f, 0xcc, 0x40, 0x74, 0xf8,
+	0x95, 0xa2, 0x53, 0xea, 0x57, 0xe2, 0xbb, 0xc5, 0xd9, 0x9f, 0x00, 0x00, 0x00, 0xff, 0xff, 0xc0,
+	0xcc, 0xba, 0x64, 0x72, 0x08, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -297,6 +864,22 @@ type CommonClient interface {
 	GenerateAddress(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*GenerateAddressReply, error)
 	// Validate address
 	ValidateAddress(ctx context.Context, in *AddressRequest, opts ...grpc.CallOption) (*ValidateAddressReply, error)
+	// Get suggested transaction's fee
+	Fee(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*FeeReply, error)
+	// Get account's balance
+	GetBalance(ctx context.Context, in *AddressRequest, opts ...grpc.CallOption) (*GetBalanceReply, error)
+	// request to create raw transaction by senders's address
+	GetRawTransactionBySendersAddress(ctx context.Context, in *RawTransactionBySendersAddressRequest, opts ...grpc.CallOption) (*RawTransactionReply, error)
+	// request to create raw transaction by senders's public key
+	GetRawTransactionBySendersPublicKey(ctx context.Context, in *RawTransactionBySendersPublicKeyRequest, opts ...grpc.CallOption) (*RawTransactionReply, error)
+	// Sing transaction with private key keeped in adapter
+	SignTransaction(ctx context.Context, in *SignTransactionRequest, opts ...grpc.CallOption) (*SignTransactionReply, error)
+	// Sing transaction by private key in parameters
+	SignTransactionBySecretKey(ctx context.Context, in *SignTransactionBySecretKeyRequest, opts ...grpc.CallOption) (*SignTransactionReply, error)
+	// Send transaction
+	SendTransaction(ctx context.Context, in *SendTransactionRequest, opts ...grpc.CallOption) (*SendTransactionReply, error)
+	// Get transaction status
+	GetTransactionStatus(ctx context.Context, in *GetTransactionStatusRequest, opts ...grpc.CallOption) (*GetTransactionStatusReply, error)
 }
 
 type commonClient struct {
@@ -334,6 +917,78 @@ func (c *commonClient) ValidateAddress(ctx context.Context, in *AddressRequest, 
 	return out, nil
 }
 
+func (c *commonClient) Fee(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*FeeReply, error) {
+	out := new(FeeReply)
+	err := c.cc.Invoke(ctx, "/wavesAdapter.Common/Fee", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonClient) GetBalance(ctx context.Context, in *AddressRequest, opts ...grpc.CallOption) (*GetBalanceReply, error) {
+	out := new(GetBalanceReply)
+	err := c.cc.Invoke(ctx, "/wavesAdapter.Common/GetBalance", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonClient) GetRawTransactionBySendersAddress(ctx context.Context, in *RawTransactionBySendersAddressRequest, opts ...grpc.CallOption) (*RawTransactionReply, error) {
+	out := new(RawTransactionReply)
+	err := c.cc.Invoke(ctx, "/wavesAdapter.Common/GetRawTransactionBySendersAddress", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonClient) GetRawTransactionBySendersPublicKey(ctx context.Context, in *RawTransactionBySendersPublicKeyRequest, opts ...grpc.CallOption) (*RawTransactionReply, error) {
+	out := new(RawTransactionReply)
+	err := c.cc.Invoke(ctx, "/wavesAdapter.Common/GetRawTransactionBySendersPublicKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonClient) SignTransaction(ctx context.Context, in *SignTransactionRequest, opts ...grpc.CallOption) (*SignTransactionReply, error) {
+	out := new(SignTransactionReply)
+	err := c.cc.Invoke(ctx, "/wavesAdapter.Common/SignTransaction", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonClient) SignTransactionBySecretKey(ctx context.Context, in *SignTransactionBySecretKeyRequest, opts ...grpc.CallOption) (*SignTransactionReply, error) {
+	out := new(SignTransactionReply)
+	err := c.cc.Invoke(ctx, "/wavesAdapter.Common/SignTransactionBySecretKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonClient) SendTransaction(ctx context.Context, in *SendTransactionRequest, opts ...grpc.CallOption) (*SendTransactionReply, error) {
+	out := new(SendTransactionReply)
+	err := c.cc.Invoke(ctx, "/wavesAdapter.Common/SendTransaction", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonClient) GetTransactionStatus(ctx context.Context, in *GetTransactionStatusRequest, opts ...grpc.CallOption) (*GetTransactionStatusReply, error) {
+	out := new(GetTransactionStatusReply)
+	err := c.cc.Invoke(ctx, "/wavesAdapter.Common/GetTransactionStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CommonServer is the server API for Common service.
 type CommonServer interface {
 	// getting last block
@@ -342,6 +997,22 @@ type CommonServer interface {
 	GenerateAddress(context.Context, *EmptyRequest) (*GenerateAddressReply, error)
 	// Validate address
 	ValidateAddress(context.Context, *AddressRequest) (*ValidateAddressReply, error)
+	// Get suggested transaction's fee
+	Fee(context.Context, *EmptyRequest) (*FeeReply, error)
+	// Get account's balance
+	GetBalance(context.Context, *AddressRequest) (*GetBalanceReply, error)
+	// request to create raw transaction by senders's address
+	GetRawTransactionBySendersAddress(context.Context, *RawTransactionBySendersAddressRequest) (*RawTransactionReply, error)
+	// request to create raw transaction by senders's public key
+	GetRawTransactionBySendersPublicKey(context.Context, *RawTransactionBySendersPublicKeyRequest) (*RawTransactionReply, error)
+	// Sing transaction with private key keeped in adapter
+	SignTransaction(context.Context, *SignTransactionRequest) (*SignTransactionReply, error)
+	// Sing transaction by private key in parameters
+	SignTransactionBySecretKey(context.Context, *SignTransactionBySecretKeyRequest) (*SignTransactionReply, error)
+	// Send transaction
+	SendTransaction(context.Context, *SendTransactionRequest) (*SendTransactionReply, error)
+	// Get transaction status
+	GetTransactionStatus(context.Context, *GetTransactionStatusRequest) (*GetTransactionStatusReply, error)
 }
 
 func RegisterCommonServer(s *grpc.Server, srv CommonServer) {
@@ -402,6 +1073,150 @@ func _Common_ValidateAddress_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Common_Fee_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServer).Fee(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wavesAdapter.Common/Fee",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServer).Fee(ctx, req.(*EmptyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Common_GetBalance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServer).GetBalance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wavesAdapter.Common/GetBalance",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServer).GetBalance(ctx, req.(*AddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Common_GetRawTransactionBySendersAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RawTransactionBySendersAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServer).GetRawTransactionBySendersAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wavesAdapter.Common/GetRawTransactionBySendersAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServer).GetRawTransactionBySendersAddress(ctx, req.(*RawTransactionBySendersAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Common_GetRawTransactionBySendersPublicKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RawTransactionBySendersPublicKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServer).GetRawTransactionBySendersPublicKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wavesAdapter.Common/GetRawTransactionBySendersPublicKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServer).GetRawTransactionBySendersPublicKey(ctx, req.(*RawTransactionBySendersPublicKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Common_SignTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SignTransactionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServer).SignTransaction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wavesAdapter.Common/SignTransaction",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServer).SignTransaction(ctx, req.(*SignTransactionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Common_SignTransactionBySecretKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SignTransactionBySecretKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServer).SignTransactionBySecretKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wavesAdapter.Common/SignTransactionBySecretKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServer).SignTransactionBySecretKey(ctx, req.(*SignTransactionBySecretKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Common_SendTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendTransactionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServer).SendTransaction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wavesAdapter.Common/SendTransaction",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServer).SendTransaction(ctx, req.(*SendTransactionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Common_GetTransactionStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTransactionStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServer).GetTransactionStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wavesAdapter.Common/GetTransactionStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServer).GetTransactionStatus(ctx, req.(*GetTransactionStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Common_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "wavesAdapter.Common",
 	HandlerType: (*CommonServer)(nil),
@@ -417,6 +1232,38 @@ var _Common_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ValidateAddress",
 			Handler:    _Common_ValidateAddress_Handler,
+		},
+		{
+			MethodName: "Fee",
+			Handler:    _Common_Fee_Handler,
+		},
+		{
+			MethodName: "GetBalance",
+			Handler:    _Common_GetBalance_Handler,
+		},
+		{
+			MethodName: "GetRawTransactionBySendersAddress",
+			Handler:    _Common_GetRawTransactionBySendersAddress_Handler,
+		},
+		{
+			MethodName: "GetRawTransactionBySendersPublicKey",
+			Handler:    _Common_GetRawTransactionBySendersPublicKey_Handler,
+		},
+		{
+			MethodName: "SignTransaction",
+			Handler:    _Common_SignTransaction_Handler,
+		},
+		{
+			MethodName: "SignTransactionBySecretKey",
+			Handler:    _Common_SignTransactionBySecretKey_Handler,
+		},
+		{
+			MethodName: "SendTransaction",
+			Handler:    _Common_SendTransaction_Handler,
+		},
+		{
+			MethodName: "GetTransactionStatus",
+			Handler:    _Common_GetTransactionStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
