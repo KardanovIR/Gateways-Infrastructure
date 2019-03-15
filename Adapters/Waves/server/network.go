@@ -21,12 +21,11 @@ func (s *grpcServer) GetLastBlockHeight(ctx context.Context, in *pb.BlockRequest
 	return &pb.BlockReply{Block: blockHeight}, nil
 }
 
-// Get suggested transaction's fee
-func (s *grpcServer) Fee(ctx context.Context, in *pb.EmptyRequest) (*pb.FeeReply, error) {
+// Get transaction's fee
+func (s *grpcServer) Fee(ctx context.Context, in *pb.FeeRequest) (*pb.FeeReply, error) {
 	log := logger.FromContext(ctx)
-	log.Info("Fee request")
-
-	var fee, err = s.nodeClient.Fee(ctx)
+	log.Infof("Fee request for sender %s, assetId %s", in.SendersPublicKey, in.AssetId)
+	var fee, err = s.nodeClient.Fee(ctx, in.SendersPublicKey, in.AssetId)
 	if err != nil {
 		log.Errorf("get fee fails: %s", err)
 		return nil, err

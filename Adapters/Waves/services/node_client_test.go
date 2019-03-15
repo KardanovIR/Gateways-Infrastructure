@@ -38,7 +38,7 @@ func TestNodeClient(t *testing.T) {
 	// start test
 	amount := uint64(1000000)
 	// check fee and transfered amount
-	fee, err := GetNodeClient().Fee(ctx)
+	fee, err := GetNodeClient().Fee(ctx, publicKey, "")
 	if err != nil {
 		log.Error(err)
 		t.FailNow()

@@ -17,8 +17,8 @@ service Common {
     // Validate address
     rpc ValidateAddress (AddressRequest) returns (ValidateAddressReply) {
     }
-    // Get suggested transaction's fee
-    rpc Fee (EmptyRequest) returns (FeeReply) {
+    // Get transaction's fee
+    rpc Fee (FeeRequest) returns (FeeReply) {
     }
     // Get account's balance
     rpc GetBalance (AddressRequest) returns (GetBalanceReply) {
@@ -61,6 +61,12 @@ message AddressRequest {
 // empty request message
 message EmptyRequest {
 
+}
+
+// fee request message
+message FeeRequest {
+    string sendersPublicKey = 1;
+    string assetId = 2;
 }
 
 // The response message containing transaction's fee

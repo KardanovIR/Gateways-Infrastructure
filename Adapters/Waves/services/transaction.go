@@ -11,6 +11,8 @@ import (
 	"github.com/wavesplatform/gowaves/pkg/proto"
 )
 
+const millisecondsInSec = 1000
+
 // CreateRawTxBySendersAddress creates transaction for senders address if private key keeps in adapter
 func (cl *nodeClient) CreateRawTxBySendersAddress(ctx context.Context, addressFrom string,
 	addressTo string, amount uint64) ([]byte, error) {
@@ -48,31 +50,61 @@ func (cl *nodeClient) createRawTransaction(ctx context.Context, senderPublic cry
 	if !ok || err != nil {
 		return nil, fmt.Errorf("recipient address is not valid: %s", err)
 	}
-	recipientAddress, err := proto.NewAddressFromString(addressTo)
+	tx, err := createRawTransactionWithoutFee(ctx, senderPublic, addressTo, amount, "", "")
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
-	fee, err := cl.Fee(ctx)
+	fee, err := cl.FeeForTx(ctx, tx)
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
-	amountAsset := proto.OptionalAsset{}
-	feeAsset := proto.OptionalAsset{}
-	timestamp := time.Now().Unix() * 1000
-	tx, err := proto.NewUnsignedTransferV2(senderPublic, amountAsset, feeAsset, uint64(timestamp), amount, fee,
-		recipientAddress, "")
-	if err != nil {
-		log.Error(err)
-		return nil, err
-	}
+	tx.Fee = fee
 	txBinary, err := tx.BodyMarshalBinary()
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
 	return txBinary, nil
+}
+
+func createRawTransactionWithoutFee(ctx context.Context, senderPublic crypto.PublicKey,
+	addressTo string, amount uint64, amountAssetId, feeAssetId string) (*proto.TransferV2, error) {
+	log := logger.FromContext(ctx)
+	recipientAddress, err := proto.NewAddressFromString(addressTo)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	amountAsset := proto.OptionalAsset{}
+	if len(amountAssetId) > 0 {
+		amAs, err := crypto.NewDigestFromBase58(amountAssetId)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		amountAsset.ID = amAs
+		amountAsset.Present = true
+	}
+	feeAsset := proto.OptionalAsset{}
+	if len(feeAssetId) > 0 {
+		fAs, err := crypto.NewDigestFromBase58(feeAssetId)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		feeAsset.ID = fAs
+		feeAsset.Present = true
+	}
+	timestamp := time.Now().Unix() * millisecondsInSec
+	tx, err := proto.NewUnsignedTransferV2(senderPublic, amountAsset, feeAsset, uint64(timestamp), amount, 1,
+		recipientAddress, "")
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	return tx, err
 }
 
 func (cl *nodeClient) SignTxWithKeepedSecretKey(ctx context.Context, sendersAddress string, txUnsigned []byte) ([]byte, error) {

@@ -46,7 +46,8 @@ func TestGrpcClient(t *testing.T) {
 	log := logger.FromContext(ctx)
 
 	// check fee and transfered amount on predefined address
-	feeReply, err := clientgrpc.GetClient().Fee(ctx, &wavesAdapter.EmptyRequest{})
+	feeReply, err := clientgrpc.GetClient().Fee(ctx, &wavesAdapter.FeeRequest{
+		SendersPublicKey: "3FdG1P3KzLxNgGW9BxLGpzk9G8rKWDujBST8LKjmMMdv", AssetId: ""})
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -122,15 +123,9 @@ func TestGrpcClient(t *testing.T) {
 	assert.Equal(t, balanceReply.Balance, amount.String())
 
 	// return money back
-	fee2Reply, err := clientgrpc.GetClient().Fee(ctx, &wavesAdapter.EmptyRequest{})
-	if err != nil {
-		log.Error(err)
-		t.FailNow()
-	}
-	balance, _ := new(big.Int).SetString(balanceReply.Balance, 10)
-	fee2, _ := new(big.Int).SetString(fee2Reply.Fee, 10)
-	amountBack := new(big.Int).Sub(balance, fee2)
 
+	balance, _ := new(big.Int).SetString(balanceReply.Balance, 10)
+	amountBack := new(big.Int).Sub(balance, fee)
 	tx2, err := clientgrpc.GetClient().GetRawTransactionBySendersAddress(ctx,
 		&wavesAdapter.RawTransactionBySendersAddressRequest{
 			AddressFrom: address2,
@@ -166,7 +161,7 @@ func TestGrpcClient(t *testing.T) {
 		t.FailNow()
 	}
 	// final_balance_on_address1 = initial_balance_on_address1 - (fee_of_1_to_2 + fee_of_2_to_1)
-	amountResult := new(big.Int).Sub(sBalance, new(big.Int).Add(fee, fee2))
+	amountResult := new(big.Int).Sub(sBalance, new(big.Int).Add(fee, fee))
 	assert.Equal(t, amountResult.String(), balance1Reply.Balance)
 }
 
