@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"net/http"
-	"strconv"
 	"sync"
 	"time"
 
@@ -17,7 +16,17 @@ import (
 type INodeClient interface {
 	GenerateAddress(ctx context.Context) (publicAddress string, err error)
 	ValidateAddress(ctx context.Context, address string) (bool, error)
+	GetBalance(ctx context.Context, address string) (uint64, error)
+
+	Fee(ctx context.Context) (uint64, error)
 	GetLastBlockHeight(ctx context.Context) (string, error)
+
+	CreateRawTxBySendersAddress(ctx context.Context, addressFrom string, addressTo string, amount uint64) ([]byte, error)
+	CreateRawTxBySendersPublicKey(ctx context.Context, sendersPublicKey string, addressTo string, amount uint64) ([]byte, error)
+	SignTxWithKeepedSecretKey(ctx context.Context, sendersAddress string, txUnsigned []byte) ([]byte, error)
+	SignTxWithSecretKey(ctx context.Context, secretKeyInBase58 string, txUnsigned []byte) ([]byte, error)
+	SendTransaction(ctx context.Context, txSigned []byte) (txId string, err error)
+	GetTransactionByTxId(ctx context.Context, txId string) ([]byte, error)
 }
 
 type nodeClient struct {
@@ -25,18 +34,6 @@ type nodeClient struct {
 	chainID    models.NetworkType
 	// private keys for addresses
 	privateKeys map[string]crypto.SecretKey
-}
-
-func (cl *nodeClient) GetLastBlockHeight(ctx context.Context) (string, error) {
-	log := logger.FromContext(ctx)
-	log.Debug("call service method 'GetLastBlockHeight'")
-
-	lastBlock, _, err := cl.nodeClient.Blocks.Last(ctx)
-	if err != nil {
-		log.Errorf("get last block fails: %s", err)
-		return "", err
-	}
-	return strconv.FormatUint(lastBlock.Height, 10), nil
 }
 
 var (
