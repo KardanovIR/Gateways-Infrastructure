@@ -42,8 +42,11 @@ func (cl *nodeClient) CreateRawTxBySendersPublicKey(ctx context.Context, senders
 func (cl *nodeClient) createRawTransaction(ctx context.Context, senderPublic crypto.PublicKey,
 	addressTo string, amount uint64) ([]byte, error) {
 	log := logger.FromContext(ctx)
-	amountAsset := proto.OptionalAsset{}
-	feeAsset := proto.OptionalAsset{}
+
+	ok, err := cl.ValidateAddress(ctx, addressTo)
+	if !ok || err != nil {
+		return nil, fmt.Errorf("recipient address is not valid: %s", err)
+	}
 	recipientAddress, err := proto.NewAddressFromString(addressTo)
 	if err != nil {
 		log.Error(err)
@@ -54,6 +57,8 @@ func (cl *nodeClient) createRawTransaction(ctx context.Context, senderPublic cry
 		log.Error(err)
 		return nil, err
 	}
+	amountAsset := proto.OptionalAsset{}
+	feeAsset := proto.OptionalAsset{}
 	timestamp := time.Now().Unix() * 1000
 	tx, err := proto.NewUnsignedTransferV2(senderPublic, amountAsset, feeAsset, uint64(timestamp), amount, fee,
 		recipientAddress, "")
@@ -128,9 +133,9 @@ func (cl *nodeClient) SendTransaction(ctx context.Context, txSigned []byte) (txI
 	return
 }
 
-func (cl *nodeClient) GetTransactionByTx(ctx context.Context, txId string) ([]byte, error) {
+func (cl *nodeClient) GetTransactionByTxId(ctx context.Context, txId string) ([]byte, error) {
 	log := logger.FromContext(ctx)
-	log.Info("call service method 'GetTransactionByTx' for txID %s", txId)
+	log.Info("call service method 'GetTransactionByTxId' for txID %s", txId)
 
 	id, err := crypto.NewDigestFromBase58(txId)
 	tr, _, err := cl.nodeClient.Transactions.Info(ctx, id)

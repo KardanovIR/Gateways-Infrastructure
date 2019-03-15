@@ -26,7 +26,7 @@ type INodeClient interface {
 	SignTxWithKeepedSecretKey(ctx context.Context, sendersAddress string, txUnsigned []byte) ([]byte, error)
 	SignTxWithSecretKey(ctx context.Context, secretKeyInBase58 string, txUnsigned []byte) ([]byte, error)
 	SendTransaction(ctx context.Context, txSigned []byte) (txId string, err error)
-	GetTransactionByTx(ctx context.Context, txId string) ([]byte, error)
+	GetTransactionByTxId(ctx context.Context, txId string) ([]byte, error)
 }
 
 type nodeClient struct {
