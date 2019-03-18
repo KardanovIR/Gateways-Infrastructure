@@ -36,7 +36,7 @@ func (s *grpcServer) GetRawTransactionBySendersPublicKey(ctx context.Context, in
 	if err != nil {
 		return nil, err
 	}
-	tx, err := s.nodeClient.CreateRawTxBySendersPublicKey(ctx, in.SendersPublicKey, in.AddressTo, uint64(amount))
+	tx, err := s.nodeClient.CreateRawTxBySendersPublicKey(ctx, in.SendersPublicKey, in.AddressTo, uint64(amount), in.AssetId)
 	if err != nil {
 		log.Errorf("get raw transaction fails: %s", err)
 		return nil, err

@@ -2,11 +2,11 @@ package services
 
 import (
 	"context"
-	"github.com/magiconair/properties/assert"
 	"strconv"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
 )
@@ -64,11 +64,11 @@ func TestNodeClient(t *testing.T) {
 		log.Error(err)
 		t.Fail()
 	}
-	assert.Equal(t, len(cl.(*nodeClient).privateKeys), 1)
+	assert.True(t, len(cl.(*nodeClient).privateKeys) > 0)
 	log.Infof("Private hex %s, address %s", cl.(*nodeClient).privateKeys[address2], address2)
 
 	// send 0.001 WAVES to receiver
-	tx, err := GetNodeClient().CreateRawTxBySendersPublicKey(ctx, publicKey, address2, amount)
+	tx, err := GetNodeClient().CreateRawTxBySendersPublicKey(ctx, publicKey, address2, amount, "")
 	if err != nil {
 		log.Error(err)
 		t.Fail()

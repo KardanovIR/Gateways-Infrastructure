@@ -24,7 +24,7 @@ type INodeClient interface {
 	GetLastBlockHeight(ctx context.Context) (string, error)
 
 	CreateRawTxBySendersAddress(ctx context.Context, addressFrom string, addressTo string, amount uint64) ([]byte, error)
-	CreateRawTxBySendersPublicKey(ctx context.Context, sendersPublicKey string, addressTo string, amount uint64) ([]byte, error)
+	CreateRawTxBySendersPublicKey(ctx context.Context, sendersPublicKey string, addressTo string, amount uint64, assetId string) ([]byte, error)
 	SignTxWithKeepedSecretKey(ctx context.Context, sendersAddress string, txUnsigned []byte) ([]byte, error)
 	SignTxWithSecretKey(ctx context.Context, secretKeyInBase58 string, txUnsigned []byte) ([]byte, error)
 	SendTransaction(ctx context.Context, txSigned []byte) (txId string, err error)

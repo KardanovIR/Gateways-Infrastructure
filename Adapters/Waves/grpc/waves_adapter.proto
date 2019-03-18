@@ -101,6 +101,7 @@ message RawTransactionBySendersPublicKeyRequest {
     string sendersPublicKey = 1;
     string addressTo = 2;
     string amount = 3;
+    string assetId = 4; // empty for WAVES
 }
 
 // The response message containing raw transaction

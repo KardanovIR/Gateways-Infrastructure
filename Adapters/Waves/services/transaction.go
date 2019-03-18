@@ -24,12 +24,12 @@ func (cl *nodeClient) CreateRawTxBySendersAddress(ctx context.Context, addressFr
 		return nil, fmt.Errorf("haven't private key for address %s", addressFrom)
 	}
 	senderPublic := crypto.GeneratePublicKey(secretKey)
-	return cl.createRawTransaction(ctx, senderPublic, addressTo, amount)
+	return cl.createRawTransaction(ctx, senderPublic, addressTo, amount, "")
 }
 
 // CreateRawTxBySendersPublicKey creates transaction using public key. Private key is not used
 func (cl *nodeClient) CreateRawTxBySendersPublicKey(ctx context.Context, sendersPublicKey string,
-	addressTo string, amount uint64) ([]byte, error) {
+	addressTo string, amount uint64, assetId string) ([]byte, error) {
 	log := logger.FromContext(ctx)
 	log.Info("call service method 'CreateRawTxBySendersPublicKey' pk %s send amount %d to %s",
 		sendersPublicKey, amount, addressTo)
@@ -39,18 +39,18 @@ func (cl *nodeClient) CreateRawTxBySendersPublicKey(ctx context.Context, senders
 		log.Error(err)
 		return nil, err
 	}
-	return cl.createRawTransaction(ctx, senderPublic, addressTo, amount)
+	return cl.createRawTransaction(ctx, senderPublic, addressTo, amount, assetId)
 }
 
 func (cl *nodeClient) createRawTransaction(ctx context.Context, senderPublic crypto.PublicKey,
-	addressTo string, amount uint64) ([]byte, error) {
+	addressTo string, amount uint64, assetId string) ([]byte, error) {
 	log := logger.FromContext(ctx)
 
 	ok, err := cl.ValidateAddress(ctx, addressTo)
 	if !ok || err != nil {
 		return nil, fmt.Errorf("recipient address is not valid: %s", err)
 	}
-	tx, err := createRawTransactionWithoutFee(ctx, senderPublic, addressTo, amount, "", "")
+	tx, err := createRawTransactionWithoutFee(ctx, senderPublic, addressTo, amount, assetId, "")
 	if err != nil {
 		log.Error(err)
 		return nil, err
@@ -70,7 +70,7 @@ func (cl *nodeClient) createRawTransaction(ctx context.Context, senderPublic cry
 }
 
 func createRawTransactionWithoutFee(ctx context.Context, senderPublic crypto.PublicKey,
-	addressTo string, amount uint64, amountAssetId, feeAssetId string) (*proto.TransferV2, error) {
+	addressTo string, amount uint64, assetId, feeAssetId string) (*proto.TransferV2, error) {
 	log := logger.FromContext(ctx)
 	recipientAddress, err := proto.NewAddressFromString(addressTo)
 	if err != nil {
@@ -78,8 +78,8 @@ func createRawTransactionWithoutFee(ctx context.Context, senderPublic crypto.Pub
 		return nil, err
 	}
 	amountAsset := proto.OptionalAsset{}
-	if len(amountAssetId) > 0 {
-		amAs, err := crypto.NewDigestFromBase58(amountAssetId)
+	if len(assetId) > 0 {
+		amAs, err := crypto.NewDigestFromBase58(assetId)
 		if err != nil {
 			log.Error(err)
 			return nil, err
