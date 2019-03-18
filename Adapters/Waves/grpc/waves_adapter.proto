@@ -17,6 +17,30 @@ service Common {
     // Validate address
     rpc ValidateAddress (AddressRequest) returns (ValidateAddressReply) {
     }
+    // Get transaction's fee
+    rpc Fee (FeeRequest) returns (FeeReply) {
+    }
+    // Get account's balance
+    rpc GetBalance (AddressRequest) returns (GetBalanceReply) {
+    }
+    // request to create raw transaction by senders's address
+    rpc GetRawTransactionBySendersAddress (RawTransactionBySendersAddressRequest) returns (RawTransactionReply) {
+    }
+      // request to create raw transaction by senders's public key
+    rpc GetRawTransactionBySendersPublicKey (RawTransactionBySendersPublicKeyRequest) returns (RawTransactionReply) {
+    }
+    // Sing transaction with private key keeped in adapter
+    rpc SignTransaction (SignTransactionRequest) returns (SignTransactionReply) {
+    }
+     // Sing transaction by private key in parameters
+    rpc SignTransactionBySecretKey (SignTransactionBySecretKeyRequest) returns (SignTransactionReply) {
+    }
+    // Send transaction
+    rpc SendTransaction (SendTransactionRequest) returns (SendTransactionReply) {
+    }
+    // Get transaction status
+    rpc GetTransactionStatus (GetTransactionStatusRequest) returns (GetTransactionStatusReply) {
+    }
 }
 
 // The request message for getting last block
@@ -38,6 +62,23 @@ message AddressRequest {
 message EmptyRequest {
 
 }
+
+// fee request message
+message FeeRequest {
+    string sendersPublicKey = 1;
+    string assetId = 2;
+}
+
+// The response message containing transaction's fee
+message FeeReply {
+    string fee = 1;
+}
+
+// The response message containing account's balance
+message GetBalanceReply {
+    string balance = 1;
+}
+
 // The response message containing generated address
 message GenerateAddressReply {
     string address = 1;
@@ -46,4 +87,61 @@ message GenerateAddressReply {
 // The response message containing result of address's validation
 message ValidateAddressReply {
     bool valid = 1;
+}
+
+// The request message for raw transaction creation
+message RawTransactionBySendersAddressRequest {
+    string addressFrom = 1;
+    string addressTo = 2;
+    string amount = 3;
+}
+
+// The request message for raw transaction creation
+message RawTransactionBySendersPublicKeyRequest {
+    string sendersPublicKey = 1;
+    string addressTo = 2;
+    string amount = 3;
+    string assetId = 4; // empty for WAVES
+}
+
+// The response message containing raw transaction
+message RawTransactionReply {
+    bytes tx = 1;
+}
+
+// The request message for singing transaction
+message SignTransactionRequest {
+    string senderAddress = 1;
+    bytes tx = 2;
+}
+
+// The request message for singing transaction by private key in parameters
+message SignTransactionBySecretKeyRequest {
+    string senderSecretKey = 1;
+    bytes tx = 2;
+}
+
+// The response message containing signed transaction
+message SignTransactionReply {
+    bytes tx = 1;
+}
+
+// The request message for singing transaction
+message SendTransactionRequest {
+    bytes tx = 1;
+}
+
+// The response message containing transaction's id
+message SendTransactionReply {
+    string txId = 1;
+}
+
+// The request message for getting transaction's status containing tx id
+message GetTransactionStatusRequest {
+    string txId = 1;
+}
+
+// The response message containing transaction's status: UNKNOWN, PENDING, SUCCESS
+message GetTransactionStatusReply {
+    string status = 1;
 }
