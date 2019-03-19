@@ -14,6 +14,9 @@ service Common {
     // request to create raw transaction
     rpc GetRawTransaction (RawTransactionRequest) returns (RawTransactionReply) {
     }
+    // request to create raw transaction to transfer erc-20 tokens
+    rpc GetErc20RawTransaction (Erc20RawTransactionRequest) returns (RawTransactionReply) {
+    }
     // Get suggested transaction's fee
     rpc SuggestFee (EmptyRequest) returns (SuggestFeeReply) {
     }
@@ -85,6 +88,14 @@ message RawTransactionRequest {
     string addressFrom = 1;
     string addressTo = 2;
     string amount = 3;
+}
+
+// The request message for raw transaction creation
+message Erc20RawTransactionRequest {
+    string addressFrom = 1;
+    string addressTo = 2;
+    string amount = 3;
+    string contract = 4;
 }
 
 // The response message containing the suggested gas price

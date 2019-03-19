@@ -54,6 +54,11 @@ func startServerAndGetConnection(ctx context.Context) (*grpc.ClientConn, error) 
 type nodeClientMock struct {
 }
 
+func (n *nodeClientMock) CreateErc20TokensRawTransaction(ctx context.Context, addressFrom string, contractAddress string, addressTo string,
+	amount *big.Int) ([]byte, error) {
+	return nil, nil
+}
+
 func (n *nodeClientMock) SignTransactionWithPrivateKey(ctx context.Context, privateKey string, rlpTx []byte) ([]byte, error) {
 	return nil, nil
 }

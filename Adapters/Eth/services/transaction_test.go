@@ -3,7 +3,9 @@ package services
 import (
 	"context"
 	"encoding/hex"
+	"errors"
 	"math/big"
+	"sync"
 	"testing"
 	"time"
 
@@ -17,7 +19,11 @@ import (
 const (
 	privateKey = "f8a425216e5b765a3abc829eeb1c0fb8fe291fe9612b23818ee201a7c7a276e8"
 	address    = "0xfFDB407fD780b62f43303cCC1f8B0ecF46c72e5b"
+	// ChainLink Token contract
+	contractAddress = "0x20fE562d797A42Dcb3399062AE9546cd06f63280"
 )
+
+var initTest sync.Once
 
 // test for following process:
 // 1) generate receiver address
@@ -25,28 +31,8 @@ const (
 // 3) return money back: send money from generated address to predefined address
 //
 func TestNodeClient_Transactions(t *testing.T) {
-	ctx := context.Background()
-	// setup
-	log, _ := logger.Init(false, logger.DEBUG)
-	err := config.Load("./testdata/config_test.yml")
-	if err != nil {
-		log.Error(err)
-		t.FailNow()
-	}
-	err = New(ctx, config.Cfg.Node)
-	if err != nil {
-		log.Error(err)
-		t.FailNow()
-	}
-	pk, err := crypto.HexToECDSA(privateKey)
-	if err != nil {
-		log.Errorf("can't cast key to ECDSA: %s", err)
-		t.FailNow()
-	}
-	cl.(*nodeClient).privateKeys[address] = pk
-	// start test
+	ctx, log := beforeTest()
 	amount, _ := new(big.Int).SetString("100000000000000", 10)
-
 	// check fee and transfered amount
 	fee, err := GetNodeClient().SuggestFee(ctx)
 	if err != nil {
@@ -74,7 +60,7 @@ func TestNodeClient_Transactions(t *testing.T) {
 		log.Error(err)
 		t.FailNow()
 	}
-	assert.Equal(t, len(cl.(*nodeClient).privateKeys), 2)
+	assert.True(t, len(cl.(*nodeClient).privateKeys) > 0)
 	log.Infof("Private hex %s, public address %s",
 		hex.EncodeToString(crypto.FromECDSA(cl.(*nodeClient).privateKeys[address2])), address2)
 
@@ -96,28 +82,10 @@ func TestNodeClient_Transactions(t *testing.T) {
 	}
 	log.Infof("send transaction %s", txId)
 	// wait while transaction will be complete
-	var lastStatus models.TxStatus
-	var i = 0
-	for ; i < 10; i++ {
-		lastStatus, err := GetNodeClient().GetTxStatusByTxID(ctx, txId)
-		log.Infof("transaction status %s", lastStatus)
-		if err != nil {
-			log.Error(err)
-			t.Fail()
-		}
-		if lastStatus == models.TxStatusUnKnown {
-			log.Error("unknown transaction by txID %s ", txId)
-			t.Fail()
-		}
-		if lastStatus == models.TxStatusSuccess {
-			break
-		}
-		time.Sleep(10 * time.Second)
-	}
-	log.Info("returned from loop on %d iteration", i+1)
-	if lastStatus == models.TxStatusPending {
-		log.Error("transaction in pending status yet!! %s ", txId)
-		t.Fail()
+	err = waitForTxComplete(ctx, txId)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
 	}
 	// check receiver's balance
 	balance, err := GetNodeClient().GetBalance(ctx, address2)
@@ -149,30 +117,86 @@ func TestNodeClient_Transactions(t *testing.T) {
 		log.Error(err)
 		t.FailNow()
 	}
-	log.Infof("send transaction %s", txId2)
 	// wait while transaction will be complete
-	{
-		var lastStatus models.TxStatus
-		var i = 0
-		for ; i < 10; i++ {
-			lastStatus, err := GetNodeClient().GetTxStatusByTxID(ctx, txId2)
-			if err != nil {
-				log.Error(err)
-				t.Fail()
-			}
-			if lastStatus == models.TxStatusUnKnown {
-				log.Error("unknown transaction by txID %s ", txId2)
-				t.Fail()
-			}
-			if lastStatus == models.TxStatusSuccess {
-				break
-			}
-			time.Sleep(10 * time.Second)
-		}
-		log.Infof("returned from loop on %d iteration", i+1)
-		if lastStatus == models.TxStatusPending {
-			log.Error("back money transaction in pending status yet!! %s ", txId2)
-			t.Fail()
-		}
+	err = waitForTxComplete(ctx, txId2)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
 	}
+}
+
+func TestNodeClient_SendErc20(t *testing.T) {
+	ctx, log := beforeTest()
+	// send 0.0001 Link to receiver
+	amount, _ := new(big.Int).SetString("100000000000000", 10)
+	address1 := "0x5F862eff5Fb0F2b6B3d83F714A8fe581a8d78e62"
+	privateKey1 := "63e8892145d22fbff2c8381b242bd78f191b32c718d51b99dd6b7f9319822320"
+
+	address2 := "0x7D7EB567Df197471A3C43e504844883538356635"
+	//privateKey2 := "f0229190763eb29915c40f1e439f510461ec31d6228eceb434fad13659aef0c1"
+
+	tx, err := GetNodeClient().CreateErc20TokensRawTransaction(ctx, address1, contractAddress, address2, amount)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	signedTx, err := GetNodeClient().SignTransactionWithPrivateKey(ctx, privateKey1, tx)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+
+	txId, err := GetNodeClient().SendTransaction(ctx, signedTx)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	err = waitForTxComplete(ctx, txId)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+}
+
+func beforeTest() (context.Context, logger.ILogger) {
+	ctx := context.Background()
+	initTest.Do(func() {
+		log, _ := logger.Init(false, logger.DEBUG)
+		err := config.Load("./testdata/config_test.yml")
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = New(ctx, config.Cfg.Node)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pk, err := crypto.HexToECDSA(privateKey)
+		if err != nil {
+			log.Fatal("can't cast key to ECDSA: %s", err)
+		}
+		cl.(*nodeClient).privateKeys[address] = pk
+	})
+	log := logger.FromContext(ctx)
+	return ctx, log
+}
+
+func waitForTxComplete(ctx context.Context, txId string) error {
+	log := logger.FromContext(ctx)
+	// wait while transaction will be complete
+	for i := 0; i < 20; i++ {
+		lastStatus, err := GetNodeClient().GetTxStatusByTxID(ctx, txId)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		if lastStatus == models.TxStatusUnKnown {
+			log.Error("unknown transaction by txID %s ", txId)
+			return err
+		}
+		if lastStatus == models.TxStatusSuccess {
+			return nil
+		}
+		time.Sleep(10 * time.Second)
+	}
+	return errors.New("transaction in pending status yet")
 }

@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"crypto/ecdsa"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,10 +15,10 @@ func TestNodeClient_IsAddressValid(t *testing.T) {
 }
 
 func TestNodeClient_GenerateAddress(t *testing.T) {
-	cl := nodeClient{chainID: 3, privateKeys: make(map[string]*ecdsa.PrivateKey)}
-	pb, err := cl.GenerateAddress(context.Background())
+	ctx, _ := beforeTest()
+	pb, err := cl.GenerateAddress(ctx)
 	if err != nil {
 		t.Fail()
 	}
-	assert.True(t, cl.IsAddressValid(context.Background(), pb))
+	assert.True(t, cl.IsAddressValid(ctx, pb))
 }
