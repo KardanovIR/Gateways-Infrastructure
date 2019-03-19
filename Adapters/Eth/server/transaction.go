@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
 
@@ -31,6 +32,21 @@ func (s *grpcServer) SignTransaction(ctx context.Context, in *pb.SignTransaction
 	log := logger.FromContext(ctx)
 	log.Info("SignTransaction")
 	tx, err := s.nodeClient.SignTransaction(ctx, in.SenderAddress, []byte(in.Tx))
+	if err != nil {
+		log.Errorf("sign transaction fails: %s", err)
+		return nil, err
+	}
+	return &pb.SignTransactionReply{Tx: tx}, nil
+}
+
+// Sing transaction by private key in parameters
+func (s *grpcServer) SignTransactionWithPrivateKey(ctx context.Context, in *pb.SignTransactionWithPrivateKeyRequest) (*pb.SignTransactionReply, error) {
+	log := logger.FromContext(ctx)
+	log.Info("SignTransactionWithPrivateKey")
+	if len(in.PrivateKey) == 0 {
+		return nil, errors.New("private key can't be empty")
+	}
+	tx, err := s.nodeClient.SignTransactionWithPrivateKey(ctx, in.PrivateKey, []byte(in.Tx))
 	if err != nil {
 		log.Errorf("sign transaction fails: %s", err)
 		return nil, err

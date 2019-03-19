@@ -27,6 +27,7 @@ type INodeClient interface {
 	CreateRawTransaction(ctx context.Context, addressFrom string, addressTo string, amount *big.Int) ([]byte, error)
 	// sign transaction if has private key. rlpTx is transaction for signing on RPL encoding (returned by CreateRawTransaction function)
 	SignTransaction(ctx context.Context, senderAddr string, rlpTx []byte) ([]byte, error)
+	SignTransactionWithPrivateKey(ctx context.Context, privateKey string, rlpTx []byte) ([]byte, error)
 	// send transaction. rlpTx is transaction for sending on RPL encoding (returned by SignTransaction function)
 	SendTransaction(ctx context.Context, rlpTx []byte) (txHash string, err error)
 	GetTxStatusByTxID(ctx context.Context, txID string) (models.TxStatus, error)

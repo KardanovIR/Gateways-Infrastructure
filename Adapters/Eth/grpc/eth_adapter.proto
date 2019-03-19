@@ -32,6 +32,9 @@ service Common {
     // Sing transaction
     rpc SignTransaction (SignTransactionRequest) returns (SignTransactionReply) {
     }
+    // Sing transaction by private key in parameters
+    rpc SignTransactionWithPrivateKey (SignTransactionWithPrivateKeyRequest) returns (SignTransactionReply) {
+    }
     // Send transaction
     rpc SendTransaction (SendTransactionRequest) returns (SendTransactionReply) {
     }
@@ -58,6 +61,12 @@ message EmptyRequest {
 // The request message for singing transaction
 message SignTransactionRequest {
     string senderAddress = 1;
+    bytes tx = 2;
+}
+
+// The request message for singing transaction by private key in parameters
+message SignTransactionWithPrivateKeyRequest {
+    string privateKey = 1;
     bytes tx = 2;
 }
 
