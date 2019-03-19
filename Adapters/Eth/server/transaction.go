@@ -10,6 +10,7 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 )
 
+// create raw transaction
 func (s *grpcServer) GetRawTransaction(ctx context.Context, in *pb.RawTransactionRequest) (*pb.RawTransactionReply, error) {
 	log := logger.FromContext(ctx)
 	log.Infof("getRawTransaction %+v", in)
@@ -20,6 +21,24 @@ func (s *grpcServer) GetRawTransaction(ctx context.Context, in *pb.RawTransactio
 		return nil, err
 	}
 	var tx, err = s.nodeClient.CreateRawTransaction(ctx, in.AddressFrom, in.AddressTo, amount)
+	if err != nil {
+		log.Errorf("transaction's creation fails: %s", err)
+		return nil, err
+	}
+	return &pb.RawTransactionReply{Tx: tx}, nil
+}
+
+// create raw transaction to transfer erc-20 tokens
+func (s *grpcServer) GetErc20RawTransaction(ctx context.Context, in *pb.Erc20RawTransactionRequest) (*pb.RawTransactionReply, error) {
+	log := logger.FromContext(ctx)
+	log.Infof("GetErc20RawTransaction %+v", in)
+	amount, ok := new(big.Int).SetString(in.Amount, 10)
+	if !ok {
+		err := fmt.Errorf("wrong amount value: %s", in.Amount)
+		log.Error(err)
+		return nil, err
+	}
+	var tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount)
 	if err != nil {
 		log.Errorf("transaction's creation fails: %s", err)
 		return nil, err

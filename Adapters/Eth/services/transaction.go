@@ -5,7 +5,9 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
+	"golang.org/x/crypto/sha3"
 	"math/big"
+	"sync"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
@@ -16,17 +18,25 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/models"
 )
 
+var (
+	transferErc20MethodID []byte
+	initTransferOnce      sync.Once
+)
+
 func (cl *nodeClient) CreateRawTransaction(ctx context.Context, addressFrom string, addressTo string,
 	amount *big.Int) ([]byte, error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("call service method 'CreateRawTransaction': send %s from %s to %s", amount, addressFrom, addressTo)
 	gasPrice, err := cl.SuggestGasPrice(ctx)
-	log.Debugf("suggest gas price %s", gasPrice)
-	nonce, err := cl.GetNextNonce(ctx, addressFrom)
-	log.Debugf("nonce will be %d", nonce)
 	if err != nil {
 		return nil, fmt.Errorf("can't get suggected gas price %s", err)
 	}
+	log.Debugf("suggest gas price %s", gasPrice)
+	nonce, err := cl.GetNextNonce(ctx, addressFrom)
+	if err != nil {
+		return nil, fmt.Errorf("can't get next nonce for address %s: %s", addressFrom, err)
+	}
+	log.Debugf("nonce will be %d", nonce)
 	tx := types.NewTransaction(
 		nonce,
 		common.HexToAddress(addressTo),
@@ -35,6 +45,55 @@ func (cl *nodeClient) CreateRawTransaction(ctx context.Context, addressFrom stri
 		gasPrice,
 		nil,
 	)
+	b, err := SerializeTx(tx)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
+func (cl *nodeClient) CreateErc20TokensRawTransaction(ctx context.Context, addressFrom string, contractAddress string,
+	addressTo string, amount *big.Int) ([]byte, error) {
+	log := logger.FromContext(ctx)
+	log.Debugf("call service method 'CreateErc20TokensRawTransaction': send %s tokens from %s to %s; contract %s",
+		amount, addressFrom, addressTo, contractAddress)
+
+	gasPrice, err := cl.SuggestGasPrice(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("can't get suggected gas price %s", err)
+	}
+	log.Debugf("suggest gas price %s", gasPrice)
+	nonce, err := cl.GetNextNonce(ctx, addressFrom)
+	log.Debugf("nonce will be %d", nonce)
+	if err != nil {
+		return nil, fmt.Errorf("can't get next nonce for address %s: %s", addressFrom, err)
+	}
+	recipient := common.HexToAddress(addressTo)
+	sender := common.HexToAddress(addressFrom)
+	tokenAddress := common.HexToAddress(contractAddress)
+	methodID := getTransferErc20MethodID()
+
+	// add zeros before address and amount value
+	paddedAddress := common.LeftPadBytes(recipient.Bytes(), 32)
+	paddedAmount := common.LeftPadBytes(amount.Bytes(), 32)
+
+	var data []byte
+	data = append(data, methodID...)
+	data = append(data, paddedAddress...)
+	data = append(data, paddedAmount...)
+
+	gasLimit, err := cl.ethClient.EstimateGas(context.Background(), ethereum.CallMsg{
+		From: sender,
+		To:   &tokenAddress,
+		Data: data,
+	})
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	log.Debugf("estimated gas limit %d", gasLimit)
+	ethAmountZero := big.NewInt(0)
+	tx := types.NewTransaction(nonce, tokenAddress, ethAmountZero, gasLimit, gasPrice, data)
 	b, err := SerializeTx(tx)
 	if err != nil {
 		return nil, err
@@ -119,4 +178,14 @@ func SerializeTx(tx *types.Transaction) ([]byte, error) {
 		return nil, err
 	}
 	return b.Bytes(), nil
+}
+
+func getTransferErc20MethodID() []byte {
+	initTransferOnce.Do(func() {
+		transferFnSignature := []byte("transfer(address,uint256)")
+		hash := sha3.NewLegacyKeccak256()
+		hash.Write(transferFnSignature)
+		transferErc20MethodID = hash.Sum(nil)[:4]
+	})
+	return transferErc20MethodID
 }
