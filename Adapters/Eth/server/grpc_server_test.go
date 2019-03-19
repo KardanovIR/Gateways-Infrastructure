@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/models"
 	"google.golang.org/grpc"
 	"math/big"
 	"sync"
@@ -11,6 +10,7 @@ import (
 
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/models"
 )
 
 const serverPort = "20001"
@@ -52,6 +52,10 @@ func startServerAndGetConnection(ctx context.Context) (*grpc.ClientConn, error) 
 }
 
 type nodeClientMock struct {
+}
+
+func (n *nodeClientMock) SignTransactionWithPrivateKey(ctx context.Context, privateKey string, rlpTx []byte) ([]byte, error) {
+	return nil, nil
 }
 
 func (n *nodeClientMock) SuggestGasPrice(ctx context.Context) (*big.Int, error) {

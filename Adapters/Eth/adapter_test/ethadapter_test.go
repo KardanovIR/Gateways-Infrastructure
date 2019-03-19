@@ -88,7 +88,8 @@ func TestGrpcClient(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	signedTx, err := clientgrpc.GetClient().SignTransaction(ctx, &ethAdapter.SignTransactionRequest{SenderAddress: address, Tx: tx.Tx})
+	signedTx, err := clientgrpc.GetClient().SignTransactionWithPrivateKey(ctx,
+		&ethAdapter.SignTransactionWithPrivateKeyRequest{PrivateKey: privateKey, Tx: tx.Tx})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -186,11 +187,6 @@ func beforeTests(ctx context.Context, t *testing.T) {
 	}
 	err = services.New(ctx, config.Cfg.Node)
 	if err != nil {
-		log.Error(err)
-		t.Fail()
-	}
-
-	if err := services.SetKeyPair(address, privateKey); err != nil {
 		log.Error(err)
 		t.Fail()
 	}

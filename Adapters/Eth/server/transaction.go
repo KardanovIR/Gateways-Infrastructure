@@ -38,6 +38,18 @@ func (s *grpcServer) SignTransaction(ctx context.Context, in *pb.SignTransaction
 	return &pb.SignTransactionReply{Tx: tx}, nil
 }
 
+// Sing transaction by private key in parameters
+func (s *grpcServer) SignTransactionWithPrivateKey(ctx context.Context, in *pb.SignTransactionWithPrivateKeyRequest) (*pb.SignTransactionReply, error) {
+	log := logger.FromContext(ctx)
+	log.Info("SignTransactionWithPrivateKey")
+	tx, err := s.nodeClient.SignTransactionWithPrivateKey(ctx, in.PrivateKey, []byte(in.Tx))
+	if err != nil {
+		log.Errorf("sign transaction fails: %s", err)
+		return nil, err
+	}
+	return &pb.SignTransactionReply{Tx: tx}, nil
+}
+
 // Send transaction
 func (s *grpcServer) SendTransaction(ctx context.Context, in *pb.SendTransactionRequest) (*pb.SendTransactionReply, error) {
 	log := logger.FromContext(ctx)

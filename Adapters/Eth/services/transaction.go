@@ -3,12 +3,14 @@ package services
 import (
 	"bytes"
 	"context"
+	"crypto/ecdsa"
 	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/models"
@@ -43,17 +45,30 @@ func (cl *nodeClient) CreateRawTransaction(ctx context.Context, addressFrom stri
 func (cl *nodeClient) SignTransaction(ctx context.Context, senderAddr string, rlpTx []byte) ([]byte, error) {
 	log := logger.FromContext(ctx)
 	log.Debug("call service method 'SignTransaction'")
-
-	tx, err := DeserializeTx(rlpTx)
-	if err != nil {
-		return nil, fmt.Errorf("can't deserialize tx %s", err)
-	}
 	pk, ok := cl.privateKeys[senderAddr]
 	if !ok {
 		return nil, fmt.Errorf("can't signed transaction for %s: haven't private key", senderAddr)
 	}
-	log.Debugf("try to sign transaction %+v", tx)
-	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(big.NewInt(cl.chainID)), pk)
+	return cl.signTx(ctx, pk, rlpTx)
+}
+
+func (cl *nodeClient) SignTransactionWithPrivateKey(ctx context.Context, privateKey string, rlpTx []byte) ([]byte, error) {
+	log := logger.FromContext(ctx)
+	log.Debug("call service method 'SignTransactionWithPrivateKey'")
+	pk, err := crypto.HexToECDSA(privateKey)
+	if err != nil {
+		log.Errorf("can't cast key to ECDSA: %s", err)
+		return nil, err
+	}
+	return cl.signTx(ctx, pk, rlpTx)
+}
+
+func (cl *nodeClient) signTx(ctx context.Context, privateKey *ecdsa.PrivateKey, rlpTx []byte) ([]byte, error) {
+	tx, err := DeserializeTx(rlpTx)
+	if err != nil {
+		return nil, fmt.Errorf("can't deserialize tx %s", err)
+	}
+	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(big.NewInt(cl.chainID)), privateKey)
 	if err != nil {
 		return nil, err
 	}

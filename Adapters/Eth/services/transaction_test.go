@@ -3,12 +3,12 @@ package services
 import (
 	"context"
 	"encoding/hex"
-	"github.com/stretchr/testify/assert"
 	"math/big"
 	"testing"
 	"time"
 
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/stretchr/testify/assert"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/models"
@@ -31,17 +31,19 @@ func TestNodeClient_Transactions(t *testing.T) {
 	err := config.Load("./testdata/config_test.yml")
 	if err != nil {
 		log.Error(err)
-		t.Fail()
+		t.FailNow()
 	}
 	err = New(ctx, config.Cfg.Node)
 	if err != nil {
 		log.Error(err)
-		t.Fail()
+		t.FailNow()
 	}
-	if err := SetKeyPair(address, privateKey); err != nil {
-		log.Error(err)
-		t.Fail()
+	pk, err := crypto.HexToECDSA(privateKey)
+	if err != nil {
+		log.Errorf("can't cast key to ECDSA: %s", err)
+		t.FailNow()
 	}
+	cl.(*nodeClient).privateKeys[address] = pk
 	// start test
 	amount, _ := new(big.Int).SetString("100000000000000", 10)
 
@@ -49,28 +51,28 @@ func TestNodeClient_Transactions(t *testing.T) {
 	fee, err := GetNodeClient().SuggestFee(ctx)
 	if err != nil {
 		log.Error(err)
-		t.Fail()
+		t.FailNow()
 	}
 	if fee.Cmp(amount) >= 0 {
 		log.Error("fee %s more than sending amount %s", fee, amount)
-		t.Fail()
+		t.FailNow()
 	}
 	// check sender's balance
 	b, err := GetNodeClient().GetBalance(ctx, address)
 	if err != nil {
 		log.Error(err)
-		t.Fail()
+		t.FailNow()
 	}
 	amountPlusFee := new(big.Int).Add(amount, fee)
 	if b.Cmp(amountPlusFee) <= 0 {
 		log.Error("balance %s on sender's address is not more than sending amount %s plus fee %s", b, amount, fee)
-		t.Fail()
+		t.FailNow()
 	}
 	// generate receiver address
 	address2, err := GetNodeClient().GenerateAddress(ctx)
 	if err != nil {
 		log.Error(err)
-		t.Fail()
+		t.FailNow()
 	}
 	assert.Equal(t, len(cl.(*nodeClient).privateKeys), 2)
 	log.Infof("Private hex %s, public address %s",
@@ -80,17 +82,17 @@ func TestNodeClient_Transactions(t *testing.T) {
 	tx, err := GetNodeClient().CreateRawTransaction(ctx, address, address2, amount)
 	if err != nil {
 		log.Error(err)
-		t.Fail()
+		t.FailNow()
 	}
 	signedTx, err := GetNodeClient().SignTransaction(ctx, address, tx)
 	if err != nil {
 		log.Error(err)
-		t.Fail()
+		t.FailNow()
 	}
 	txId, err := GetNodeClient().SendTransaction(ctx, signedTx)
 	if err != nil {
 		log.Error(err)
-		t.Fail()
+		t.FailNow()
 	}
 	log.Infof("send transaction %s", txId)
 	// wait while transaction will be complete
@@ -115,11 +117,13 @@ func TestNodeClient_Transactions(t *testing.T) {
 	log.Info("returned from loop on %d iteration", i+1)
 	if lastStatus == models.TxStatusPending {
 		log.Error("transaction in pending status yet!! %s ", txId)
+		t.Fail()
 	}
 	// check receiver's balance
 	balance, err := GetNodeClient().GetBalance(ctx, address2)
 	if err != nil {
 		log.Error(err)
+		t.FailNow()
 	}
 	assert.Equal(t, balance, amount)
 
@@ -127,23 +131,23 @@ func TestNodeClient_Transactions(t *testing.T) {
 	fee2, err := GetNodeClient().SuggestFee(ctx)
 	if err != nil {
 		log.Error(err)
-		t.Fail()
+		t.FailNow()
 	}
 	amountBack := new(big.Int).Sub(balance, fee2)
 	tx2, err := GetNodeClient().CreateRawTransaction(ctx, address2, address, amountBack)
 	if err != nil {
 		log.Error(err)
-		t.Fail()
+		t.FailNow()
 	}
 	signedTx2, err := GetNodeClient().SignTransaction(ctx, address2, tx2)
 	if err != nil {
 		log.Error(err)
-		t.Fail()
+		t.FailNow()
 	}
 	txId2, err := GetNodeClient().SendTransaction(ctx, signedTx2)
 	if err != nil {
 		log.Error(err)
-		t.Fail()
+		t.FailNow()
 	}
 	log.Infof("send transaction %s", txId2)
 	// wait while transaction will be complete
