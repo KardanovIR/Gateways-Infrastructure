@@ -5,9 +5,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
-	"golang.org/x/crypto/sha3"
 	"math/big"
-	"sync"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
@@ -16,11 +14,6 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/models"
-)
-
-var (
-	transferErc20MethodID []byte
-	initTransferOnce      sync.Once
 )
 
 func (cl *nodeClient) CreateRawTransaction(ctx context.Context, addressFrom string, addressTo string,
@@ -68,19 +61,9 @@ func (cl *nodeClient) CreateErc20TokensRawTransaction(ctx context.Context, addre
 	if err != nil {
 		return nil, fmt.Errorf("can't get next nonce for address %s: %s", addressFrom, err)
 	}
-	recipient := common.HexToAddress(addressTo)
 	sender := common.HexToAddress(addressFrom)
 	tokenAddress := common.HexToAddress(contractAddress)
-	methodID := getTransferErc20MethodID()
-
-	// add zeros before address and amount value
-	paddedAddress := common.LeftPadBytes(recipient.Bytes(), 32)
-	paddedAmount := common.LeftPadBytes(amount.Bytes(), 32)
-
-	var data []byte
-	data = append(data, methodID...)
-	data = append(data, paddedAddress...)
-	data = append(data, paddedAmount...)
+	data := cl.contractProvider.CreateTransferTokenData(ctx, addressTo, amount)
 
 	gasLimit, err := cl.ethClient.EstimateGas(context.Background(), ethereum.CallMsg{
 		From: sender,
@@ -178,14 +161,4 @@ func SerializeTx(tx *types.Transaction) ([]byte, error) {
 		return nil, err
 	}
 	return b.Bytes(), nil
-}
-
-func getTransferErc20MethodID() []byte {
-	initTransferOnce.Do(func() {
-		transferFnSignature := []byte("transfer(address,uint256)")
-		hash := sha3.NewLegacyKeccak256()
-		hash.Write(transferFnSignature)
-		transferErc20MethodID = hash.Sum(nil)[:4]
-	})
-	return transferErc20MethodID
 }

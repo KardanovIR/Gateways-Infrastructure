@@ -18,6 +18,7 @@ type INodeClient interface {
 	SuggestFee(ctx context.Context) (*big.Int, error)
 
 	GetBalance(ctx context.Context, address string) (*big.Int, error)
+	GetTokenBalance(ctx context.Context, address string, contracts ...string) (*models.AccountBalance, error)
 	GetNextNonce(ctx context.Context, address string) (uint64, error)
 
 	GenerateAddress(ctx context.Context) (publicAddress string, err error)
@@ -38,8 +39,9 @@ type INodeClient interface {
 const gasLimitForMoneyTransfer = 21000
 
 type nodeClient struct {
-	ethClient *ethclient.Client
-	chainID   int64
+	ethClient        *ethclient.Client
+	contractProvider *Erc20ContractProvider
+	chainID          int64
 	// private keys for addresses
 	privateKeys map[string]*ecdsa.PrivateKey
 }
@@ -60,7 +62,13 @@ func New(ctx context.Context, config config.Node) error {
 			return
 		}
 		ethClient := ethclient.NewClient(rc)
-		cl = &nodeClient{ethClient: ethClient, chainID: config.ChainId, privateKeys: make(map[string]*ecdsa.PrivateKey)}
+		cp := NewContractProvider(ethClient)
+		cl = &nodeClient{
+			ethClient:        ethClient,
+			contractProvider: cp,
+			chainID:          config.ChainId,
+			privateKeys:      make(map[string]*ecdsa.PrivateKey),
+		}
 	})
 	return err
 }
