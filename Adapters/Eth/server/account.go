@@ -22,15 +22,37 @@ func (s *grpcServer) GetNextNonce(ctx context.Context, in *pb.AddressRequest) (*
 }
 
 // Get account's balance
-func (s *grpcServer) GetBalance(ctx context.Context, in *pb.AddressRequest) (*pb.GetBalanceReply, error) {
+func (s *grpcServer) GetEthBalance(ctx context.Context, in *pb.AddressRequest) (*pb.GetEthBalanceReply, error) {
 	log := logger.FromContext(ctx)
 	log.Infof("GetBalance for address %s", in.Address)
 
-	balance, err := s.nodeClient.GetBalance(ctx, in.Address)
+	balance, err := s.nodeClient.GetEthBalance(ctx, in.Address)
 	if err != nil {
 		log.Errorf(" getting balance fails: %s", err)
 		return nil, err
 	}
 
-	return &pb.GetBalanceReply{Balance: balance.String()}, nil
+	return &pb.GetEthBalanceReply{Balance: balance.String()}, nil
+}
+
+// Get account's balance and balances of requested tokens// Get account's balance
+func (s *grpcServer) GetAllBalance(ctx context.Context, in *pb.GetAllBalanceRequest) (*pb.GetAllBalanceReply, error) {
+	log := logger.FromContext(ctx)
+	log.Infof("GetBalanceIncludedTokens for address %s, balance for contracts %v", in.Address, in.Contracts)
+
+	balance, err := s.nodeClient.GetAllBalances(ctx, in.Address, in.Contracts...)
+	if err != nil {
+		log.Errorf("getting token's balance fails: %s", err)
+		return nil, err
+	}
+	tokenBalances := make([]*pb.GetAllBalanceReply_TokenBalance, 0, len(balance.Tokens))
+	for c, amount := range balance.Tokens {
+		tokenBalances = append(tokenBalances,
+			&pb.GetAllBalanceReply_TokenBalance{Contract: c, Amount: amount.String()},
+		)
+	}
+	return &pb.GetAllBalanceReply{
+		Amount:        balance.Amount.String(),
+		TokenBalances: tokenBalances,
+	}, nil
 }

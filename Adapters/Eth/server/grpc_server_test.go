@@ -54,6 +54,14 @@ func startServerAndGetConnection(ctx context.Context) (*grpc.ClientConn, error) 
 type nodeClientMock struct {
 }
 
+func (n *nodeClientMock) GetEthBalance(ctx context.Context, address string) (*big.Int, error) {
+	return nil, nil
+}
+
+func (n *nodeClientMock) GetAllBalances(ctx context.Context, address string, contracts ...string) (*models.AccountBalance, error) {
+	return nil, nil
+}
+
 func (n *nodeClientMock) CreateErc20TokensRawTransaction(ctx context.Context, addressFrom string, contractAddress string, addressTo string,
 	amount *big.Int) ([]byte, error) {
 	return nil, nil
@@ -71,9 +79,6 @@ func (n *nodeClientMock) SuggestFee(ctx context.Context) (*big.Int, error) {
 	return nil, nil
 }
 
-func (n *nodeClientMock) GetBalance(ctx context.Context, address string) (*big.Int, error) {
-	return nil, nil
-}
 func (n *nodeClientMock) GetNextNonce(ctx context.Context, address string) (uint64, error) {
 	return 0, nil
 }
