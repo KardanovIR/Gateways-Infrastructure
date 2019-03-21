@@ -23,16 +23,19 @@ service Common {
     // Get account's balance
     rpc GetBalance (AddressRequest) returns (GetBalanceReply) {
     }
+    // Get account's balance with assets balances
+    rpc GetAllBalances (AddressRequest) returns (GetAllBalancesReply) {
+    }
     // request to create raw transaction by senders's address
     rpc GetRawTransactionBySendersAddress (RawTransactionBySendersAddressRequest) returns (RawTransactionReply) {
     }
-      // request to create raw transaction by senders's public key
+    // request to create raw transaction by senders's public key
     rpc GetRawTransactionBySendersPublicKey (RawTransactionBySendersPublicKeyRequest) returns (RawTransactionReply) {
     }
     // Sing transaction with private key keeped in adapter
     rpc SignTransaction (SignTransactionRequest) returns (SignTransactionReply) {
     }
-     // Sing transaction by private key in parameters
+    // Sing transaction by private key in parameters
     rpc SignTransactionBySecretKey (SignTransactionBySecretKeyRequest) returns (SignTransactionReply) {
     }
     // Send transaction
@@ -77,6 +80,17 @@ message FeeReply {
 // The response message containing account's balance
 message GetBalanceReply {
     string balance = 1;
+}
+
+// The response message containing account's balance with assets balances
+message GetAllBalancesReply {
+    message AssetBalance {
+        string assetId = 1;
+        string amount = 2;
+    }
+
+    string amount = 1;
+    repeated AssetBalance assetBalances = 2;
 }
 
 // The response message containing generated address

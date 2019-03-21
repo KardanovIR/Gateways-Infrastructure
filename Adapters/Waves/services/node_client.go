@@ -18,6 +18,7 @@ type INodeClient interface {
 	GenerateAddress(ctx context.Context) (publicAddress string, err error)
 	ValidateAddress(ctx context.Context, address string) (bool, error)
 	GetBalance(ctx context.Context, address string) (uint64, error)
+	GetAllBalances(ctx context.Context, address string) (*models.AccountBalance, error)
 
 	Fee(ctx context.Context, senderPublicKey string, feeAssetId string) (uint64, error)
 	FeeForTx(ctx context.Context, tx *proto.TransferV2) (uint64, error)

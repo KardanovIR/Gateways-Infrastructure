@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/models"
 	"github.com/wavesplatform/gowaves/pkg/proto"
 )
 
@@ -21,4 +22,31 @@ func (cl *nodeClient) GetBalance(ctx context.Context, address string) (uint64, e
 		return 0, err
 	}
 	return balance.Balance, nil
+}
+
+func (cl *nodeClient) GetAllBalances(ctx context.Context, address string) (*models.AccountBalance, error) {
+	log := logger.FromContext(ctx)
+	log.Infof("call service method 'GetBalanceWithAssets' for address %s", address)
+	balance := models.AccountBalance{}
+	wavesBalance, err := cl.GetBalance(ctx, address)
+	if err != nil {
+		log.Error("get waves balance fails", err)
+		return nil, err
+	}
+	balance.Amount = wavesBalance
+	a, err := proto.NewAddressFromString(address)
+	if err != nil {
+		log.Error("can't get address from string", err)
+		return nil, err
+	}
+	assetBalances, _, err := cl.nodeClient.Assets.BalanceByAddress(ctx, a)
+	if err != nil {
+		log.Error("can't get assets balance", err)
+		return nil, err
+	}
+	balance.Assets = make(map[string]uint64)
+	for _, b := range assetBalances.Balances {
+		balance.Assets[b.AssetId.String()] = b.Balance
+	}
+	return &balance, nil
 }
