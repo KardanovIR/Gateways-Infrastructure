@@ -44,7 +44,7 @@ func TestNodeClient_Transactions(t *testing.T) {
 		t.FailNow()
 	}
 	// check sender's balance
-	b, err := GetNodeClient().GetBalance(ctx, address)
+	b, err := GetNodeClient().GetEthBalance(ctx, address)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -88,7 +88,7 @@ func TestNodeClient_Transactions(t *testing.T) {
 		t.FailNow()
 	}
 	// check receiver's balance
-	balance, err := GetNodeClient().GetBalance(ctx, address2)
+	balance, err := GetNodeClient().GetEthBalance(ctx, address2)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()

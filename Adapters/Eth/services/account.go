@@ -9,8 +9,8 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/models"
 )
 
-// GetBalance return current balance for address
-func (cl *nodeClient) GetBalance(ctx context.Context, address string) (*big.Int, error) {
+// GetEthBalance return current balance for address
+func (cl *nodeClient) GetEthBalance(ctx context.Context, address string) (*big.Int, error) {
 	return cl.ethClient.BalanceAt(ctx, common.HexToAddress(address), nil)
 }
 
@@ -19,12 +19,13 @@ func (cl *nodeClient) GetNextNonce(ctx context.Context, address string) (uint64,
 	return cl.ethClient.PendingNonceAt(ctx, a)
 }
 
-// GetBalance return eth balance for address and token's balance for contracts
-func (cl *nodeClient) GetTokenBalance(ctx context.Context, address string, contracts ...string) (*models.AccountBalance, error) {
+// GetAllBalances return eth balance and token's balances for address.
+// Token's balances requested only for tokens which contract was passed to parameters
+func (cl *nodeClient) GetAllBalances(ctx context.Context, address string, contracts ...string) (*models.AccountBalance, error) {
 	log := logger.FromContext(ctx)
-	log.Debugf("Call method 'GetTokenBalance' for %s", address)
+	log.Debugf("Call method 'GetAllBalances' for %s", address)
 	balances := models.AccountBalance{Tokens: make(map[string]*big.Int)}
-	ethBalance, err := cl.GetBalance(ctx, address)
+	ethBalance, err := cl.GetEthBalance(ctx, address)
 	if err != nil {
 		return nil, err
 	}

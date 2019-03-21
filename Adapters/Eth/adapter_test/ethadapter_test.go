@@ -52,7 +52,7 @@ func TestGrpcClient(t *testing.T) {
 		log.Fatal("fee %s more than sending amount %s", fee, amount)
 	}
 	// check sender's balance
-	b, err := clientgrpc.GetClient().GetBalance(ctx, &ethAdapter.AddressRequest{Address: address})
+	b, err := clientgrpc.GetClient().GetEthBalance(ctx, &ethAdapter.AddressRequest{Address: address})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,7 +100,7 @@ func TestGrpcClient(t *testing.T) {
 	}
 
 	// check receiver's balance
-	balanceReply, err := clientgrpc.GetClient().GetBalance(ctx, &ethAdapter.AddressRequest{Address: address2})
+	balanceReply, err := clientgrpc.GetClient().GetEthBalance(ctx, &ethAdapter.AddressRequest{Address: address2})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -138,7 +138,7 @@ func TestGrpcClient(t *testing.T) {
 	}
 
 	// check balance
-	balance1Reply, err := clientgrpc.GetClient().GetBalance(ctx, &ethAdapter.AddressRequest{Address: address})
+	balance1Reply, err := clientgrpc.GetClient().GetEthBalance(ctx, &ethAdapter.AddressRequest{Address: address})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -160,7 +160,7 @@ func TestTokenBalance(t *testing.T) {
 	contract1 := "0x20fe562d797a42dcb3399062ae9546cd06f63280"
 	// Test Standard Token (TST)
 	contract2 := "0x722dd3F80BAC40c951b51BdD28Dd19d435762180"
-	balances, err := clientgrpc.GetClient().GetBalanceIncludedTokens(ctx, &ethAdapter.GetBalanceIncludedTokensRequest{
+	balances, err := clientgrpc.GetClient().GetAllBalance(ctx, &ethAdapter.GetAllBalanceRequest{
 		Address:   address,
 		Contracts: []string{contract1, contract2},
 	})

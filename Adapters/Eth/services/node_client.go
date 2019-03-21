@@ -17,8 +17,8 @@ type INodeClient interface {
 	SuggestGasPrice(ctx context.Context) (*big.Int, error)
 	SuggestFee(ctx context.Context) (*big.Int, error)
 
-	GetBalance(ctx context.Context, address string) (*big.Int, error)
-	GetTokenBalance(ctx context.Context, address string, contracts ...string) (*models.AccountBalance, error)
+	GetEthBalance(ctx context.Context, address string) (*big.Int, error)
+	GetAllBalances(ctx context.Context, address string, contracts ...string) (*models.AccountBalance, error)
 	GetNextNonce(ctx context.Context, address string) (uint64, error)
 
 	GenerateAddress(ctx context.Context) (publicAddress string, err error)

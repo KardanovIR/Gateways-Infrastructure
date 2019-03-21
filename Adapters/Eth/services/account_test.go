@@ -14,7 +14,7 @@ func TestNodeClient_GetTokenBalance(t *testing.T) {
 	contract1 := "0x20fe562d797a42dcb3399062ae9546cd06f63280"
 	// Test Standard Token (TST)
 	contract2 := "0x722dd3F80BAC40c951b51BdD28Dd19d435762180"
-	balances, err := GetNodeClient().GetTokenBalance(ctx, address, contract1, contract2)
+	balances, err := GetNodeClient().GetAllBalances(ctx, address, contract1, contract2)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
