@@ -39,11 +39,8 @@ const (
 // 11) check balance on predefined account: balance_on_2_step - fee_on_1_step - fee_on_10_step
 // 12) GetNextNonce method: check nonce on generated account: it must be equal 1
 func TestGrpcClient(t *testing.T) {
-	ctx := context.Background()
-	beforeTests(ctx, t)
+	ctx, log := beforeTests()
 	amount, _ := new(big.Int).SetString("100000000000000", 10)
-
-	log := logger.FromContext(ctx)
 
 	// check fee and transfered amount on predefined address
 	feeReply, err := clientgrpc.GetClient().SuggestFee(ctx, &ethAdapter.EmptyRequest{})
@@ -156,6 +153,34 @@ func TestGrpcClient(t *testing.T) {
 	assert.Equal(t, int64(1), nonceReply.Nonce)
 }
 
+func TestTokenBalance(t *testing.T) {
+	ctx, log := beforeTests()
+	address := "0xb8ebd916689e773c6657de537151476A3a8259fc"
+	// ERC-20 (LINK)
+	contract1 := "0x20fe562d797a42dcb3399062ae9546cd06f63280"
+	// Test Standard Token (TST)
+	contract2 := "0x722dd3F80BAC40c951b51BdD28Dd19d435762180"
+	balances, err := clientgrpc.GetClient().GetBalanceIncludedTokens(ctx, &ethAdapter.GetBalanceIncludedTokensRequest{
+		Address:   address,
+		Contracts: []string{contract1, contract2},
+	})
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	assert.Equal(t, balances.Amount, "4200000000000000")
+	assert.Equal(t, len(balances.TokenBalances), 2)
+	if balances.TokenBalances[0].Contract == contract1 {
+		assert.Equal(t, balances.TokenBalances[0].Amount, "325000000000000000")
+		assert.Equal(t, balances.TokenBalances[1].Amount, "19000000000000000000")
+		assert.Equal(t, balances.TokenBalances[1].Contract, contract2)
+	} else {
+		assert.Equal(t, balances.TokenBalances[0].Amount, "19000000000000000000")
+		assert.Equal(t, balances.TokenBalances[1].Amount, "325000000000000000")
+		assert.Equal(t, balances.TokenBalances[1].Contract, contract1)
+	}
+}
+
 func waitForTxComplete(ctx context.Context, txHash string) error {
 	log := logger.FromContext(ctx)
 	// wait while transaction will be complete
@@ -178,17 +203,16 @@ func waitForTxComplete(ctx context.Context, txHash string) error {
 	return errors.New("transaction in pending status yet")
 }
 
-func beforeTests(ctx context.Context, t *testing.T) {
+func beforeTests() (context.Context, logger.ILogger) {
+	ctx := context.Background()
 	log, _ := logger.Init(false, logger.DEBUG)
 	err := config.Load("./testdata/config_test.yml")
 	if err != nil {
-		log.Error(err)
-		t.Fail()
+		log.Fatal(err)
 	}
 	err = services.New(ctx, config.Cfg.Node)
 	if err != nil {
-		log.Error(err)
-		t.Fail()
+		log.Fatal(err)
 	}
 
 	go func() {
@@ -200,4 +224,5 @@ func beforeTests(ctx context.Context, t *testing.T) {
 	if err := clientgrpc.New(ctx, ":"+config.Cfg.Port); err != nil {
 		log.Fatal("Can't init grpc client", err)
 	}
+	return ctx, log
 }

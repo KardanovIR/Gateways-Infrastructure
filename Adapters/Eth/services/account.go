@@ -38,6 +38,7 @@ func (cl *nodeClient) GetTokenBalance(ctx context.Context, address string, contr
 			return nil, err
 		}
 		balances.Tokens[c] = tokenBalance
+		log.Debugf("token balance for contract %s for account %s: %s", c, address, tokenBalance)
 	}
 	return &balances, nil
 }

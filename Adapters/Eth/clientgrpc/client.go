@@ -28,7 +28,9 @@ func New(ctx context.Context, host string) error {
 		}
 		grpcCl = pb.NewCommonClient(conn)
 	})
-	log.Errorf("error during initialise node client: %s", err)
+	if err != nil {
+		log.Errorf("error during initialise node client: %s", err)
+	}
 	return err
 }
 

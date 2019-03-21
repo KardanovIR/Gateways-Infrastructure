@@ -26,6 +26,9 @@ service Common {
     // Get account's balance
     rpc GetBalance (AddressRequest) returns (GetBalanceReply) {
     }
+    // Get account's balance and balances of requested tokens
+    rpc GetBalanceIncludedTokens (GetBalanceIncludedTokensRequest) returns (GetBalanceIncludedTokensReply) {
+    }
     // Generate address
     rpc GenerateAddress (EmptyRequest) returns (GenerateAddressReply) {
     }
@@ -123,6 +126,12 @@ message GetBalanceReply {
     string balance = 1;
 }
 
+// The request message to get account's balances: eth and requested tokens
+message GetBalanceIncludedTokensRequest {
+    string address = 1;
+    repeated string contracts = 2;
+}
+
 // The response message containing generated address
 message GenerateAddressReply {
     string address = 1;
@@ -144,4 +153,14 @@ message SendTransactionReply {
 // The response message containing transaction's status: UNKNOWN, PENDING, SUCCESS
 message GetTransactionStatusReply {
     string status = 1;
+}
+// The response message containing account's balance: eth and requested tokens
+message GetBalanceIncludedTokensReply {
+    message TokenBalance {
+        string contract = 1;
+        string amount = 2;
+    }
+
+    string amount = 1;
+    repeated TokenBalance token_balances = 2;
 }
