@@ -39,11 +39,8 @@ const (
 //     GetRawTransactionBySendersAddress, SignTransaction and send transaction, wait for it's completion
 // 11) check balance on predefined account: balance_on_2_step - fee_on_1_step - fee_on_10_step
 func TestGrpcClient(t *testing.T) {
-	ctx := context.Background()
-	beforeTests(ctx, t)
+	ctx, log := beforeTests()
 	amount, _ := new(big.Int).SetString("1000000", 10)
-
-	log := logger.FromContext(ctx)
 
 	// check fee and transfered amount on predefined address
 	feeReply, err := clientgrpc.GetClient().Fee(ctx, &wavesAdapter.FeeRequest{
@@ -186,17 +183,31 @@ func waitForTxComplete(ctx context.Context, txID string) error {
 	return errors.New("transaction in pending status yet")
 }
 
-func beforeTests(ctx context.Context, t *testing.T) {
-	log, _ := logger.Init(false, logger.DEBUG)
-	err := config.Load("./testdata/config_adapter_test.yml")
+func TestGetAllBalances(t *testing.T) {
+	ctx, log := beforeTests()
+	address := "3N7DGmkCmUgMo9jpuUekUhCMpiBRR1Zm51p"
+	balanceReply, err := clientgrpc.GetClient().GetAllBalances(ctx, &wavesAdapter.AddressRequest{Address: address})
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
 	}
+	wBtcsAssetId := "DWgwcZTMhSvnyYCoWLRUXXSH1RSkzThXLJhww9gwkqdn"
+	assert.Equal(t, balanceReply.Amount, "190000000")
+	assert.Equal(t, len(balanceReply.AssetBalances), 1)
+	assert.Equal(t, balanceReply.AssetBalances[0].AssetId, wBtcsAssetId)
+	assert.Equal(t, balanceReply.AssetBalances[0].Amount, "101000")
+}
+
+func beforeTests() (context.Context, logger.ILogger) {
+	ctx := context.Background()
+	log, _ := logger.Init(false, logger.DEBUG)
+	err := config.Load("./testdata/config_adapter_test.yml")
+	if err != nil {
+		log.Fatal(err)
+	}
 	err = services.New(ctx, config.Cfg.Node)
 	if err != nil {
-		log.Error(err)
-		t.FailNow()
+		log.Fatal(err)
 	}
 
 	go func() {
@@ -208,4 +219,5 @@ func beforeTests(ctx context.Context, t *testing.T) {
 	if err := clientgrpc.New(ctx, ":"+config.Cfg.Port); err != nil {
 		log.Fatal("Can't init grpc client", err)
 	}
+	return ctx, log
 }

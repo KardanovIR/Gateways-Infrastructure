@@ -69,6 +69,9 @@ func (n *nodeClientMock) ValidateAddress(ctx context.Context, address string) (b
 func (n *nodeClientMock) GetBalance(ctx context.Context, address string) (uint64, error) {
 	return 0, nil
 }
+func (n *nodeClientMock) GetAllBalances(ctx context.Context, address string) (*models.AccountBalance, error) {
+	return nil, nil
+}
 
 func (n *nodeClientMock) Fee(ctx context.Context, senderPublicKey string, feeAssetId string) (uint64, error) {
 	return 0, nil

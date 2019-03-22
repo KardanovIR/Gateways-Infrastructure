@@ -162,5 +162,5 @@ message GetAllBalanceReply {
     }
 
     string amount = 1;
-    repeated TokenBalance token_balances = 2;
+    repeated TokenBalance tokenBalances = 2;
 }
