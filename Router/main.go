@@ -30,7 +30,7 @@ func main() {
 	log.Infof("router will be started with configuration %+v", *config.Cfg)
 	ctx := context.Background()
 	ctx = logger.ToContext(ctx, log)
-	if err := clientgrpc.InitGrpcClients(ctx, config.Cfg); err != nil {
+	if err := clientgrpc.InitAllGrpcClients(ctx, config.Cfg); err != nil {
 		log.Fatal("Can't init grpc clients: ", err)
 	}
 
