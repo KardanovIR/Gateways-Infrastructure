@@ -7,7 +7,7 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Router/config"
 )
 
-func InitGrpcClients(ctx context.Context, cfg *config.Config) error {
+func InitAllGrpcClients(ctx context.Context, cfg *config.Config) error {
 	if len(cfg.Adapters.Eth) > 0 {
 		if err := NewEthAdapterClient(ctx, cfg.Adapters.Eth); err != nil {
 			return fmt.Errorf("can't setup connection to eth adapter: %s", err)

@@ -26,3 +26,17 @@ Recompile protobuf :
     
     protobuf client for waves listener:
     protoc --proto_path=../Listeners/Waves/grpc --go_out=plugins=grpc:grpc/wavesListener ./../Listeners/Waves/grpc/waves_listener.proto
+
+Docker :
+    
+    Build container:
+    
+    docker build --rm -t gateways-router:latest .
+    
+    Run container
+    docker run --rm -d -p 5001:5001 --env-file=config/local.env --name gateways-router gateways-router:latest
+    
+    Read logs from container
+    docker logs gateways-router
+
+    
