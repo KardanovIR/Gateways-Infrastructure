@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.router";
+option java_outer_classname = "RouterProto";
+
+package router;
+
+// The router service definition.
+service Router {
+    // Get transaction status
+    rpc GetTransactionStatus (GetTransactionStatusRequest) returns (GetTransactionStatusReply) {
+    }
+}
+
+// The request message for getting transaction's status containing tx id and blockchain
+message GetTransactionStatusRequest {
+    string txId = 1;
+    string blockchain = 2;
+}
+
+// The response message containing transaction's status: UNKNOWN, PENDING, SUCCESS
+message GetTransactionStatusReply {
+    string status = 1;
+}

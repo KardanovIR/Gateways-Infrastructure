@@ -1,0 +1,7 @@
+adapter:
+  eth: localhost:5001
+  waves: localhost:5002
+listener:
+  eth: localhost:5003
+  waves: localhost:5004
+port: 5010
