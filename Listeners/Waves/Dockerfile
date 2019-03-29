@@ -5,6 +5,7 @@ WORKDIR /go/src/github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves
 RUN apk add build-base
 RUN apk update
 RUN apk add git
+RUN apk add ca-certificates
 RUN go get github.com/golang/dep/cmd/dep
 
 COPY Gopkg.toml Gopkg.toml
