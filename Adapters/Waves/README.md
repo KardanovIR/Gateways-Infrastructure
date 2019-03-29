@@ -19,7 +19,7 @@ Docker :
     docker build --rm -t gateways-waves-adapter:latest .
     
     Run container
-    docker run --rm -d -p 5001:5001 --env-file=config/dev.env --name gateways-waves-adapter gateways-waves-adapter:latest
+    docker run --rm -d -p 5001:5001 --env-file=config/local.env --name gateways-waves-adapter gateways-waves-adapter:latest
     
     Read logs from container
     docker logs gateways-waves-adapter
