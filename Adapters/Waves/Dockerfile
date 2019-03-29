@@ -1,6 +1,6 @@
 FROM golang:alpine as builder
-ADD . /go/src/github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth
-WORKDIR /go/src/github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth
+ADD . /go/src/github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves
+WORKDIR /go/src/github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves
 
 RUN apk add build-base
 RUN apk update
@@ -15,7 +15,7 @@ RUN dep ensure --vendor-only
 RUN CGO_ENABLED=1 GOOS=linux go build -o main .
 
 FROM alpine
-COPY --from=0 /go/src/github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth /
+COPY --from=0 /go/src/github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves /
 COPY config/config.y*ml /config
 
 EXPOSE 5001
