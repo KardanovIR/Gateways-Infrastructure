@@ -10,7 +10,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/globalsign/mgo"
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/config"
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/logger"
@@ -37,12 +38,26 @@ func TestListener(t *testing.T) {
 	}
 	mongoClient := mongoConnect(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name)
 
-	// add tasks TransferV1
+	// add tasks TransferV1 address
 	_, err = grpcClient.AddTask(ctx,
 		&pb.AddTaskRequest{
-			Address: "3PAgyfDELn1UixKCLQ6UsVakuofXXZMdYC4", CallbackType: string(models.Get),
-			CallbackUrl: fmt.Sprintf("http://localhost:%s/transfer", httpServerPort),
-			TaskType:    strconv.Itoa(int(models.OneTime))})
+			ListenTo:     &pb.ListenObject{Type: "Address", Value: "3PAgyfDELn1UixKCLQ6UsVakuofXXZMdYC4"},
+			CallbackType: string(models.Get),
+			CallbackUrl:  fmt.Sprintf("http://localhost:%s/transfer", httpServerPort),
+			TaskType:     strconv.Itoa(int(models.OneTime))})
+
+	if err != nil {
+		log.Error("adding task fails", err)
+		t.FailNow()
+		return
+	}
+	// add tasks TransferV1 TxID
+	_, err = grpcClient.AddTask(ctx,
+		&pb.AddTaskRequest{
+			ListenTo:     &pb.ListenObject{Type: "TxId", Value: "1tASvqX4TVNARYZZ7w1JnwUBr8pXtXHPiRVYMARYVRJ"},
+			CallbackType: string(models.Get),
+			CallbackUrl:  fmt.Sprintf("http://localhost:%s/transfer/txId", httpServerPort),
+			TaskType:     strconv.Itoa(int(models.OneTime))})
 
 	if err != nil {
 		log.Error("adding task fails", err)
@@ -53,9 +68,10 @@ func TestListener(t *testing.T) {
 	// add tasks TransferV2
 	_, err = grpcClient.AddTask(ctx,
 		&pb.AddTaskRequest{
-			Address: "3P63utQnWvQ7Xd8NMVFYjd1UqrUBqXsFVr8", CallbackType: string(models.Get),
-			CallbackUrl: fmt.Sprintf("http://localhost:%s/transfer2", httpServerPort),
-			TaskType:    strconv.Itoa(int(models.OneTime))})
+			ListenTo:     &pb.ListenObject{Type: "Address", Value: "3P63utQnWvQ7Xd8NMVFYjd1UqrUBqXsFVr8"},
+			CallbackType: string(models.Get),
+			CallbackUrl:  fmt.Sprintf("http://localhost:%s/transfer2", httpServerPort),
+			TaskType:     strconv.Itoa(int(models.OneTime))})
 
 	if err != nil {
 		log.Error("adding task fails", err)
@@ -66,9 +82,10 @@ func TestListener(t *testing.T) {
 	// add tasks Mass Transfer
 	_, err = grpcClient.AddTask(ctx,
 		&pb.AddTaskRequest{
-			Address: "3PAc93kp7CDwh2tc682JqDKT96uP5XeHsH2", CallbackType: string(models.Get),
-			CallbackUrl: fmt.Sprintf("http://localhost:%s/masstransfer", httpServerPort),
-			TaskType:    strconv.Itoa(int(models.OneTime))})
+			ListenTo:     &pb.ListenObject{Type: "Address", Value: "3PAc93kp7CDwh2tc682JqDKT96uP5XeHsH2"},
+			CallbackType: string(models.Get),
+			CallbackUrl:  fmt.Sprintf("http://localhost:%s/masstransfer", httpServerPort),
+			TaskType:     strconv.Itoa(int(models.OneTime))})
 
 	if err != nil {
 		log.Error("adding task fails", err)
@@ -83,14 +100,14 @@ func TestListener(t *testing.T) {
 		return
 	}
 	defer func() {
-		err := mongoClient.DropDatabase()
+		_, err := mongoClient.Collection(repositories.CChainState).DeleteOne(ctx, bson.D{{"chaintype", models.Waves}})
 		if err != nil {
-			log.Error("node reader task fails", err)
+			log.Error("node reader: clearing test fails", err)
 		}
 	}()
 	// wait for receiving callback
-	var isTransfer, isTransfer2, isMassTransfer bool
-	for i := 0; i < 3; i++ {
+	var isTransfer, isTransfer2, isMassTransfer, isTaskByTxId bool
+	for i := 0; i < 4; i++ {
 		select {
 		case callback := <-callBackChannel:
 			if callback == "transfer" {
@@ -102,6 +119,10 @@ func TestListener(t *testing.T) {
 			if callback == "masstransfer" {
 				isMassTransfer = true
 			}
+			if callback == "transfer_txId" {
+				isTaskByTxId = true
+			}
+
 		case <-time.After(10 * time.Second):
 			log.Error("so long waiting...")
 			t.FailNow()
@@ -114,6 +135,9 @@ func TestListener(t *testing.T) {
 		t.Fail()
 	}
 	if !isMassTransfer {
+		t.Fail()
+	}
+	if !isTaskByTxId {
 		t.Fail()
 	}
 	services.GetNodeReader().Stop(ctx)
@@ -166,6 +190,10 @@ func upHttpServer(ctx context.Context, port string) {
 		callBackChannel <- "transfer"
 		c.JSON(http.StatusOK, "")
 	})
+	router.GET("/transfer/txId", func(c *gin.Context) {
+		callBackChannel <- "transfer_txId"
+		c.JSON(http.StatusOK, "")
+	})
 	router.GET("/transfer2", func(c *gin.Context) {
 		callBackChannel <- "transfer2"
 		c.JSON(http.StatusOK, "")
@@ -179,11 +207,11 @@ func upHttpServer(ctx context.Context, port string) {
 	}
 }
 
-func mongoConnect(ctx context.Context, url string, dbName string) *mgo.Database {
+func mongoConnect(ctx context.Context, url string, dbName string) *mongo.Database {
 	log := logger.FromContext(ctx)
-	conn, err := mgo.Dial(url)
+	mongoClient, err := mongo.Connect(ctx, "mongodb://"+url)
 	if err != nil {
 		log.Fatal("Failed to connect to MongoDB at %s: %v", url, err)
 	}
-	return conn.DB(dbName)
+	return mongoClient.Database(dbName)
 }

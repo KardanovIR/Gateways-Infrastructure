@@ -3,13 +3,12 @@
 
 package wavesListener
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
-
 import (
-	context "golang.org/x/net/context"
+	context "context"
+	fmt "fmt"
+	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
+	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -21,33 +20,34 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-// The request message containing the user's name.
+// The request message containing task.
 type AddTaskRequest struct {
-	Address              string   `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	CallbackType         string   `protobuf:"bytes,2,opt,name=callbackType,proto3" json:"callbackType,omitempty"`
-	CallbackUrl          string   `protobuf:"bytes,3,opt,name=callbackUrl,proto3" json:"callbackUrl,omitempty"`
-	TaskType             string   `protobuf:"bytes,4,opt,name=taskType,proto3" json:"taskType,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	ListenTo             *ListenObject `protobuf:"bytes,1,opt,name=listenTo,proto3" json:"listenTo,omitempty"`
+	CallbackType         string        `protobuf:"bytes,2,opt,name=callbackType,proto3" json:"callbackType,omitempty"`
+	CallbackUrl          string        `protobuf:"bytes,3,opt,name=callbackUrl,proto3" json:"callbackUrl,omitempty"`
+	TaskType             string        `protobuf:"bytes,4,opt,name=taskType,proto3" json:"taskType,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
 }
 
 func (m *AddTaskRequest) Reset()         { *m = AddTaskRequest{} }
 func (m *AddTaskRequest) String() string { return proto.CompactTextString(m) }
 func (*AddTaskRequest) ProtoMessage()    {}
 func (*AddTaskRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_waves_listener_2bf4e3db82125580, []int{0}
+	return fileDescriptor_f600a1e4d89480e4, []int{0}
 }
+
 func (m *AddTaskRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddTaskRequest.Unmarshal(m, b)
 }
 func (m *AddTaskRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_AddTaskRequest.Marshal(b, m, deterministic)
 }
-func (dst *AddTaskRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AddTaskRequest.Merge(dst, src)
+func (m *AddTaskRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddTaskRequest.Merge(m, src)
 }
 func (m *AddTaskRequest) XXX_Size() int {
 	return xxx_messageInfo_AddTaskRequest.Size(m)
@@ -58,11 +58,11 @@ func (m *AddTaskRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_AddTaskRequest proto.InternalMessageInfo
 
-func (m *AddTaskRequest) GetAddress() string {
+func (m *AddTaskRequest) GetListenTo() *ListenObject {
 	if m != nil {
-		return m.Address
+		return m.ListenTo
 	}
-	return ""
+	return nil
 }
 
 func (m *AddTaskRequest) GetCallbackType() string {
@@ -97,16 +97,17 @@ func (m *AddTaskResponse) Reset()         { *m = AddTaskResponse{} }
 func (m *AddTaskResponse) String() string { return proto.CompactTextString(m) }
 func (*AddTaskResponse) ProtoMessage()    {}
 func (*AddTaskResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_waves_listener_2bf4e3db82125580, []int{1}
+	return fileDescriptor_f600a1e4d89480e4, []int{1}
 }
+
 func (m *AddTaskResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddTaskResponse.Unmarshal(m, b)
 }
 func (m *AddTaskResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_AddTaskResponse.Marshal(b, m, deterministic)
 }
-func (dst *AddTaskResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AddTaskResponse.Merge(dst, src)
+func (m *AddTaskResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddTaskResponse.Merge(m, src)
 }
 func (m *AddTaskResponse) XXX_Size() int {
 	return xxx_messageInfo_AddTaskResponse.Size(m)
@@ -135,16 +136,17 @@ func (m *RemoveTaskRequest) Reset()         { *m = RemoveTaskRequest{} }
 func (m *RemoveTaskRequest) String() string { return proto.CompactTextString(m) }
 func (*RemoveTaskRequest) ProtoMessage()    {}
 func (*RemoveTaskRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_waves_listener_2bf4e3db82125580, []int{2}
+	return fileDescriptor_f600a1e4d89480e4, []int{2}
 }
+
 func (m *RemoveTaskRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RemoveTaskRequest.Unmarshal(m, b)
 }
 func (m *RemoveTaskRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_RemoveTaskRequest.Marshal(b, m, deterministic)
 }
-func (dst *RemoveTaskRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RemoveTaskRequest.Merge(dst, src)
+func (m *RemoveTaskRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveTaskRequest.Merge(m, src)
 }
 func (m *RemoveTaskRequest) XXX_Size() int {
 	return xxx_messageInfo_RemoveTaskRequest.Size(m)
@@ -172,16 +174,17 @@ func (m *Empty) Reset()         { *m = Empty{} }
 func (m *Empty) String() string { return proto.CompactTextString(m) }
 func (*Empty) ProtoMessage()    {}
 func (*Empty) Descriptor() ([]byte, []int) {
-	return fileDescriptor_waves_listener_2bf4e3db82125580, []int{3}
+	return fileDescriptor_f600a1e4d89480e4, []int{3}
 }
+
 func (m *Empty) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Empty.Unmarshal(m, b)
 }
 func (m *Empty) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_Empty.Marshal(b, m, deterministic)
 }
-func (dst *Empty) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Empty.Merge(dst, src)
+func (m *Empty) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Empty.Merge(m, src)
 }
 func (m *Empty) XXX_Size() int {
 	return xxx_messageInfo_Empty.Size(m)
@@ -192,11 +195,87 @@ func (m *Empty) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Empty proto.InternalMessageInfo
 
+// ListenObject defines what will service listen to
+type ListenObject struct {
+	// type can be one of the follow values: TxId or Address
+	Type                 string   `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	Value                string   `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ListenObject) Reset()         { *m = ListenObject{} }
+func (m *ListenObject) String() string { return proto.CompactTextString(m) }
+func (*ListenObject) ProtoMessage()    {}
+func (*ListenObject) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f600a1e4d89480e4, []int{4}
+}
+
+func (m *ListenObject) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ListenObject.Unmarshal(m, b)
+}
+func (m *ListenObject) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ListenObject.Marshal(b, m, deterministic)
+}
+func (m *ListenObject) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListenObject.Merge(m, src)
+}
+func (m *ListenObject) XXX_Size() int {
+	return xxx_messageInfo_ListenObject.Size(m)
+}
+func (m *ListenObject) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListenObject.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListenObject proto.InternalMessageInfo
+
+func (m *ListenObject) GetType() string {
+	if m != nil {
+		return m.Type
+	}
+	return ""
+}
+
+func (m *ListenObject) GetValue() string {
+	if m != nil {
+		return m.Value
+	}
+	return ""
+}
+
 func init() {
 	proto.RegisterType((*AddTaskRequest)(nil), "wavesListener.AddTaskRequest")
 	proto.RegisterType((*AddTaskResponse)(nil), "wavesListener.AddTaskResponse")
 	proto.RegisterType((*RemoveTaskRequest)(nil), "wavesListener.RemoveTaskRequest")
 	proto.RegisterType((*Empty)(nil), "wavesListener.Empty")
+	proto.RegisterType((*ListenObject)(nil), "wavesListener.ListenObject")
+}
+
+func init() { proto.RegisterFile("waves_listener.proto", fileDescriptor_f600a1e4d89480e4) }
+
+var fileDescriptor_f600a1e4d89480e4 = []byte{
+	// 312 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x92, 0x4f, 0x4b, 0xf3, 0x40,
+	0x10, 0xc6, 0xbb, 0xef, 0xdb, 0xbf, 0xd3, 0xaa, 0x38, 0x94, 0x52, 0x2a, 0x4a, 0xd8, 0x53, 0x45,
+	0xd8, 0x43, 0x3d, 0xe8, 0xd5, 0x82, 0x82, 0x22, 0x58, 0x42, 0xc5, 0xa3, 0x6c, 0x93, 0x45, 0x6a,
+	0xd3, 0x6e, 0xcc, 0x6e, 0x23, 0xfd, 0x32, 0x7e, 0x01, 0xbf, 0xa4, 0x64, 0x37, 0x89, 0x49, 0xa4,
+	0xb7, 0x9d, 0x67, 0x9e, 0x59, 0x9e, 0xdf, 0x30, 0xd0, 0xff, 0xe4, 0xb1, 0x50, 0xaf, 0xc1, 0x52,
+	0x69, 0xb1, 0x11, 0x11, 0x0b, 0x23, 0xa9, 0x25, 0x1e, 0x18, 0xf5, 0x31, 0x15, 0xe9, 0x37, 0x81,
+	0xc3, 0x1b, 0xdf, 0x9f, 0x73, 0xb5, 0x72, 0xc5, 0xc7, 0x56, 0x28, 0x8d, 0x57, 0xd0, 0xb6, 0x33,
+	0x73, 0x39, 0x24, 0x0e, 0x19, 0x77, 0x27, 0x27, 0xac, 0x34, 0xc4, 0xec, 0xe3, 0x69, 0xf1, 0x2e,
+	0x3c, 0xed, 0xe6, 0x66, 0xa4, 0xd0, 0xf3, 0x78, 0x10, 0x2c, 0xb8, 0xb7, 0x9a, 0xef, 0x42, 0x31,
+	0xfc, 0xe7, 0x90, 0x71, 0xc7, 0x2d, 0x69, 0xe8, 0x40, 0x37, 0xab, 0x9f, 0xa3, 0x60, 0xf8, 0xdf,
+	0x58, 0x8a, 0x12, 0x8e, 0xa0, 0xad, 0xb9, 0xb2, 0x3f, 0xd4, 0x4d, 0x3b, 0xaf, 0xe9, 0x39, 0x1c,
+	0xe5, 0x61, 0x55, 0x28, 0x37, 0x4a, 0xe0, 0x00, 0x9a, 0x49, 0xfb, 0xde, 0x37, 0x59, 0x3b, 0x6e,
+	0x5a, 0xd1, 0x0b, 0x38, 0x76, 0xc5, 0x5a, 0xc6, 0xa2, 0x88, 0xb6, 0xcf, 0xdc, 0x82, 0xc6, 0xed,
+	0x3a, 0xd4, 0x3b, 0x7a, 0x0d, 0xbd, 0x22, 0x1c, 0x22, 0xd4, 0x75, 0x12, 0xc4, 0xda, 0xcd, 0x1b,
+	0xfb, 0xd0, 0x88, 0x79, 0xb0, 0xcd, 0xf8, 0x6c, 0x31, 0xf9, 0x22, 0xd0, 0xce, 0x16, 0x84, 0x0f,
+	0xd0, 0x4a, 0x73, 0xe2, 0x69, 0x65, 0x77, 0xe5, 0x65, 0x8f, 0xce, 0xf6, 0xb5, 0x2d, 0x1e, 0xad,
+	0xe1, 0x1d, 0xc0, 0x2f, 0x08, 0x3a, 0x15, 0xff, 0x1f, 0xc6, 0x51, 0xbf, 0xe2, 0xb0, 0x60, 0xb5,
+	0x29, 0x83, 0xc1, 0x52, 0xb2, 0xb7, 0x28, 0xf4, 0x58, 0x7e, 0x12, 0xc6, 0x39, 0xc5, 0x97, 0xe2,
+	0xc0, 0x2c, 0x39, 0x93, 0x19, 0x59, 0x34, 0xcd, 0xbd, 0x5c, 0xfe, 0x04, 0x00, 0x00, 0xff, 0xff,
+	0x7a, 0xee, 0x10, 0x63, 0x47, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -304,29 +383,4 @@ var _Listener_serviceDesc = grpc.ServiceDesc{
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "waves_listener.proto",
-}
-
-func init() {
-	proto.RegisterFile("waves_listener.proto", fileDescriptor_waves_listener_2bf4e3db82125580)
-}
-
-var fileDescriptor_waves_listener_2bf4e3db82125580 = []byte{
-	// 271 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x91, 0xdd, 0x4a, 0xc3, 0x30,
-	0x14, 0xc7, 0x17, 0x3f, 0xb6, 0x79, 0xfc, 0xc2, 0xc3, 0x18, 0xa5, 0xa0, 0x94, 0x5c, 0x29, 0x42,
-	0x2e, 0xf4, 0x09, 0x1c, 0x28, 0x28, 0x5e, 0x8c, 0x32, 0xf1, 0x52, 0xb2, 0xe6, 0x20, 0x63, 0xdd,
-	0x12, 0x93, 0x38, 0xd9, 0x3b, 0xf8, 0x0c, 0x3e, 0xab, 0x2c, 0x6b, 0x6b, 0x3b, 0xd9, 0xe5, 0xff,
-	0x23, 0xc9, 0x2f, 0xe7, 0x40, 0xef, 0x4b, 0x2e, 0xc8, 0xbd, 0xe5, 0x13, 0xe7, 0x69, 0x4e, 0x56,
-	0x18, 0xab, 0xbd, 0xc6, 0xe3, 0xe0, 0x3e, 0x17, 0x26, 0xff, 0x66, 0x70, 0x72, 0xa7, 0xd4, 0x48,
-	0xba, 0x69, 0x4a, 0x1f, 0x9f, 0xe4, 0x3c, 0x46, 0xd0, 0x91, 0x4a, 0x59, 0x72, 0x2e, 0x62, 0x09,
-	0xbb, 0x3c, 0x48, 0x4b, 0x89, 0x1c, 0x8e, 0x32, 0x99, 0xe7, 0x63, 0x99, 0x4d, 0x47, 0x4b, 0x43,
-	0xd1, 0x4e, 0x88, 0x1b, 0x1e, 0x26, 0x70, 0x58, 0xea, 0x17, 0x9b, 0x47, 0xbb, 0xa1, 0x52, 0xb7,
-	0x30, 0x86, 0xae, 0x97, 0x6e, 0x7d, 0xc3, 0x5e, 0x88, 0x2b, 0xcd, 0xaf, 0xe0, 0xb4, 0xa2, 0x71,
-	0x46, 0xcf, 0x1d, 0x61, 0x1f, 0xda, 0xab, 0xf8, 0x51, 0x15, 0x34, 0x85, 0xe2, 0xd7, 0x70, 0x96,
-	0xd2, 0x4c, 0x2f, 0xa8, 0xce, 0xbe, 0xad, 0xdc, 0x81, 0xfd, 0xfb, 0x99, 0xf1, 0xcb, 0x9b, 0x1f,
-	0x06, 0xdd, 0xf2, 0xf3, 0xf8, 0x04, 0x9d, 0xe2, 0x35, 0x3c, 0x17, 0x8d, 0xb9, 0x88, 0xe6, 0x4c,
-	0xe2, 0x8b, 0x6d, 0xf1, 0x1a, 0x92, 0xb7, 0xf0, 0x01, 0xe0, 0x0f, 0x07, 0x93, 0x8d, 0xfe, 0x3f,
-	0xd2, 0xb8, 0xb7, 0xd1, 0x08, 0x78, 0xbc, 0x35, 0x10, 0xd0, 0x9f, 0x68, 0xf1, 0x6e, 0x4d, 0x26,
-	0xaa, 0xcd, 0x85, 0xe6, 0x00, 0x5f, 0xeb, 0x07, 0x86, 0xab, 0x6d, 0x0e, 0xd9, 0xb8, 0x1d, 0xd6,
-	0x7a, 0xfb, 0x1b, 0x00, 0x00, 0xff, 0xff, 0x77, 0xcd, 0x95, 0x19, 0xee, 0x01, 0x00, 0x00,
 }

@@ -141,7 +141,7 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 			chainState.LastBlock = int64(block.Height + 1)
 			chainState.Timestamp = time.Now()
 
-			*chainState, err = service.rp.PutChainState(ctx, *chainState)
+			chainState, err = service.rp.PutChainState(ctx, chainState)
 			if err != nil {
 				log.Errorf("Updating chainState for %s error: %s", service.conf.ChainType, err)
 			}
@@ -175,7 +175,7 @@ func (service *nodeReader) processBlock(ctx context.Context, block *client.Block
 			if tt.AmountAsset.Present {
 				assetId = tt.AmountAsset.ID
 			}
-			if err := service.executeTasks(ctx, tt.Amount, tt.Recipient, assetId); err != nil {
+			if err := service.executeTasks(ctx, tt.Amount, tt.Recipient, assetId, t.ID.String()); err != nil {
 				return err
 			}
 		case *proto.TransferV2:
@@ -185,18 +185,20 @@ func (service *nodeReader) processBlock(ctx context.Context, block *client.Block
 			if tt.AmountAsset.Present {
 				assetId = tt.AmountAsset.ID
 			}
-			if err := service.executeTasks(ctx, tt.Amount, tt.Recipient, assetId); err != nil {
+			if err := service.executeTasks(ctx, tt.Amount, tt.Recipient, assetId, t.ID.String()); err != nil {
 				return err
 			}
 		case *proto.MassTransferV1:
-			log.Debugf("parse transaction type %d ('MassTransferTransaction'). ID %s", proto.MassTransferTransaction, t.ID)
+			log.Debugf("parse transaction type %d ('MassTransferTransaction'). ID %s", proto.MassTransferTransaction, t.ID.String())
 			tt := *t
 			var assetId crypto.Digest
 			if tt.Asset.Present {
 				assetId = tt.Asset.ID
 			}
 			for _, transfer := range tt.Transfers {
-				if err := service.executeTasks(ctx, transfer.Amount, transfer.Recipient, assetId); err != nil {
+				// TxId is one for all transfers. But tx task is OneTime task (by logic)
+				// That's why execution of first transfer tracks address and txId, txId task will be removed
+				if err := service.executeTasks(ctx, transfer.Amount, transfer.Recipient, assetId, tt.ID.String()); err != nil {
 					return err
 				}
 			}
@@ -204,7 +206,7 @@ func (service *nodeReader) processBlock(ctx context.Context, block *client.Block
 			// payment is only for waves transfer
 			log.Debugf("parse transaction type %d ('Payment'). ID %s", proto.PaymentTransaction, t.ID)
 			tt := *t
-			if err := service.executeTasksForRecipient(ctx, tt.Amount, tt.Recipient.String(), crypto.Digest{}); err != nil {
+			if err := service.executeTasksForRecipientOrTxId(ctx, tt.Amount, tt.Recipient.String(), crypto.Digest{}, t.ID.String()); err != nil {
 				return err
 			}
 		default:
@@ -215,23 +217,23 @@ func (service *nodeReader) processBlock(ctx context.Context, block *client.Block
 }
 
 func (service *nodeReader) executeTasks(ctx context.Context, amount uint64, recipient proto.Recipient,
-	assetId crypto.Digest) error {
+	assetId crypto.Digest, txId string) error {
 	if recipient.Address != nil {
 		address := recipient.Address.String()
-		return service.executeTasksForRecipient(ctx, amount, address, assetId)
+		return service.executeTasksForRecipientOrTxId(ctx, amount, address, assetId, txId)
 	}
 	if recipient.Alias != nil {
 		alias := recipient.Alias.Alias
-		return service.executeTasksForRecipient(ctx, amount, alias, assetId)
+		return service.executeTasksForRecipientOrTxId(ctx, amount, alias, assetId, txId)
 	}
 	return errors.New("haven't recipient address")
 }
 
-func (service *nodeReader) executeTasksForRecipient(ctx context.Context, amount uint64, recipient string,
-	assetId crypto.Digest) (err error) {
+func (service *nodeReader) executeTasksForRecipientOrTxId(ctx context.Context, amount uint64, recipient string,
+	assetId crypto.Digest, txId string) (err error) {
 
 	log := logger.FromContext(ctx)
-	tasks, err := service.rp.FindByAddress(ctx, models.ChainType(service.conf.ChainType), recipient)
+	tasks, err := service.rp.FindByAddressOrTxId(ctx, models.ChainType(service.conf.ChainType), recipient, txId)
 	if err != nil {
 		log.Errorf("error: %s", err)
 		return err
@@ -241,7 +243,7 @@ func (service *nodeReader) executeTasksForRecipient(ctx context.Context, amount 
 	}
 	log.Infof("address %s has %d tasks, start processing...", recipient, len(tasks))
 	for _, task := range tasks {
-		log.Debugf("Start processing incoming transfer on registered address %s ...", task.Address)
+		log.Debugf("Start processing task id %s for %v ...", task.Id.Hex(), task.ListenTo)
 		err = service.rc.RequestCallback(ctx, task.Callback, task.Callback.Data)
 		if err != nil {
 			log.Errorf("Error while processing incoming transfer for address %s. %s", recipient, err)
@@ -249,13 +251,13 @@ func (service *nodeReader) executeTasksForRecipient(ctx context.Context, amount 
 		}
 		switch task.Type {
 		case models.OneTime:
-			err := service.rp.RemoveTask(ctx, string(task.Id))
+			err := service.rp.RemoveTask(ctx, task.Id.Hex())
 			if err != nil {
 				log.Errorf("Error: removing task %s", err)
 				return err
 			}
 		}
-		log.Debugf("Incoming transfer in %s to %s has been registered!", service.conf.ChainType, task.Address)
+		log.Debugf("Task id %s for %s has been proceed successful!", task.Id.Hex(), service.conf.ChainType)
 	}
 	return nil
 }
