@@ -43,33 +43,36 @@ func GetRepository() IRepository {
 }
 
 func New(ctx context.Context, url, dbName string) error {
-	log := logger.FromContext(ctx)
 	var initErr error
 	onceRepository.Do(func() {
-		mongoClient, err := mongo.Connect(ctx, "mongodb://"+url)
-		if err != nil {
-			log.Errorf("Failed to create connect configuration to MongoDB %s: %v", url, err)
-			initErr = err
-			return
-		}
-		for i := 1; i < 6; i++ {
-			log.Debugf("Attempt %d to connect to MongoDB at %s", i, url)
-			err := mongoClient.Ping(ctx, nil)
-			if err != nil {
-				log.Errorf("Failed to connect to MongoDB at %s: %v", url, err)
-				initErr = err
-				time.Sleep(1 * time.Second)
-			} else {
-				var db = mongoClient.Database(dbName)
-				log.Infof("Connected successfully to MongoDB at %s", url)
-				rep = &repository{
-					client:      mongoClient,
-					tasksC:      db.Collection(Ctasks),
-					chainStateC: db.Collection(CChainState),
-					dbName:      dbName}
-				break
-			}
-		}
+		rep, initErr = connect(ctx, url, dbName)
 	})
 	return initErr
+}
+
+func connect(ctx context.Context, url, dbName string) (IRepository, error) {
+	log := logger.FromContext(ctx)
+	mongoClient, err := mongo.Connect(ctx, "mongodb://"+url)
+	if err != nil {
+		log.Errorf("Failed to create connect configuration to MongoDB %s: %v", url, err)
+		return nil, err
+	}
+	for i := 1; i < 6; i++ {
+		log.Debugf("Attempt %d to connect to MongoDB at %s", i, url)
+		err := mongoClient.Ping(ctx, nil)
+		if err != nil {
+			log.Errorf("Failed to connect to MongoDB at %s: %v", url, err)
+			time.Sleep(1 * time.Second)
+		} else {
+			var db = mongoClient.Database(dbName)
+			log.Infof("Connected successfully to MongoDB at %s", url)
+			rep = &repository{
+				client:      mongoClient,
+				tasksC:      db.Collection(Ctasks),
+				chainStateC: db.Collection(CChainState),
+				dbName:      dbName}
+			return rep, nil
+		}
+	}
+	return nil, err
 }

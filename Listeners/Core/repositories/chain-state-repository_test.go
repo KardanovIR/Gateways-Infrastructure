@@ -4,23 +4,26 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/stretchr/testify/assert"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 )
 
 func TestRepository_PutChainState(t *testing.T) {
 	ctx, log := beforeTest()
-	r := GetRepository().(*repository)
+	rep, err := connect(ctx, "localhost:27017", "taskDb_test")
+	if err != nil {
+		log.Fatal("Can't create db connection: ", err)
+	}
+	r := rep.(*repository)
 	defer func() {
-		// drop collection after test complete successful
-		if !t.Failed() {
-			if err := r.chainStateC.Drop(ctx); err != nil {
-				log.Error(err)
-			}
+		// drop chain state after test complete successful
+		if _, err := r.chainStateC.DeleteOne(ctx, bson.D{{"chaintype", models.Ethereum}}); err != nil {
+			log.Error(err)
 		}
 	}()
 	// get chain state first time (empty state)
-	cs, err := GetRepository().GetLastChainState(ctx, models.Ethereum)
+	cs, err := rep.GetLastChainState(ctx, models.Ethereum)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -28,7 +31,7 @@ func TestRepository_PutChainState(t *testing.T) {
 	assert.Nil(t, cs)
 	// put state (insert)
 	st1 := models.ChainState{Timestamp: time.Now(), ChainType: models.Ethereum, LastBlock: 123456}
-	st2, err := GetRepository().PutChainState(ctx, &st1)
+	st2, err := rep.PutChainState(ctx, &st1)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -37,14 +40,14 @@ func TestRepository_PutChainState(t *testing.T) {
 
 	//  put state (update)
 	st3 := models.ChainState{Timestamp: time.Now(), ChainType: models.Ethereum, LastBlock: 200000}
-	st4, err := GetRepository().PutChainState(ctx, &st3)
+	st4, err := rep.PutChainState(ctx, &st3)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
 	}
 	assert.Equal(t, int64(200000), st4.LastBlock)
 	// get chain state after insert and update
-	cs2, err := GetRepository().GetLastChainState(ctx, models.Ethereum)
+	cs2, err := rep.GetLastChainState(ctx, models.Ethereum)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()

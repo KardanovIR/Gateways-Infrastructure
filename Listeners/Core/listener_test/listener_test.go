@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/config"
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/grpc"
@@ -35,7 +36,6 @@ func TestListener(t *testing.T) {
 	if err != nil {
 		log.Fatal("Can't init grpc client", err)
 	}
-	mongoDB := mongoConnect(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name)
 
 	// add tasks Transfer
 	_, err = grpcClient.AddTask(ctx,
@@ -78,10 +78,10 @@ func TestListener(t *testing.T) {
 		t.Fail()
 	}
 
+	mongoDB := mongoConnect(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name)
 	defer func() {
-		err := mongoDB.Drop(nil)
-		if err != nil {
-			log.Error("node reader: drop db fails", err)
+		if _, err := mongoDB.Collection(repositories.CChainState).DeleteOne(ctx, bson.D{{"chaintype", models.Ethereum}}); err != nil {
+			log.Error(err)
 		}
 	}()
 

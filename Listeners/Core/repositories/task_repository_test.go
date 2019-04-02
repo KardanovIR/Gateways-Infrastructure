@@ -14,14 +14,17 @@ import (
 // check methods PutTask, RemoveTask, FindByAddressOrTxId
 func TestTaskRepository(t *testing.T) {
 	ctx, log := beforeTest()
-	r := GetRepository().(*repository)
+	rep, err := connect(ctx, "localhost:27017", "taskDb_test")
+	if err != nil {
+		log.Fatal("Can't create db connection: ", err)
+	}
+	r := rep.(*repository)
 	defer func() {
+		// for test debug
 		// drop collection after test complete successful
-		if !t.Failed() {
-			if err := r.tasksC.Drop(ctx); err != nil {
-				log.Error(err)
-			}
-		}
+		/*if err := r.tasksC.Drop(ctx); err != nil {
+			log.Error(err)
+		}*/
 	}()
 	address := "0x81b7e08f65bdf5648606c89998a9cc8164397647"
 	txId := "0x68392adbfd32cce6170eb909ad8c889319840593692df18c9a1b24818a1cfa1d"
@@ -33,7 +36,7 @@ func TestTaskRepository(t *testing.T) {
 		ListenTo:       models.ListenObject{Type: models.ListenTypeAddress, Value: address},
 		Callback:       models.Callback{Url: "who_waits/address", Type: models.Get},
 	}
-	taskAddressId, err := GetRepository().PutTask(ctx, &taskAddress)
+	taskAddressId, err := rep.PutTask(ctx, &taskAddress)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -47,7 +50,7 @@ func TestTaskRepository(t *testing.T) {
 		ListenTo:       models.ListenObject{Type: models.ListenTypeTxID, Value: txId},
 		Callback:       models.Callback{Url: "who_waits/txId", Type: models.Get},
 	}
-	taskTxId, err := GetRepository().PutTask(ctx, &taskTxHash)
+	taskTxId, err := rep.PutTask(ctx, &taskTxHash)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -57,7 +60,7 @@ func TestTaskRepository(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, int64(2), count)
 	// only address suitable
-	tasks, err := GetRepository().FindByAddressOrTxId(ctx, models.Ethereum, address, "0x912dda9f2618d6a1876863e26cf1efa9b7603e4c239aadb19556f16a0d7f8508")
+	tasks, err := rep.FindByAddressOrTxId(ctx, models.Ethereum, address, "0x912dda9f2618d6a1876863e26cf1efa9b7603e4c239aadb19556f16a0d7f8508")
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -70,7 +73,7 @@ func TestTaskRepository(t *testing.T) {
 	assert.Equal(t, "who_waits/address", tasks[0].Callback.Url, "test 'get task by address' fail")
 
 	// only txID suitable
-	tasks2, err := GetRepository().FindByAddressOrTxId(ctx, models.Ethereum, "0xf4bac4964dafa8d02ce1ace0b75b753b1dde2ac5", txId)
+	tasks2, err := rep.FindByAddressOrTxId(ctx, models.Ethereum, "0xf4bac4964dafa8d02ce1ace0b75b753b1dde2ac5", txId)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -83,7 +86,7 @@ func TestTaskRepository(t *testing.T) {
 	assert.Equal(t, "who_waits/txId", tasks2[0].Callback.Url, "test 'get task by txID' fail")
 
 	// address and txID suitable
-	tasks3, err := GetRepository().FindByAddressOrTxId(ctx, models.Ethereum, address, txId)
+	tasks3, err := rep.FindByAddressOrTxId(ctx, models.Ethereum, address, txId)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -91,7 +94,7 @@ func TestTaskRepository(t *testing.T) {
 	assert.Equal(t, 2, len(tasks3), "test 'get tasks by txID and address' fail")
 
 	// blockchain is not suitable
-	tasks4, err := GetRepository().FindByAddressOrTxId(ctx, models.ChainType("WAVES"), address, txId)
+	tasks4, err := rep.FindByAddressOrTxId(ctx, models.ChainType("WAVES"), address, txId)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -99,26 +102,28 @@ func TestTaskRepository(t *testing.T) {
 	assert.Equal(t, 0, len(tasks4), "test 'not suitable blockchain' fail")
 
 	// remove task with address
-	if err := GetRepository().RemoveTask(ctx, taskAddressId); err != nil {
+	if err := rep.RemoveTask(ctx, taskAddressId); err != nil {
 		log.Error(err)
 		t.FailNow()
 	}
 
 	// get removed task
-	tasks5, err := GetRepository().FindByAddressOrTxId(ctx, models.Ethereum, address, "0x912dda9f2618d6a1876863e26cf1efa9b7603e4c239aadb19556f16a0d7f8508")
+	tasks5, err := rep.FindByAddressOrTxId(ctx, models.Ethereum, address, "0x912dda9f2618d6a1876863e26cf1efa9b7603e4c239aadb19556f16a0d7f8508")
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
 	}
 	assert.Equal(t, 0, len(tasks5), "test 'remove task' fail")
+
+	// remove task with txId - clean DB after test
+	if err := rep.RemoveTask(ctx, taskTxId); err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
 }
 
 func beforeTest() (ctx context.Context, log logger.ILogger) {
 	ctx = context.Background()
 	log, _ = logger.Init(false, logger.DEBUG)
-	err := New(ctx, "localhost:27017", "taskDb_test")
-	if err != nil {
-		log.Fatal("Can't create db connection: ", err)
-	}
 	return
 }
