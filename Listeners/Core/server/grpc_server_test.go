@@ -6,6 +6,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/config"
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
@@ -29,7 +30,7 @@ func TestGrpcServerAddTask(t *testing.T) {
 
 	c := pb.NewListenerClient(conn)
 	reply, err := c.AddTask(ctx, &pb.AddTaskRequest{
-		Address: "", CallbackType: string(models.Post), CallbackUrl: "https:someUrl", TaskType: "1"})
+		ListenTo: &pb.ListenObject{Type: "Address", Value: "123456"}, CallbackType: string(models.Post), CallbackUrl: "https:someUrl", TaskType: "1"})
 	if err != nil {
 		log.Error("adding task fails", err)
 		t.Fail()
@@ -59,6 +60,7 @@ func TestGrpcServerRemoveTask(t *testing.T) {
 
 func startServerAndGetConnection(ctx context.Context) (*grpc.ClientConn, error) {
 	log := logger.FromContext(ctx)
+	config.Cfg = &config.Config{Node: config.Node{ChainType: models.Ethereum}}
 	oneServer.Do(func() {
 		go func() {
 			err := InitAndStart(ctx, serverPort, &repoMock{})
@@ -73,7 +75,7 @@ func startServerAndGetConnection(ctx context.Context) (*grpc.ClientConn, error) 
 type repoMock struct {
 }
 
-func (n *repoMock) PutTask(ctx context.Context, task models.Task) (string, error) {
+func (n *repoMock) PutTask(ctx context.Context, task *models.Task) (string, error) {
 	return addedTaskId, nil
 }
 
@@ -81,14 +83,18 @@ func (n *repoMock) RemoveTask(ctx context.Context, id string) error {
 	return nil
 }
 
-func (n *repoMock) FindByAddress(ctx context.Context, ticket models.ChainType, addresses string) (tasks []models.Task, err error) {
-	return make([]models.Task, 0), nil
+func (n *repoMock) FindByAddress(ctx context.Context, ticket models.ChainType, addresses string) (tasks []*models.Task, err error) {
+	return make([]*models.Task, 0), nil
+}
+
+func (n *repoMock) FindByAddressOrTxId(ctx context.Context, ticket models.ChainType, address string, txID string) (tasks []*models.Task, err error) {
+	return make([]*models.Task, 0), nil
 }
 
 func (n *repoMock) GetLastChainState(ctx context.Context, chainType models.ChainType) (chainState *models.ChainState, err error) {
 	return new(models.ChainState), nil
 }
 
-func (n *repoMock) PutChainState(ctx context.Context, state models.ChainState) (newState models.ChainState, err error) {
-	return models.ChainState{}, nil
+func (n *repoMock) PutChainState(ctx context.Context, state *models.ChainState) (newState *models.ChainState, err error) {
+	return &models.ChainState{}, nil
 }

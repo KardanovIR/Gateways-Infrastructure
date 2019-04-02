@@ -8,14 +8,17 @@ package ethListener;
 
 // The common service definition.
 service Listener {
-  // Sends a greeting
-  rpc AddTask (AddTaskRequest) returns (AddTaskResponse) {}
-  rpc RemoveTask (RemoveTaskRequest) returns (Empty) {}
+    // Add task
+    rpc AddTask (AddTaskRequest) returns (AddTaskResponse) {
+    }
+    // Remove task
+    rpc RemoveTask (RemoveTaskRequest) returns (Empty) {
+    }
 }
 
-// The request message containing the user's name.
+// The request message containing task
 message AddTaskRequest {
-    string address = 1;
+    ListenObject listenTo = 1;
     string callbackType = 2;
     string callbackUrl = 3;
     string taskType = 4;
@@ -29,4 +32,12 @@ message RemoveTaskRequest {
     string taskId = 1;
 }
 
-message Empty {}
+// ListenObject defines what will service listen to
+message ListenObject {
+    // type can be one of the follow values: TxId or Address
+    string type = 1;
+    string value = 2;
+}
+
+message Empty {
+}

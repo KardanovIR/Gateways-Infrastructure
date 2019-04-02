@@ -1,22 +1,36 @@
 package models
 
 import (
-	"github.com/globalsign/mgo/bson"
 	"time"
+
+	"github.com/mongodb/mongo-go-driver/bson/objectid"
 )
 
 type Task struct {
-	Id             bson.ObjectId `json:"id" bson:"_id,omitempty"`
-	CreatedAt      time.Time     `json:"createdAt" bson:"createdAt"`
-	UpdatedAt      time.Time     `json:"updatedAt" bson:"updatedAt"`
-	Address        string        `json:"address" bson:"address"`
-	Callback       Callback      `json:"callback" bson:"callback"`
-	Type           TaskType      `json:"taskType" bson:"taskType"`
-	BlockchainType ChainType     `json:"blockchainType" bson:"blockchainType"`
+	Id             objectid.ObjectID `bson:"_id,omitempty"`
+	CreatedAt      time.Time         `bson:"createdAt"`
+	UpdatedAt      time.Time         `bson:"updatedAt"`
+	ListenTo       ListenObject      `bson:"listenTo"`
+	Callback       Callback          `bson:"callback"`
+	Type           TaskType          `bson:"taskType"`
+	BlockchainType ChainType         `bson:"blockchainType"`
 }
 
 type Callback struct {
-	Url  string                 `json:"url" bson:"url"`
-	Type CallbackType           `json:"callbackType" bson:"callbackType"`
-	Data map[string]interface{} `json:"data" bson:"-"`
+	Url  string                 `bson:"url"`
+	Type CallbackType           `bson:"callbackType"`
+	Data map[string]interface{} `bson:"data"`
 }
+
+// what is listen to: txId or address and it's value
+type ListenObject struct {
+	Type  ListenType `bson:"type"`
+	Value string     `bson:"value"`
+}
+
+type ListenType string
+
+const (
+	ListenTypeAddress ListenType = "Address"
+	ListenTypeTxID    ListenType = "TxId"
+)
