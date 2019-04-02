@@ -3,8 +3,15 @@ package listener_test
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc"
+	"net/http"
+	"strconv"
+	"testing"
+	"time"
+
 	"github.com/gin-gonic/gin"
-	"github.com/globalsign/mgo"
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/config"
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
@@ -12,11 +19,6 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/server"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
-	"google.golang.org/grpc"
-	"net/http"
-	"strconv"
-	"testing"
-	"time"
 )
 
 const (
@@ -34,14 +36,14 @@ func TestListener(t *testing.T) {
 	if err != nil {
 		log.Fatal("Can't init grpc client", err)
 	}
-	mongoClient := mongoConnect(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name)
 
 	// add tasks Transfer
 	_, err = grpcClient.AddTask(ctx,
 		&pb.AddTaskRequest{
-			Address: "0x9515735d60e8ff4036efaffaf3370f3097615d19", CallbackType: string(models.Get),
-			CallbackUrl: fmt.Sprintf("http://localhost:%s/transfer", httpServerPort),
-			TaskType:    strconv.Itoa(int(models.OneTime))})
+			ListenTo:     &pb.ListenObject{Type: "Address", Value: "0x9515735d60e8ff4036efaffaf3370f3097615d19"},
+			CallbackType: string(models.Get),
+			CallbackUrl:  fmt.Sprintf("http://localhost:%s/transfer", httpServerPort),
+			TaskType:     strconv.Itoa(int(models.OneTime))})
 
 	if err != nil {
 		log.Error("adding task fails", err)
@@ -59,30 +61,27 @@ func TestListener(t *testing.T) {
 
 	log.Debugf("node reader start  success", err)
 
-
 	// wait for receiving callback
 	var isTransfer bool
 
-		select {
-		case callback := <-callBackChannel:
-			if callback == "transfer" {
-				isTransfer = true
-			}
-		case <-time.After(10 * time.Second):
-			log.Error("so long waiting...")
-			t.FailNow()
+	select {
+	case callback := <-callBackChannel:
+		if callback == "transfer" {
+			isTransfer = true
 		}
+	case <-time.After(10 * time.Second):
+		log.Error("so long waiting...")
+		t.FailNow()
+	}
 
 	if !isTransfer {
 		t.Fail()
 	}
 
-
-
+	mongoDB := mongoConnect(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name)
 	defer func() {
-		err := mongoClient.DropDatabase()
-		if err != nil {
-			log.Error("node reader task fails", err)
+		if _, err := mongoDB.Collection(repositories.CChainState).DeleteOne(ctx, bson.D{{"chaintype", models.Ethereum}}); err != nil {
+			log.Error(err)
 		}
 	}()
 
@@ -141,11 +140,11 @@ func upHttpServer(ctx context.Context, port string) {
 	}
 }
 
-func mongoConnect(ctx context.Context, url string, dbName string) *mgo.Database {
+func mongoConnect(ctx context.Context, url string, dbName string) *mongo.Database {
 	log := logger.FromContext(ctx)
-	conn, err := mgo.Dial(url)
+	mongoClient, err := mongo.Connect(ctx, "mongodb://"+url)
 	if err != nil {
 		log.Fatal("Failed to connect to MongoDB at %s: %v", url, err)
 	}
-	return conn.DB(dbName)
+	return mongoClient.Database(dbName)
 }

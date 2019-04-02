@@ -39,13 +39,13 @@ func (s *grpcServer) AddTask(ctx context.Context, in *pb.AddTaskRequest) (*pb.Ad
 		return nil, err
 	}
 	var newTask = models.Task{
-		Address:        in.Address,
-		Callback:       models.Callback{in.CallbackUrl, models.CallbackType(in.CallbackType), nil},
+		ListenTo:       models.ListenObject{Type: models.ListenType(in.ListenTo.Type), Value: in.ListenTo.Value},
+		Callback:       models.Callback{Url: in.CallbackUrl, Type: models.CallbackType(in.CallbackType)},
 		BlockchainType: config.Cfg.Node.ChainType,
 		Type:           models.TaskType(taskType),
 	}
 
-	id, err := s.rp.PutTask(ctx, newTask)
+	id, err := s.rp.PutTask(ctx, &newTask)
 	if err != nil {
 		log.Errorf("Creating task fails: %s", err)
 		return nil, err

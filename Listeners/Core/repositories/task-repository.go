@@ -2,65 +2,80 @@ package repositories
 
 import (
 	"context"
-	"github.com/globalsign/mgo/bson"
+	"fmt"
+
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson/objectid"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 )
 
-func (rep *repository) PutTask(ctx context.Context, task models.Task) (id string, err error) {
+func (rep *repository) PutTask(ctx context.Context, task *models.Task) (id string, err error) {
 	log := logger.FromContext(ctx)
-	log.Infof("InsertTask %+v", task)
-
-	rep.refreshSession()
-
-	if string(task.Id) == "" {
-		task.Id = bson.NewObjectId()
-		err = rep.tasksC.Insert(task)
+	log.Infof("PutTask %+v", task)
+	if task.Id.IsZero() {
+		ir, err := rep.tasksC.InsertOne(ctx, task)
 		if err != nil {
 			log.Errorf("Inserting task to DB fails: %s", err)
 			return "", err
 		}
-		return task.Id.String(), nil
+		id := ir.InsertedID.(objectid.ObjectID)
+		task.Id = id
+		return id.Hex(), nil
 	}
-
-	err = rep.tasksC.UpdateId(task.Id, task)
-
-	return task.Id.String(), nil
+	return "", fmt.Errorf("task id is not empty: %s", id)
 }
 
 func (rep *repository) RemoveTask(ctx context.Context, id string) (err error) {
 	log := logger.FromContext(ctx)
-	log.Info("RemoveTask")
-	rep.refreshSession()
-
-	if string(id) != "" {
-		var objectId = bson.ObjectId(id)
-		err = rep.tasksC.Remove(bson.M{
-			"_id": objectId,
-		})
+	log.Infof("RemoveTask %s", id)
+	if id != "" {
+		objId, err := objectid.FromHex(id)
 		if err != nil {
-			log.Errorf("Removing task to DB fails: %s", err)
+			log.Errorf("task id %s has wrong format: %s", id, err)
 			return err
 		}
-		return nil
+		if _, err := rep.tasksC.DeleteOne(ctx, bson.M{"_id": objId}); err != nil {
+			log.Errorf("Removing task from DB fails: %s", err)
+			return err
+		}
 	}
-
 	return nil
 }
 
-func (rep *repository) FindByAddress(ctx context.Context, ticket models.ChainType, addresses string) (tasks []models.Task, err error) {
-	log := logger.FromContext(ctx)
-	log.Infof("FindByAddress %s", addresses)
-	rep.refreshSession()
+func (rep *repository) FindByAddressOrTxId(ctx context.Context, ticket models.ChainType, address string,
+	txID string) ([]*models.Task, error) {
 
-	err = rep.tasksC.Find(bson.M{
-		"address":        addresses,
-		"blockchainType": ticket,
-	}).All(&tasks)
+	log := logger.FromContext(ctx)
+	log.Infof("FindByAddressOrTxId: address %s, txID %s", address, txID)
+	cur, err := rep.tasksC.Find(ctx,
+		bson.D{{
+			"$or", bson.A{
+				bson.D{{"listenTo", bson.D{{"type", models.ListenTypeAddress}, {"value", address}}}},
+				bson.D{{"listenTo", bson.D{{"type", models.ListenTypeTxID}, {"value", txID}}}},
+			}},
+			{"blockchainType", ticket},
+		})
 	if err != nil {
 		log.Errorf("Finding task in DB fails: %s", err)
 		return nil, err
 	}
-
-	return
+	defer func() {
+		if err := cur.Close(ctx); err != nil {
+			log.Error("close cursor error: ", err)
+		}
+	}()
+	tasks := make([]*models.Task, 0)
+	for cur.Next(ctx) {
+		var task models.Task
+		if err := cur.Decode(&task); err != nil {
+			return tasks, err
+		}
+		log.Debugf("%+v", task)
+		tasks = append(tasks, &task)
+	}
+	if err := cur.Err(); err != nil {
+		return tasks, err
+	}
+	return tasks, nil
 }

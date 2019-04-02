@@ -154,7 +154,7 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 			chainState.LastBlock = block.Number().Int64() + 1
 			chainState.Timestamp = time.Now()
 
-			*chainState, err = service.rp.PutChainState(ctx, *chainState)
+			chainState, err = service.rp.PutChainState(ctx, chainState)
 			if err != nil {
 				log.Errorf("Updating chainState for %s error: %s", service.conf.ChainType, err)
 			}
@@ -189,39 +189,39 @@ func (service *nodeReader) processBlock(ctx context.Context, block *types.Block)
 			continue
 		}
 
-		var adr=strings.ToLower(outAddresses.String())
-		tasks, err := service.rp.FindByAddress(ctx, models.ChainType(service.conf.ChainType), adr)
+		var adr = strings.ToLower(outAddresses.String())
+		tasks, err := service.rp.FindByAddressOrTxId(ctx, models.ChainType(service.conf.ChainType), adr, tx.Hash().Hex())
 		if err != nil {
 			log.Errorf("error: %s", err)
 			return err
 		}
 
 		if len(tasks) == 0 {
-			log.Infof("-> tx %s has no task, will be skipped.", tx.Hash().String())
+			log.Debugf("-> tx %s has no task, will be skipped.", tx.Hash().String())
 			continue
 		}
 
-		log.Infof("-> tx %s has %d transafers, start processing...", tx.Hash().String(), len(tasks))
+		log.Infof("-> tx %s has %d tasks, start processing...", tx.Hash().String(), len(tasks))
 
 		for _, task := range tasks {
-			log.Infof("->   Start processing transfer on registered wallet %s ...", task.Address)
+			log.Infof("->   Start processing task id %s for %v ...", task.Id.Hex(), task.ListenTo)
 			err := service.rc.RequestCallback(ctx, task.Callback, task.Callback.Data)
-			//block, btcTx, wallet.Address, outAddresses[wallet.Address])
 			if err != nil {
-				log.Errorf("->   Error: creating incoming tx %s for wallet %s: %s", tx.Hash().String(), task.Address, err)
+				log.Errorf("->   Error: send callback %s for task %v for tx %s: %s", task.Callback.Url,
+					task.ListenTo, tx.Hash().String(), err)
 				continue
 			}
 
 			switch task.Type {
 			case models.OneTime:
-				err := service.rp.RemoveTask(ctx, string(task.Id))
+				err := service.rp.RemoveTask(ctx, task.Id.Hex())
 				if err != nil {
 					log.Errorf("->   Error: removing task %s", err)
 					return err
 				}
 			}
 
-			log.Infof("->   Transfer %s to %s has been registered!", service.conf.ChainType, task.Address)
+			log.Infof("->   Task id %s for %s has been proceed successful!", task.Id.Hex(), service.conf.ChainType)
 		}
 
 	}

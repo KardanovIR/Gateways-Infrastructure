@@ -93,7 +93,7 @@ func (rc *restClient) request(ctx context.Context, urlPath, requestType string, 
 
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Request to %s returned wrong status code $s", urlPath, res.StatusCode)
+		return nil, fmt.Errorf("Request to %s returned wrong status code %d", urlPath, res.StatusCode)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
