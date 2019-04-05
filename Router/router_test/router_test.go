@@ -2,10 +2,14 @@ package router_test
 
 import (
 	"context"
+	"github.com/stretchr/testify/assert"
+	"github.com/wavesplatform/GatewaysInfrastructure/Router/clientgrpc"
+	"github.com/wavesplatform/GatewaysInfrastructure/Router/server"
+	"github.com/wavesplatform/GatewaysInfrastructure/Router/service"
 	"google.golang.org/grpc"
+	"log"
 	"testing"
 
-	"github.com/magiconair/properties/assert"
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Router/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Router/logger"
 )
@@ -15,7 +19,7 @@ import (
 func TestRouter_TransactionStatus(t *testing.T) {
 	ctx := context.Background()
 	log := logger.FromContext(ctx)
-	cl, err := routerClient(":5010")
+	cl, err := beforeTest()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,10 +44,25 @@ func TestRouter_TransactionStatus(t *testing.T) {
 	assert.Equal(t, wavesSt2.Status, "UNKNOWN")
 }
 
-func routerClient(host string) (pb.RouterClient, error) {
-	conn, err := grpc.Dial(host, grpc.WithInsecure())
+func beforeTest() (pb.RouterClient, error) {
+	ctx := context.Background()
+	// client to adapters and listeners send requests to port of nginx
+	if err := clientgrpc.NewUniversalAdapterClient(context.Background(), ":50000"); err != nil {
+		log.Fatal("Can't init grpc clients: ", err)
+	}
+	blockchainService := service.New(clientgrpc.GetUniversalClient())
+
+	// router's server starts on port 5555
+	go func() {
+		if err := server.InitAndStart(ctx, "5555", blockchainService); err != nil {
+			log.Fatal("Can't start grpc server", err)
+		}
+	}()
+	// client that send request to router
+	conn, err := grpc.Dial(":5555", grpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
+
 	return pb.NewRouterClient(conn), nil
 }

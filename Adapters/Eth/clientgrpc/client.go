@@ -13,7 +13,7 @@ import (
 
 var (
 	rpcClientInstance sync.Once
-	grpcCl            pb.CommonClient
+	grpcCl            pb.AdapterClient
 )
 
 // New create grpc client with connection to grpc server
@@ -26,7 +26,7 @@ func New(ctx context.Context, host string) error {
 			err = e
 			return
 		}
-		grpcCl = pb.NewCommonClient(conn)
+		grpcCl = pb.NewAdapterClient(conn)
 	})
 	if err != nil {
 		log.Errorf("error during initialise node client: %s", err)
@@ -34,7 +34,7 @@ func New(ctx context.Context, host string) error {
 	return err
 }
 
-func GetClient() pb.CommonClient {
+func GetClient() pb.AdapterClient {
 	rpcClientInstance.Do(func() {
 		panic("try to get node client before it's creation!")
 	})

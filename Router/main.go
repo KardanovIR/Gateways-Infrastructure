@@ -30,15 +30,11 @@ func main() {
 	log.Infof("router will be started with configuration %+v", *config.Cfg)
 	ctx := context.Background()
 	ctx = logger.ToContext(ctx, log)
-	if err := clientgrpc.InitAllGrpcClients(ctx, config.Cfg); err != nil {
+	if err := clientgrpc.NewUniversalAdapterClient(ctx, ":50000"); err != nil {
 		log.Fatal("Can't init grpc clients: ", err)
 	}
 
-	blockchainService := service.New(
-		clientgrpc.GetEthAdapterClient(),
-		clientgrpc.GetWavesAdapterClient(),
-		clientgrpc.GetEthListenerClient(),
-		clientgrpc.GetWavesListenerClient())
+	blockchainService := service.New(clientgrpc.GetUniversalClient())
 
 	if err := server.InitAndStart(ctx, config.Cfg.GrpcPort, blockchainService); err != nil {
 		log.Fatal("Can't start grpc server", err)

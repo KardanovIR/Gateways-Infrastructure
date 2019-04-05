@@ -4,7 +4,7 @@ option java_multiple_files = true;
 option java_package = "io.grpc.listener.waves";
 option java_outer_classname = "WavesListenerProto";
 
-package wavesListener;
+package blockchain;
 
 // The common service definition.
 service Listener {

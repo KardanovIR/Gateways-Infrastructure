@@ -17,7 +17,7 @@ type grpcServer struct {
 }
 
 var (
-	server                  pb.CommonServer
+	server                  pb.AdapterServer
 	onceGrpcServertInstance sync.Once
 )
 
@@ -35,7 +35,7 @@ func InitAndStart(ctx context.Context, port string, client services.INodeClient)
 		}
 
 		newServer := grpc.NewServer()
-		pb.RegisterCommonServer(newServer, server)
+		pb.RegisterAdapterServer(newServer, server)
 		log.Info("Grpc server registered")
 		if err := newServer.Serve(lis); err != nil {
 			log.Errorf("failed to serve: %v", err)
@@ -47,7 +47,7 @@ func InitAndStart(ctx context.Context, port string, client services.INodeClient)
 	return initErr
 }
 
-func GetGrpsServer() pb.CommonServer {
+func GetGrpsServer() pb.AdapterServer {
 	onceGrpcServertInstance.Do(func() {
 		panic("try to get grpc server before it's creation!")
 	})

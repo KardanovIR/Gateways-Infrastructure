@@ -27,7 +27,7 @@ func TestGrpcServerGasPrice(t *testing.T) {
 	}
 	defer conn.Close()
 
-	c := pb.NewCommonClient(conn)
+	c := pb.NewAdapterClient(conn)
 	reply, err := c.GasPrice(ctx, &pb.GasPriceRequest{})
 	if err != nil {
 		log.Error("getting gas price fails", err)
