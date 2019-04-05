@@ -3,5 +3,6 @@ package models
 type ChainType string
 
 const (
-	Ethereum ChainType = "WAVES"
+	Ethereum ChainType = "ETH"
+	Waves    ChainType = "WAVES"
 )
