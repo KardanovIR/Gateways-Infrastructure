@@ -4,10 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/wavesplatform/GatewaysInfrastructure/Router/grpc/ethAdapter"
-	"github.com/wavesplatform/GatewaysInfrastructure/Router/grpc/ethListener"
-	"github.com/wavesplatform/GatewaysInfrastructure/Router/grpc/wavesAdapter"
-	"github.com/wavesplatform/GatewaysInfrastructure/Router/grpc/wavesListener"
+	"github.com/wavesplatform/GatewaysInfrastructure/Router/grpc/blockchain"
 	"github.com/wavesplatform/GatewaysInfrastructure/Router/model"
 )
 
@@ -21,22 +18,13 @@ type IBlockChainsService interface {
 }
 
 type blockchainsService struct {
-	ethAdapter    ethAdapter.CommonClient
-	wavesAdapter  wavesAdapter.CommonClient
-	ethListener   ethListener.ListenerClient
-	wavesListener wavesListener.ListenerClient
+	universal blockchain.AdapterClient
 }
 
-func New(ethAdapter ethAdapter.CommonClient,
-	wavesAdapter wavesAdapter.CommonClient,
-	ethListener ethListener.ListenerClient,
-	wavesListener wavesListener.ListenerClient) IBlockChainsService {
+func New(universal blockchain.AdapterClient) IBlockChainsService {
 	serviceSync.Do(func() {
 		serviceInstance = &blockchainsService{
-			ethAdapter:    ethAdapter,
-			wavesAdapter:  wavesAdapter,
-			ethListener:   ethListener,
-			wavesListener: wavesListener,
+			universal: universal,
 		}
 	})
 	return serviceInstance

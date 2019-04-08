@@ -10,7 +10,7 @@ Run :
 
 Recompile protobuf :
     
-    protoc -I grpc/ grpc/ethAdapter.proto --go_out=plugins=grpc:grpc
+    protoc -I grpc/ grpc/eth_adapter.proto --go_out=plugins=grpc:grpc
     
 Docker :
     

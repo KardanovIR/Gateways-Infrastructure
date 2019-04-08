@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/clientgrpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/config"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/grpc"
+	ethAdapter "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/server"

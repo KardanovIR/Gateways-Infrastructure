@@ -4,7 +4,7 @@ option java_multiple_files = true;
 option java_package = "io.grpc.listener.eth";
 option java_outer_classname = "EthListenerProto";
 
-package ethListener;
+package blockchain;
 
 // The common service definition.
 service Listener {

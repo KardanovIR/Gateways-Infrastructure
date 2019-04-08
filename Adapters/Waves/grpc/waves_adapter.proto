@@ -4,10 +4,10 @@ option java_multiple_files = true;
 option java_package = "io.grpc.adapter.waves";
 option java_outer_classname = "WavesAdapterProto";
 
-package wavesAdapter;
+package blockchain;
 
-// The common service definition.
-service Common {
+// The adapter service definition.
+service Adapter {
     // getting last block
     rpc GetLastBlockHeight (BlockRequest) returns (BlockReply) {
     }

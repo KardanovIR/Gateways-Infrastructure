@@ -4,10 +4,10 @@ option java_multiple_files = true;
 option java_package = "io.grpc.adapter.eth";
 option java_outer_classname = "EthAdapterProto";
 
-package ethAdapter;
+package blockchain;
 
-// The common service definition.
-service Common {
+// The adapter service definition.
+service Adapter {
     // Get suggested gas price
     rpc GasPrice (GasPriceRequest) returns (GasPriceReply) {
     }

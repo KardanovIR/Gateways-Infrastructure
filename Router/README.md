@@ -39,4 +39,9 @@ Docker :
     Read logs from container
     docker logs gateways-router
 
+Nginx :
+    
+    nginx.conf shoul be placed to /usr/local/etc/nginx/nginx.conf
+    start: sudo nginx
+    stop:  sudo nginx -s quit
     
