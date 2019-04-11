@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/clientgrpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/config"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/grpc"
+	wavesAdapter "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/server"
@@ -84,8 +84,8 @@ func TestGrpcClient(t *testing.T) {
 	}
 	// send 0.0001 Waves to receiver
 	address2 := address2Reply.Address
-	tx, err := clientgrpc.GetClient().GetRawTransactionBySendersPublicKey(ctx,
-		&wavesAdapter.RawTransactionBySendersPublicKeyRequest{
+	tx, err := clientgrpc.GetClient().GetRawTransaction(ctx,
+		&wavesAdapter.RawTransactionRequest{
 			SendersPublicKey: publicKey,
 			AddressTo:        address2,
 			Amount:           amount.String(),

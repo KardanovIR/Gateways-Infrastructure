@@ -27,6 +27,7 @@ const (
 
 var callBackChannel = make(chan string, 2)
 
+// todo don't work, correct callback request checking
 func TestListener(t *testing.T) {
 	ctx := context.Background()
 	// setup
@@ -42,7 +43,6 @@ func TestListener(t *testing.T) {
 		&pb.AddTaskRequest{
 			ListenTo:     &pb.ListenObject{Type: "Address", Value: "0x9515735d60e8ff4036efaffaf3370f3097615d19"},
 			CallbackType: string(models.Get),
-			CallbackUrl:  fmt.Sprintf("http://localhost:%s/transfer", httpServerPort),
 			TaskType:     strconv.Itoa(int(models.OneTime))})
 
 	if err != nil {

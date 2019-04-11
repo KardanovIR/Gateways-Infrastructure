@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/wavesplatform/GatewaysInfrastructure/Router/grpc/blockchain"
+	"github.com/wavesplatform/GatewaysInfrastructure/Router/clientgrpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Router/model"
 )
 
@@ -18,10 +18,10 @@ type IBlockChainsService interface {
 }
 
 type blockchainsService struct {
-	universal blockchain.AdapterClient
+	universal clientgrpc.UniversalGrpcClient
 }
 
-func New(universal blockchain.AdapterClient) IBlockChainsService {
+func New(universal clientgrpc.UniversalGrpcClient) IBlockChainsService {
 	serviceSync.Do(func() {
 		serviceInstance = &blockchainsService{
 			universal: universal,

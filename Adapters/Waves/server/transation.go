@@ -27,11 +27,12 @@ func (s *grpcServer) GetRawTransactionBySendersAddress(ctx context.Context, in *
 }
 
 // create raw transaction by senders's public key
-func (s *grpcServer) GetRawTransactionBySendersPublicKey(ctx context.Context, in *pb.RawTransactionBySendersPublicKeyRequest) (
+func (s *grpcServer) GetRawTransaction(ctx context.Context, in *pb.RawTransactionRequest) (
 	*pb.RawTransactionReply, error) {
 
 	log := logger.FromContext(ctx)
-	log.Infof("GetRawTransactionBySendersPublicKey: pk %s to %s send %s", in.SendersPublicKey, in.AddressTo, in.Amount)
+	log.Infof("GetRawTransactionBySendersPublicKey: pk %s to %s send %s (asset %s)", in.SendersPublicKey,
+		in.AddressTo, in.Amount, in.AssetId)
 	amount, err := strconv.Atoi(in.Amount)
 	if err != nil {
 		return nil, err

@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/repositories"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/server"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/services"
 )

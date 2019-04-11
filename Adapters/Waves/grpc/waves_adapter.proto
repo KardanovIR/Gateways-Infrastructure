@@ -30,7 +30,7 @@ service Adapter {
     rpc GetRawTransactionBySendersAddress (RawTransactionBySendersAddressRequest) returns (RawTransactionReply) {
     }
     // request to create raw transaction by senders's public key
-    rpc GetRawTransactionBySendersPublicKey (RawTransactionBySendersPublicKeyRequest) returns (RawTransactionReply) {
+    rpc GetRawTransaction (RawTransactionRequest) returns (RawTransactionReply) {
     }
     // Sing transaction with private key keeped in adapter
     rpc SignTransaction (SignTransactionRequest) returns (SignTransactionReply) {
@@ -111,11 +111,12 @@ message RawTransactionBySendersAddressRequest {
 }
 
 // The request message for raw transaction creation
-message RawTransactionBySendersPublicKeyRequest {
-    string sendersPublicKey = 1;
-    string addressTo = 2;
-    string amount = 3;
-    string assetId = 4; // empty for WAVES
+message RawTransactionRequest {
+    string addressFrom = 1;
+    string sendersPublicKey = 2;
+    string addressTo = 3;
+    string amount = 4;
+    string assetId = 5; // empty for WAVES
 }
 
 // The response message containing raw transaction

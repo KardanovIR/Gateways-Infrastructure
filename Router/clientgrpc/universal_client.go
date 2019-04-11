@@ -11,7 +11,7 @@ import (
 
 var (
 	universalSync   sync.Once
-	universalClient pb.AdapterClient
+	universalClient UniversalGrpcClient
 )
 
 // New create grpc waves adapter client with connection to grpc server
@@ -26,14 +26,19 @@ func NewUniversalAdapterClient(ctx context.Context, host string) error {
 			log.Errorf("setup connection to proxy fails: %s", err)
 			return
 		}
-		universalClient = pb.NewAdapterClient(conn)
+		universalClient = UniversalGrpcClient{pb.NewAdapterClient(conn), pb.NewListenerClient(conn)}
 	})
 	return err
 }
 
-func GetUniversalClient() pb.AdapterClient {
+func GetUniversalClient() UniversalGrpcClient {
 	universalSync.Do(func() {
 		panic("try to get waves adapter client before it's creation!")
 	})
 	return universalClient
+}
+
+type UniversalGrpcClient struct {
+	pb.AdapterClient
+	pb.ListenerClient
 }

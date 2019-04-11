@@ -12,21 +12,12 @@ Run :
        
 Recompile protobuf :
     
+    protobuf client for all adapters and listeners
+    protoc -I grpc/blockchain grpc/blockchain/blockchain_services.proto  --go_out=plugins=grpc:grpc/blockchain
+   
     router server api:
     protoc -I grpc/ grpc/router.proto --go_out=plugins=grpc:grpc
     
-    protobuf client for eth adapter:
-    protoc --proto_path=../Adapters/Eth/grpc --go_out=plugins=grpc:grpc/ethAdapter ./../Adapters/Eth/grpc/eth_adapter.proto
- 
-    protobuf client for waves adapter:
-    protoc --proto_path=../Adapters/Waves/grpc --go_out=plugins=grpc:grpc/wavesAdapter ./../Adapters/Waves/grpc/waves_adapter.proto
-    
-    protobuf client for eth listener:
-    protoc --proto_path=../Listeners/Core/grpc --go_out=plugins=grpc:grpc/ethListener ./../Listeners/Core/grpc/eth_listener.proto
-    
-    protobuf client for waves listener:
-    protoc --proto_path=../Listeners/Waves/grpc --go_out=plugins=grpc:grpc/wavesListener ./../Listeners/Waves/grpc/waves_listener.proto
-
 Docker :
     
     Build container:

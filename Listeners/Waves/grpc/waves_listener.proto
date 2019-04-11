@@ -17,8 +17,7 @@ service Listener {
 message AddTaskRequest {
     ListenObject listenTo = 1;
     string callbackType = 2;
-    string callbackUrl = 3;
-    string taskType = 4;
+    string taskType = 3;
 }
 
 message AddTaskResponse {
