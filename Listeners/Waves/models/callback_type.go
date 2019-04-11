@@ -3,6 +3,8 @@ package models
 type CallbackType string
 
 const (
-	Get  CallbackType = "GET"
-	Post CallbackType = "POST"
+	StartProcess  CallbackType = "StartProcess"
+	InitInTx      CallbackType = "InitInTx"
+	InitOutTx     CallbackType = "InitOutTx"
+	FinishProcess CallbackType = "FinishProcess"
 )

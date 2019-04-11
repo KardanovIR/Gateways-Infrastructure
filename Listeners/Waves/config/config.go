@@ -16,9 +16,10 @@ const (
 )
 
 type Config struct {
-	Node Node   `mapstructure:"NODE"`
-	Db   DB     `mapstructure:"DB"`
-	Port string `mapstructure:"PORT"`
+	Node        Node   `mapstructure:"NODE"`
+	Db          DB     `mapstructure:"DB"`
+	Port        string `mapstructure:"PORT"`
+	CallbackUrl string `mapstructure:"CALLBACKURL"`
 }
 
 // Load set configuration parameters.
@@ -66,6 +67,9 @@ func validate() error {
 	}
 	if len(Cfg.Node.ChainType) == 0 {
 		return errors.New("CHAIN parameter is empty")
+	}
+	if len(Cfg.CallbackUrl) == 0 {
+		return errors.New("CALLBACKURL parameter is empty")
 	}
 	return nil
 }

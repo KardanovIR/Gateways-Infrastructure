@@ -204,7 +204,7 @@ func (service *nodeReader) processBlock(ctx context.Context, block *types.Block)
 
 		for _, task := range tasks {
 			log.Infof("->   Start processing task id %s for %v ...", task.Id.Hex(), task.ListenTo)
-			err := GetCallbackService().SendRequest(ctx, task, tx.Hash().String())
+			err = GetCallbackService().SendRequest(ctx, task, tx.Hash().String())
 			if err != nil {
 				log.Errorf("->   Error: send callback %s for task %v for tx %s: %s", task.Callback.Type,
 					task.ListenTo, tx.Hash().String(), err)

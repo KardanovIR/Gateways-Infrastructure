@@ -17,9 +17,8 @@ type Task struct {
 }
 
 type Callback struct {
-	Url  string                 `bson:"url"`
-	Type CallbackType           `bson:"callbackType"`
-	Data map[string]interface{} `bson:"data"`
+	Type      CallbackType `bson:"callbackType"`
+	ProcessId string       `bson:"processId"`
 }
 
 // what is listen to: txId or address and it's value

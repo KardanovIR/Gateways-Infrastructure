@@ -26,7 +26,6 @@ type INodeReader interface {
 type nodeReader struct {
 	nodeClient *client.Client
 	rp         repositories.IRepository
-	rc         IRestClient
 	conf       *config.Node
 	stopListen chan struct{}
 }
@@ -37,7 +36,7 @@ var (
 )
 
 // New create node's client with connection to Waves node
-func New(ctx context.Context, config *config.Node, rc IRestClient, rp repositories.IRepository) error {
+func New(ctx context.Context, config *config.Node, rp repositories.IRepository) error {
 	log := logger.FromContext(ctx)
 	var err error
 	onceNodeClient.Do(func() {
@@ -52,7 +51,7 @@ func New(ctx context.Context, config *config.Node, rc IRestClient, rp repositori
 			return
 		}
 
-		cl = &nodeReader{nodeClient: wavesClient, rc: rc, rp: rp, conf: config, stopListen: make(chan struct{})}
+		cl = &nodeReader{nodeClient: wavesClient, rp: rp, conf: config, stopListen: make(chan struct{})}
 	})
 
 	if err != nil {
@@ -244,7 +243,7 @@ func (service *nodeReader) executeTasksForRecipientOrTxId(ctx context.Context, a
 	log.Infof("address %s has %d tasks, start processing...", recipient, len(tasks))
 	for _, task := range tasks {
 		log.Debugf("Start processing task id %s for %v ...", task.Id.Hex(), task.ListenTo)
-		err = service.rc.RequestCallback(ctx, task.Callback, task.Callback.Data)
+		err = GetCallbackService().SendRequest(ctx, task, txId)
 		if err != nil {
 			log.Errorf("Error while processing incoming transfer for address %s. %s", recipient, err)
 			continue
