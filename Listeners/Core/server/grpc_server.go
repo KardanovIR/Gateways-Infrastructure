@@ -40,7 +40,7 @@ func (s *grpcServer) AddTask(ctx context.Context, in *pb.AddTaskRequest) (*pb.Ad
 	}
 	var newTask = models.Task{
 		ListenTo:       models.ListenObject{Type: models.ListenType(in.ListenTo.Type), Value: in.ListenTo.Value},
-		Callback:       models.Callback{Type: models.CallbackType(in.CallbackType)},
+		Callback:       models.Callback{Type: models.CallbackType(in.CallbackType), ProcessId: in.ProcessId},
 		BlockchainType: config.Cfg.Node.ChainType,
 		Type:           models.TaskType(taskType),
 	}

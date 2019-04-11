@@ -11,6 +11,7 @@ Run :
 Recompile protobuf :
     
     protoc -I grpc/ grpc/eth_listener.proto --go_out=plugins=grpc:grpc
+    protoc -I grpc/client grpc/client/callback_service.proto --go_out=plugins=grpc:grpc/client
 
 Docker :
     

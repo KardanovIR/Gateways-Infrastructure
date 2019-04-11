@@ -24,7 +24,6 @@ type INodeReader interface {
 type nodeReader struct {
 	nodeClient *ethclient.Client
 	rp         repositories.IRepository
-	rc         IRestClient
 	conf       *config.Node
 	stopListen chan struct{}
 }
@@ -35,7 +34,7 @@ var (
 )
 
 // New create node's client with connection to eth node
-func New(ctx context.Context, config *config.Node, rc IRestClient, rp repositories.IRepository) error {
+func New(ctx context.Context, config *config.Node, rp repositories.IRepository) error {
 	log := logger.FromContext(ctx)
 	var err error
 	onceNodeClient.Do(func() {
@@ -46,7 +45,7 @@ func New(ctx context.Context, config *config.Node, rc IRestClient, rp repositori
 			return
 		}
 		ethClient := ethclient.NewClient(rpcc)
-		cl = &nodeReader{nodeClient: ethClient, rc: rc, rp: rp, conf: config, stopListen: make(chan struct{})}
+		cl = &nodeReader{nodeClient: ethClient, rp: rp, conf: config, stopListen: make(chan struct{})}
 	})
 
 	if err != nil {
@@ -205,9 +204,9 @@ func (service *nodeReader) processBlock(ctx context.Context, block *types.Block)
 
 		for _, task := range tasks {
 			log.Infof("->   Start processing task id %s for %v ...", task.Id.Hex(), task.ListenTo)
-			err := service.rc.RequestCallback(ctx, task.Callback, task.Callback.Data)
+			err := GetCallbackService().SendRequest(ctx, task, tx.Hash().String())
 			if err != nil {
-				log.Errorf("->   Error: send callback %s for task %v for tx %s: %s", task.Callback.Url,
+				log.Errorf("->   Error: send callback %s for task %v for tx %s: %s", task.Callback.Type,
 					task.ListenTo, tx.Hash().String(), err)
 				continue
 			}
