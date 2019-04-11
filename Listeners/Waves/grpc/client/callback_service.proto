@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.service.core";
+option java_outer_classname = "CoreServiceProto";
+
+package core;
+
+// The core service definition.
+service CoreService {
+    rpc InitOutTx (Request) returns (Empty) {
+    }
+    rpc FinishProcess (Request) returns (Empty) {
+    }
+}
+
+message Request {
+    string processId = 1;
+    string txHash = 2;
+}
+
+message Empty {
+}

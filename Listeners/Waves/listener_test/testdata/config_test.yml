@@ -8,3 +8,4 @@ db:
   name: block_db_test
   host: localhost:27017
 port: 5002
+callbackUrl: localhost:5020

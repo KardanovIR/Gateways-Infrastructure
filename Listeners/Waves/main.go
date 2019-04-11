@@ -38,12 +38,12 @@ func main() {
 		log.Fatal("Can't create db connection: ", err)
 	}
 
-	if err := services.NewRestClient(ctx); err != nil {
-		log.Fatal("Can't create rest client: ", err)
+	if err := services.NewCallbackService(ctx, config.Cfg.CallbackUrl); err != nil {
+		log.Fatal("Can't create callback service: ", err)
 	}
 
 	repository := repositories.GetRepository()
-	if err := services.New(ctx, &config.Cfg.Node, services.GetRestClient(), repository); err != nil {
+	if err := services.New(ctx, &config.Cfg.Node, repository); err != nil {
 		log.Fatal("Can't create node's client: ", err)
 	}
 	nodeReader := services.GetNodeReader()

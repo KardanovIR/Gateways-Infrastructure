@@ -18,6 +18,7 @@ message AddTaskRequest {
     ListenObject listenTo = 1;
     string callbackType = 2;
     string taskType = 3;
+    string processId = 4;
 }
 
 message AddTaskResponse {

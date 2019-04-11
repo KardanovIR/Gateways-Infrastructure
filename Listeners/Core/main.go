@@ -4,12 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/server"
 	"os"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/server"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
 )
 
@@ -38,16 +38,16 @@ func main() {
 		log.Fatal("Can't create db connection: ", err)
 	}
 
-	if err := services.NewRestClient(ctx); err != nil {
-		log.Fatal("Can't create rest client: ", err)
-	}
-
 	repository := repositories.GetRepository()
-	if err := services.New(ctx, &config.Cfg.Node, services.GetRestClient(), repository); err != nil {
+	if err := services.New(ctx, &config.Cfg.Node, repository); err != nil {
 		log.Fatal("Can't create node's client: ", err)
 	}
-	nodeReader := services.GetNodeReader()
 
+	if err := services.NewCallbackService(ctx, config.Cfg.CallbackUrl); err != nil {
+		log.Fatal("Can't create callback service: ", err)
+	}
+
+	nodeReader := services.GetNodeReader()
 	err = nodeReader.Start(ctx)
 	if err != nil {
 		log.Fatal("Can't start node reader: ", err)

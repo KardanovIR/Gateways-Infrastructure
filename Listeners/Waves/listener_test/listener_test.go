@@ -4,16 +4,17 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
-	"net/http"
+	"net"
 	"strconv"
 	"testing"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/stretchr/testify/assert"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/config"
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/grpc"
+	corePb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/grpc/client"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/repositories"
@@ -22,16 +23,15 @@ import (
 )
 
 const (
-	httpServerPort = "8085"
+	httpServerPort = "5020"
 )
 
-var callBackChannel = make(chan string, 2)
+var callBackChannel = make(chan string, 5)
 
-// todo don't work, correct callback request checking
 func TestListener(t *testing.T) {
 	ctx := context.Background()
 	// setup
-	beforeTests(ctx)
+	beforeTests(t, ctx)
 	log := logger.FromContext(ctx)
 	grpcClient, err := getGrpcClient()
 	if err != nil {
@@ -43,8 +43,10 @@ func TestListener(t *testing.T) {
 	_, err = grpcClient.AddTask(ctx,
 		&pb.AddTaskRequest{
 			ListenTo:     &pb.ListenObject{Type: "Address", Value: "3PAgyfDELn1UixKCLQ6UsVakuofXXZMdYC4"},
-			CallbackType: string(models.Get),
-			TaskType:     strconv.Itoa(int(models.OneTime))})
+			CallbackType: string(models.InitOutTx),
+			TaskType:     strconv.Itoa(int(models.OneTime)),
+			ProcessId:    "111111111",
+		})
 
 	if err != nil {
 		log.Error("adding task fails", err)
@@ -55,8 +57,10 @@ func TestListener(t *testing.T) {
 	_, err = grpcClient.AddTask(ctx,
 		&pb.AddTaskRequest{
 			ListenTo:     &pb.ListenObject{Type: "TxId", Value: "1tASvqX4TVNARYZZ7w1JnwUBr8pXtXHPiRVYMARYVRJ"},
-			CallbackType: string(models.Get),
-			TaskType:     strconv.Itoa(int(models.OneTime))})
+			CallbackType: string(models.InitOutTx),
+			TaskType:     strconv.Itoa(int(models.OneTime)),
+			ProcessId:    "222222222",
+		})
 
 	if err != nil {
 		log.Error("adding task fails", err)
@@ -68,8 +72,10 @@ func TestListener(t *testing.T) {
 	_, err = grpcClient.AddTask(ctx,
 		&pb.AddTaskRequest{
 			ListenTo:     &pb.ListenObject{Type: "Address", Value: "3P63utQnWvQ7Xd8NMVFYjd1UqrUBqXsFVr8"},
-			CallbackType: string(models.Get),
-			TaskType:     strconv.Itoa(int(models.OneTime))})
+			CallbackType: string(models.FinishProcess),
+			TaskType:     strconv.Itoa(int(models.OneTime)),
+			ProcessId:    "333333333"},
+	)
 
 	if err != nil {
 		log.Error("adding task fails", err)
@@ -81,8 +87,10 @@ func TestListener(t *testing.T) {
 	_, err = grpcClient.AddTask(ctx,
 		&pb.AddTaskRequest{
 			ListenTo:     &pb.ListenObject{Type: "Address", Value: "3PAc93kp7CDwh2tc682JqDKT96uP5XeHsH2"},
-			CallbackType: string(models.Get),
-			TaskType:     strconv.Itoa(int(models.OneTime))})
+			CallbackType: string(models.FinishProcess),
+			TaskType:     strconv.Itoa(int(models.OneTime)),
+			ProcessId:    "444444444",
+		})
 
 	if err != nil {
 		log.Error("adding task fails", err)
@@ -140,28 +148,27 @@ func TestListener(t *testing.T) {
 	services.GetNodeReader().Stop(ctx)
 }
 
-func beforeTests(ctx context.Context) {
+func beforeTests(t *testing.T, ctx context.Context) {
 	log, _ := logger.Init(false, logger.DEBUG)
 	err := config.Load("./testdata/config_test.yml")
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := services.NewRestClient(ctx); err != nil {
-		log.Fatal("Can't create rest client: ", err)
-	}
 
 	if err := repositories.New(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name); err != nil {
 		log.Fatal("Can't create db connection: ", err)
 	}
-
+	if err := services.NewCallbackService(ctx, config.Cfg.CallbackUrl); err != nil {
+		log.Fatal("Can't create callback service: ", err)
+	}
 	// create node reader
-	if err = services.New(ctx, &config.Cfg.Node, services.GetRestClient(), repositories.GetRepository()); err != nil {
+	if err = services.New(ctx, &config.Cfg.Node, repositories.GetRepository()); err != nil {
 		log.Fatal(err)
 	}
 
 	go func() {
 		// start http server to handle callbacks
-		upHttpServer(ctx, httpServerPort)
+		upCoreServer(t, ctx, httpServerPort)
 	}()
 
 	go func() {
@@ -170,6 +177,7 @@ func beforeTests(ctx context.Context) {
 			log.Fatal("Can't start grpc server", err)
 		}
 	}()
+	time.Sleep(100 * time.Millisecond)
 }
 
 func getGrpcClient() (pb.ListenerClient, error) {
@@ -180,28 +188,54 @@ func getGrpcClient() (pb.ListenerClient, error) {
 	return pb.NewListenerClient(conn), nil
 }
 
-func upHttpServer(ctx context.Context, port string) {
+// callbacks will be sent to this server
+func upCoreServer(t *testing.T, ctx context.Context, port string) {
 	log := logger.FromContext(ctx)
-	router := gin.Default()
-	router.GET("/transfer", func(c *gin.Context) {
-		callBackChannel <- "transfer"
-		c.JSON(http.StatusOK, "")
-	})
-	router.GET("/transfer/txId", func(c *gin.Context) {
-		callBackChannel <- "transfer_txId"
-		c.JSON(http.StatusOK, "")
-	})
-	router.GET("/transfer2", func(c *gin.Context) {
-		callBackChannel <- "transfer2"
-		c.JSON(http.StatusOK, "")
-	})
-	router.GET("/masstransfer", func(c *gin.Context) {
-		callBackChannel <- "masstransfer"
-		c.JSON(http.StatusOK, "")
-	})
-	if err := router.Run(":" + port); err != nil {
-		log.Fatal(err)
+	lis, err := net.Listen("tcp", ":"+port)
+	if err != nil {
+		log.Fatal("failed to listen: %s", err)
 	}
+	newServer := grpc.NewServer()
+	corePb.RegisterCoreServiceServer(newServer, coreServerMock{requestChannel: callBackChannel, t: t})
+	if err := newServer.Serve(lis); err != nil {
+		log.Fatal("failed to serve: %v", err)
+	}
+}
+
+type coreServerMock struct {
+	requestChannel chan string
+	t              *testing.T
+}
+
+func (c coreServerMock) InitOutTx(ctx context.Context, in *corePb.Request) (*corePb.Empty, error) {
+	assert.True(c.t, len(in.ProcessId) > 0)
+	switch in.ProcessId {
+	case "111111111":
+		assert.Equal(c.t, "GA7PECC8DFEPwRwyN75FG2mpx5ad3BYAPSUp66MeT6RP", in.TxHash)
+		callBackChannel <- "transfer"
+	case "222222222":
+		assert.Equal(c.t, "1tASvqX4TVNARYZZ7w1JnwUBr8pXtXHPiRVYMARYVRJ", in.TxHash)
+		callBackChannel <- "transfer_txId"
+	default:
+		c.t.Fail()
+	}
+
+	return &corePb.Empty{}, nil
+}
+
+func (c coreServerMock) FinishProcess(ctx context.Context, in *corePb.Request) (*corePb.Empty, error) {
+	assert.True(c.t, len(in.ProcessId) > 0)
+	switch in.ProcessId {
+	case "333333333":
+		assert.Equal(c.t, "6BabdgUzv96pRcD42YPrv6Wd8oHAPbHhdPoMGTa2ziE9", in.TxHash)
+		callBackChannel <- "transfer2"
+	case "444444444":
+		assert.Equal(c.t, "6bwsRivXTBU396bYswL6vW8rPYcbafKvbeAvM2sGKqLP", in.TxHash)
+		callBackChannel <- "masstransfer"
+	default:
+		c.t.Fail()
+	}
+	return &corePb.Empty{}, nil
 }
 
 func mongoConnect(ctx context.Context, url string, dbName string) *mongo.Database {
