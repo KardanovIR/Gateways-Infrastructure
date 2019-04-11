@@ -27,6 +27,7 @@ const (
 
 var callBackChannel = make(chan string, 2)
 
+// todo don't work, correct callback request checking
 func TestListener(t *testing.T) {
 	ctx := context.Background()
 	// setup
@@ -43,7 +44,6 @@ func TestListener(t *testing.T) {
 		&pb.AddTaskRequest{
 			ListenTo:     &pb.ListenObject{Type: "Address", Value: "3PAgyfDELn1UixKCLQ6UsVakuofXXZMdYC4"},
 			CallbackType: string(models.Get),
-			CallbackUrl:  fmt.Sprintf("http://localhost:%s/transfer", httpServerPort),
 			TaskType:     strconv.Itoa(int(models.OneTime))})
 
 	if err != nil {
@@ -56,7 +56,6 @@ func TestListener(t *testing.T) {
 		&pb.AddTaskRequest{
 			ListenTo:     &pb.ListenObject{Type: "TxId", Value: "1tASvqX4TVNARYZZ7w1JnwUBr8pXtXHPiRVYMARYVRJ"},
 			CallbackType: string(models.Get),
-			CallbackUrl:  fmt.Sprintf("http://localhost:%s/transfer/txId", httpServerPort),
 			TaskType:     strconv.Itoa(int(models.OneTime))})
 
 	if err != nil {
@@ -70,7 +69,6 @@ func TestListener(t *testing.T) {
 		&pb.AddTaskRequest{
 			ListenTo:     &pb.ListenObject{Type: "Address", Value: "3P63utQnWvQ7Xd8NMVFYjd1UqrUBqXsFVr8"},
 			CallbackType: string(models.Get),
-			CallbackUrl:  fmt.Sprintf("http://localhost:%s/transfer2", httpServerPort),
 			TaskType:     strconv.Itoa(int(models.OneTime))})
 
 	if err != nil {
@@ -84,7 +82,6 @@ func TestListener(t *testing.T) {
 		&pb.AddTaskRequest{
 			ListenTo:     &pb.ListenObject{Type: "Address", Value: "3PAc93kp7CDwh2tc682JqDKT96uP5XeHsH2"},
 			CallbackType: string(models.Get),
-			CallbackUrl:  fmt.Sprintf("http://localhost:%s/masstransfer", httpServerPort),
 			TaskType:     strconv.Itoa(int(models.OneTime))})
 
 	if err != nil {

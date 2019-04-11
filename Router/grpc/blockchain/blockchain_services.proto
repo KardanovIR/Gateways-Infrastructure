@@ -1,16 +1,46 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "io.grpc.router";
-option java_outer_classname = "RouterProto";
+option java_package = "io.grpc.blockchain";
+option java_outer_classname = "BlockchainProto";
 
 package blockchain;
 
 // The common adapter service definition.
 service Adapter {
+    // common request to create raw transaction: for main currency or based on this currency assets transfer
+    rpc GetRawTransaction (RawTransactionRequest) returns (RawTransactionReply) {
+    }
+    // Send transaction
+    rpc SendTransaction (SendTransactionRequest) returns (SendTransactionReply) {
+    }
     // Get transaction status
     rpc GetTransactionStatus (GetTransactionStatusRequest) returns (GetTransactionStatusReply) {
     }
+}
+
+// The request message for raw transaction creation
+message RawTransactionRequest {
+    string addressFrom = 1;
+    string sendersPublicKey = 2; // can be empty
+    string addressTo = 3;
+    string amount = 4;
+    string assetId = 5; // empty for main currency
+}
+
+// The response message containing raw transaction
+message RawTransactionReply {
+    bytes tx = 1;
+}
+
+// The request message for singing transaction
+message SendTransactionRequest {
+    bytes tx = 1;
+}
+
+// The response message containing transaction's id
+message SendTransactionReply {
+    string txId = 1;
 }
 
 // The request message for getting transaction's status containing tx id
@@ -21,4 +51,39 @@ message GetTransactionStatusRequest {
 // The response message containing transaction's status: UNKNOWN, PENDING, SUCCESS
 message GetTransactionStatusReply {
     string status = 1;
+}
+
+// The listener service definition.
+service Listener {
+    // Add task
+    rpc AddTask (AddTaskRequest) returns (AddTaskResponse) {
+    }
+    // Remove task
+    rpc RemoveTask (RemoveTaskRequest) returns (Empty) {
+    }
+}
+
+// The request message containing task
+message AddTaskRequest {
+    ListenObject listenTo = 1;
+    string callbackType = 2;
+    string taskType = 3;
+}
+
+message AddTaskResponse {
+    string taskId = 1;
+}
+
+message RemoveTaskRequest {
+    string taskId = 1;
+}
+
+// ListenObject defines what will service listen to
+message ListenObject {
+    // type can be one of the follow values: TxId or Address
+    string type = 1;
+    string value = 2;
+}
+
+message Empty {
 }

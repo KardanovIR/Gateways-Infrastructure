@@ -30,7 +30,7 @@ func TestGrpcServerAddTask(t *testing.T) {
 
 	c := pb.NewListenerClient(conn)
 	reply, err := c.AddTask(ctx, &pb.AddTaskRequest{
-		ListenTo: &pb.ListenObject{Type: "Address", Value: "123456"}, CallbackType: string(models.Post), CallbackUrl: "https:someUrl", TaskType: "1"})
+		ListenTo: &pb.ListenObject{Type: "Address", Value: "123456"}, CallbackType: string(models.Post), TaskType: "1"})
 	if err != nil {
 		log.Error("adding task fails", err)
 		t.Fail()
