@@ -258,5 +258,5 @@ func (service *nodeReader) executeTasksForRecipientOrTxId(ctx context.Context, a
 		}
 		log.Debugf("Task id %s for %s has been proceed successful!", task.Id.Hex(), service.conf.ChainType)
 	}
-	return nil
+	return err
 }
