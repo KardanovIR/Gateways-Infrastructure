@@ -53,6 +53,7 @@ func New(ctx context.Context, conf config.Node) error {
 		wavesClient, e := client.NewClient(client.Options{
 			Client:  &http.Client{Timeout: 30 * time.Second},
 			BaseUrl: conf.Host,
+			ApiKey:  conf.ApiKey,
 		})
 		if e != nil {
 			log.Errorf("error during initialise waves client: %s", e)

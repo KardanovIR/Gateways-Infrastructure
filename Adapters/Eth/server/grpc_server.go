@@ -6,6 +6,7 @@ import (
 	"net"
 	"sync"
 
+	_ "github.com/jnewmano/grpc-json-proxy/codec"
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/services"
