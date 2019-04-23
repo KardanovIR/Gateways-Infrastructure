@@ -2,3 +2,10 @@ node:
   host: https://pool.testnet.wavesnodes.com/
   chainId: TestNet
 port: 5010
+
+#config for vostok
+#node:
+#  host: http://54.76.145.18:6862/
+#  chainId: D
+#  apiKey: 8qNHJZPOtQ
+#port: 5002
