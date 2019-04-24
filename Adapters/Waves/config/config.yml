@@ -1,12 +1,11 @@
-node:
+#node:
   host: https://nodes.wavesplatform.com
-  chainId: MainNet
+  chainId: W
   apiKey:
 port: 5002
 
 #config for vostok
 #node:
 #  host: http://54.76.145.18:6862
-#  chainId: D
+#  chainId: T
 #  apiKey: 8qNHJZPOtQ
-#port: 5002

@@ -43,6 +43,7 @@ func New(ctx context.Context, config *config.Node, rp repositories.IRepository) 
 		wavesClient, e := client.NewClient(client.Options{
 			Client:  &http.Client{Timeout: 30 * time.Second},
 			BaseUrl: config.Host,
+			ApiKey:  config.ApiKey,
 		})
 
 		if e != nil {

@@ -14,7 +14,7 @@ func TestRead(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
-	expected := Config{Node: Node{Host: "https://eth_node_test", Confirmations: 2, StartBlockHeight: 70800},
+	expected := Config{Node: Node{Host: "https://eth_node_test", Confirmations: "2", StartBlockHeight: 70800, ApiKey: "test"},
 		Db: DB{Name: "block_db_test", Host: "localhost:27017"},
 	}
 	assert.Equal(t, expected, *cfg)
@@ -26,12 +26,13 @@ func TestReadWithEnvVariables(t *testing.T) {
 	_ = os.Setenv("NODE_CONFIRMATIONS", "6")
 	_ = os.Setenv("DB_NAME", "block_db_test_env")
 	_ = os.Setenv("PORT", "5001")
+	_ = os.Setenv("NODE_API_KEY", "test")
 	path := filepath.Join("testdata", "config_test.yml")
 	cfg, err := read(path)
 	if err != nil {
 		t.Fail()
 	}
-	expected := Config{Node: Node{Host: "https://eth_node_test_from_env", Confirmations: 6, StartBlockHeight: 7239023},
+	expected := Config{Node: Node{Host: "https://eth_node_test_from_env", Confirmations: "6", StartBlockHeight: 7239023, ApiKey:"test"},
 		Db: DB{Name: "block_db_test_env", Host: "localhost:27017"},
 	}
 	assert.Equal(t, expected, *cfg)

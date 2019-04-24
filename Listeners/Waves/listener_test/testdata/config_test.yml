@@ -9,3 +9,10 @@ db:
   host: localhost:27017
 port: 5002
 callbackUrl: localhost:5020
+#config for vostok
+#node:
+#  host: http://1.testnet-pos.vostoknodes.com:6862/
+#  startBlock: 13020
+#  confirmations: 2
+#  apiKey: vostok
+#  chain: VOSTOK

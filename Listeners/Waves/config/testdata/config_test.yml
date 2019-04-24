@@ -2,7 +2,7 @@ node:
   host: https://eth_node_test
   startBlock: 70800
   confirmations: 2
-
+  apiKey: test
 db:
   name: block_db_test
   host: localhost:27017
