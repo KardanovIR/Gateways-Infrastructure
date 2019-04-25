@@ -1,4 +1,4 @@
-#node:
+node:
   host: https://nodes.wavesplatform.com
   chainId: W
   apiKey:
