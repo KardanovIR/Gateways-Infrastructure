@@ -5,6 +5,7 @@ import (
 	"google.golang.org/grpc"
 	"net"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/config"
@@ -39,7 +40,7 @@ func (s *grpcServer) AddTask(ctx context.Context, in *pb.AddTaskRequest) (*pb.Ad
 		return nil, err
 	}
 	var newTask = models.Task{
-		ListenTo:       models.ListenObject{Type: models.ListenType(in.ListenTo.Type), Value: in.ListenTo.Value},
+		ListenTo:       models.ListenObject{Type: models.ListenType(in.ListenTo.Type), Value: strings.ToLower(in.ListenTo.Value)},
 		Callback:       models.Callback{Type: models.CallbackType(in.CallbackType), ProcessId: in.ProcessId},
 		BlockchainType: config.Cfg.Node.ChainType,
 		Type:           models.TaskType(taskType),

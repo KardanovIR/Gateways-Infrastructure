@@ -8,6 +8,8 @@ package core;
 
 // The core service definition.
 service CoreService {
+    rpc InitInTx (InitInTxRequest) returns (Empty) {
+    }
     rpc InitOutTx (Request) returns (Empty) {
     }
     rpc FinishProcess (Request) returns (Empty) {
@@ -17,6 +19,11 @@ service CoreService {
 message Request {
     string processId = 1;
     string txHash = 2;
+}
+
+message InitInTxRequest {
+    string txHash = 1;
+    string blockchainType = 2;
 }
 
 message Empty {

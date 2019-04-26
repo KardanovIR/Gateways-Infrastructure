@@ -7,3 +7,14 @@ const (
 	TxStatusPending TxStatus = "PENDING"
 	TxStatusSuccess TxStatus = "SUCCESS"
 )
+
+type TxInfo struct {
+	From     string
+	To       string
+	Amount   string
+	Contract string
+	TxHash   string
+	Fee      string
+	Data     string
+	Status   TxStatus
+}

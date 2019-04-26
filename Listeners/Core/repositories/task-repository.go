@@ -47,7 +47,7 @@ func (rep *repository) FindByAddressOrTxId(ctx context.Context, ticket models.Ch
 	txID string) ([]*models.Task, error) {
 
 	log := logger.FromContext(ctx)
-	log.Infof("FindByAddressOrTxId: address %s, txID %s", address, txID)
+	log.Debugf("FindByAddressOrTxId: address %s, txID %s", address, txID)
 	cur, err := rep.tasksC.Find(ctx,
 		bson.D{{
 			"$or", bson.A{

@@ -47,6 +47,9 @@ service Adapter {
     // Get transaction status
     rpc GetTransactionStatus (GetTransactionStatusRequest) returns (GetTransactionStatusReply) {
     }
+    // Get transaction
+    rpc TransactionByHash (TransactionByHashRequest) returns (TransactionByHashReply) {
+    }
 }
 
 // The request message for getting suggested gas price
@@ -165,4 +168,22 @@ message GetAllBalanceReply {
 
     string amount = 1;
     repeated TokenBalance tokenBalances = 2;
+}
+
+// The request message for getting transaction by hash
+message TransactionByHashRequest {
+    string txHash = 1;
+}
+
+// The response message for getting transaction by hash
+message TransactionByHashReply {
+    string senderAddress = 1;
+    string sendersPublicKey = 2;
+    string recipientAddress = 3;
+    string amount = 4;
+    string assetId = 5;
+    string txHash = 6;
+    string fee = 7;
+    string data = 8;
+    string status = 9;
 }

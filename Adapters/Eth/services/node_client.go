@@ -34,6 +34,7 @@ type INodeClient interface {
 	// send transaction. rlpTx is transaction for sending on RPL encoding (returned by SignTransaction function)
 	SendTransaction(ctx context.Context, rlpTx []byte) (txHash string, err error)
 	GetTxStatusByTxID(ctx context.Context, txID string) (models.TxStatus, error)
+	TransactionInfo(ctx context.Context, txID string) (*models.TxInfo, error)
 }
 
 const gasLimitForMoneyTransfer = 21000
