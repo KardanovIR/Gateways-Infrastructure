@@ -97,8 +97,29 @@ func (s *grpcServer) GetTransactionStatus(ctx context.Context, in *pb.GetTransac
 	log.Infof("GetTransactionStatus %s", in.TxHash)
 	status, err := s.nodeClient.GetTxStatusByTxID(ctx, in.TxHash)
 	if err != nil {
-		log.Errorf("send transaction fails: %s", err)
+		log.Errorf("get transaction status fails: %s", err)
 		return nil, err
 	}
 	return &pb.GetTransactionStatusReply{Status: string(status)}, nil
+}
+
+// TransactionByHash
+func (s *grpcServer) TransactionByHash(ctx context.Context, in *pb.TransactionByHashRequest) (*pb.TransactionByHashReply, error) {
+	log := logger.FromContext(ctx)
+	log.Infof("TransactionByHash %s", in.TxHash)
+	tx, err := s.nodeClient.TransactionInfo(ctx, in.TxHash)
+	if err != nil {
+		log.Errorf("get transaction by hash fails: %s", err)
+		return nil, err
+	}
+	return &pb.TransactionByHashReply{
+		SenderAddress:    tx.From,
+		RecipientAddress: tx.To,
+		Amount:           tx.Amount,
+		Fee:              tx.Fee,
+		AssetId:          tx.Contract,
+		Status:           string(tx.Status),
+		TxHash:           tx.TxHash,
+		Data:             tx.Data,
+	}, nil
 }

@@ -137,6 +137,16 @@ func TestGrpcClient(t *testing.T) {
 		log.Fatal(err)
 	}
 
+	txInfoReply, err := clientgrpc.GetClient().TransactionByHash(ctx, &ethAdapter.TransactionByHashRequest{TxHash: txHash2.TxHash})
+	if err != nil {
+		log.Fatal(err)
+	}
+	assert.Equal(t, "SUCCESS", txInfoReply.Status)
+	assert.Equal(t, amountBack.String(), txInfoReply.Amount)
+	assert.Equal(t, address2, txInfoReply.SenderAddress)
+	assert.Equal(t, address, txInfoReply.RecipientAddress)
+	assert.Equal(t, fee2.String(), txInfoReply.Fee)
+
 	// check balance
 	balance1Reply, err := clientgrpc.GetClient().GetEthBalance(ctx, &ethAdapter.AddressRequest{Address: address})
 	if err != nil {

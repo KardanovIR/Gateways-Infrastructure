@@ -28,7 +28,7 @@ func NewCallbackService(ctx context.Context, callbackUrl string) error {
 			err = e
 			return
 		}
-		service = callbackService{pb.NewCoreServiceClient(conn)}
+		service = callbackService{pb.NewCoreServiceClient(conn), models.Ethereum}
 	})
 	if err != nil {
 		log.Errorf("error during initialize callback service: %s", err)
@@ -45,27 +45,27 @@ func GetCallbackService() ICallbackService {
 
 type callbackService struct {
 	grpcClient pb.CoreServiceClient
+	chainType  models.ChainType
 }
 
 func (cs callbackService) SendRequest(ctx context.Context, task *models.Task, txId string) error {
 	log := logger.FromContext(ctx)
 	log.Debugf("send callback request %s for processId %s (txId %s)", task.Callback.Type, task.Callback.ProcessId, txId)
-	requestFunc := cs.getCallbackByType(ctx, task.Callback.Type)
-	_, err := requestFunc(ctx, &pb.Request{TxHash: txId, ProcessId: task.Callback.ProcessId})
+	_, err := cs.callback(ctx, txId, task.Callback.ProcessId, task.Callback.Type)
 	return err
 }
 
-func (cs callbackService) getCallbackByType(ctx context.Context, callbackType models.CallbackType) func(ctx context.Context, in *pb.Request, opts ...grpc.CallOption) (*pb.Empty, error) {
+func (cs callbackService) callback(ctx context.Context, txHash string, processId string, callbackType models.CallbackType) (*pb.Empty, error) {
 	switch callbackType {
 	case models.InitOutTx:
-		return cs.grpcClient.InitOutTx
+		return cs.grpcClient.InitOutTx(ctx, &pb.Request{TxHash: txHash, ProcessId: processId})
 	case models.FinishProcess:
-		return cs.grpcClient.FinishProcess
+		return cs.grpcClient.FinishProcess(ctx, &pb.Request{TxHash: txHash, ProcessId: processId})
+	case models.InitInTx:
+		return cs.grpcClient.InitInTx(ctx, &pb.InitInTxRequest{TxHash: txHash, BlockchainType: string(cs.chainType)})
 	default:
-		return func(ctx context.Context, in *pb.Request, opts ...grpc.CallOption) (*pb.Empty, error) {
-			log := logger.FromContext(ctx)
-			log.Errorf("not implemented callback %s was requested", callbackType)
-			return &pb.Empty{}, nil
-		}
+		log := logger.FromContext(ctx)
+		log.Errorf("not implemented callback %s was requested", callbackType)
+		return &pb.Empty{}, nil
 	}
 }

@@ -132,17 +132,55 @@ func (cl *nodeClient) SendTransaction(ctx context.Context, rlpTx []byte) (txHex 
 func (cl *nodeClient) GetTxStatusByTxID(ctx context.Context, txID string) (models.TxStatus, error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("call service method 'GetTransactionByHash' %s", txID)
-	_, pending, err := cl.ethClient.TransactionByHash(ctx, common.HexToHash(txID))
+	_, status, err := cl.getTxAndStatus(ctx, txID)
 	if err != nil {
-		if err == ethereum.NotFound {
-			return models.TxStatusUnKnown, nil
-		}
 		return "", err
 	}
-	if pending {
-		return models.TxStatusPending, nil
+	return status, nil
+}
+
+func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models.TxInfo, error) {
+	log := logger.FromContext(ctx)
+	log.Debugf("call service method 'TransactionInfo' %s", txID)
+	tx, status, err := cl.getTxAndStatus(ctx, txID)
+	if err != nil {
+		return nil, err
 	}
-	return models.TxStatusSuccess, nil
+	if status == models.TxStatusUnKnown {
+		return &models.TxInfo{Status: status}, nil
+	}
+	sender, err := types.Sender(types.NewEIP155Signer(big.NewInt(cl.chainID)), tx)
+	if err != nil {
+		log.Errorf("can't get sender for tx %s: %s", txID, err)
+		return nil, err
+	}
+	// Todo do for erc-20 tokens: another implementation for recipient, amount
+	fee := new(big.Int).Mul(big.NewInt(int64(tx.Gas())), tx.GasPrice())
+	txInfo := models.TxInfo{
+		From:     sender.String(),
+		To:       tx.To().String(),
+		Amount:   tx.Value().String(),
+		Fee:      fee.String(),
+		Contract: "",
+		TxHash:   tx.Hash().String(),
+		Data:     string(tx.Data()),
+		Status:   status,
+	}
+	return &txInfo, nil
+}
+
+func (cl *nodeClient) getTxAndStatus(ctx context.Context, txID string) (*types.Transaction, models.TxStatus, error) {
+	tx, pending, err := cl.ethClient.TransactionByHash(ctx, common.HexToHash(txID))
+	if err != nil {
+		if err == ethereum.NotFound {
+			return &types.Transaction{}, models.TxStatusUnKnown, nil
+		}
+		return nil, "", err
+	}
+	if pending {
+		return tx, models.TxStatusPending, nil
+	}
+	return tx, models.TxStatusSuccess, nil
 }
 
 func DeserializeTx(rlpTx []byte) (*types.Transaction, error) {
