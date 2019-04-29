@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
@@ -11,7 +12,10 @@ import (
 	"github.com/wavesplatform/gowaves/pkg/proto"
 )
 
-const millisecondsInSec = 1000
+const (
+	millisecondsInSec = 1000
+	decimalBase       = 10
+)
 
 // CreateRawTxBySendersAddress creates transaction for senders address if private key keeps in adapter
 func (cl *nodeClient) CreateRawTxBySendersAddress(ctx context.Context, addressFrom string,
@@ -107,44 +111,45 @@ func createRawTransactionWithoutFee(ctx context.Context, senderPublic crypto.Pub
 	return tx, err
 }
 
-func (cl *nodeClient) SignTxWithKeepedSecretKey(ctx context.Context, sendersAddress string, txUnsigned []byte) ([]byte, error) {
+func (cl *nodeClient) SignTxWithKeepedSecretKey(ctx context.Context, sendersAddress string, txUnsigned []byte) ([]byte, string, error) {
 	log := logger.FromContext(ctx)
 	log.Info("call service method 'SignTxWithKeepedSecretKey' for address %s", sendersAddress)
 	secretKey, ok := cl.privateKeys[sendersAddress]
 	if !ok {
-		return nil, fmt.Errorf("haven't private key for address %s", sendersAddress)
+		return nil, "", fmt.Errorf("haven't private key for address %s", sendersAddress)
 	}
 	return cl.signTransaction(ctx, secretKey, txUnsigned)
 }
 
-func (cl *nodeClient) SignTxWithSecretKey(ctx context.Context, secretKeyInBase58 string, txUnsigned []byte) ([]byte, error) {
+func (cl *nodeClient) SignTxWithSecretKey(ctx context.Context, secretKeyInBase58 string, txUnsigned []byte) ([]byte, string, error) {
 	log := logger.FromContext(ctx)
 	log.Info("call service method 'SignTxWithSecretKey'")
 	secretKey, err := crypto.NewSecretKeyFromBase58(secretKeyInBase58)
 	if err != nil {
 		log.Error(err)
-		return nil, err
+		return nil, "", err
 	}
 	return cl.signTransaction(ctx, secretKey, txUnsigned)
 }
 
-func (cl *nodeClient) signTransaction(ctx context.Context, secretKey crypto.SecretKey, txUnsigned []byte) ([]byte, error) {
+func (cl *nodeClient) signTransaction(ctx context.Context, secretKey crypto.SecretKey, txUnsigned []byte) ([]byte, string, error) {
 	log := logger.FromContext(ctx)
 	tx := new(proto.TransferV2)
 	if err := tx.BodyUnmarshalBinary(txUnsigned); err != nil {
 		log.Error(err)
-		return nil, err
+		return nil, "", err
 	}
 	if err := tx.Sign(secretKey); err != nil {
 		log.Error(err)
-		return nil, err
+		return nil, "", err
 	}
 	txBinary, err := tx.MarshalBinary()
 	if err != nil {
 		log.Error(err)
-		return nil, err
+		return nil, "", err
 	}
-	return txBinary, nil
+
+	return txBinary, tx.ID.String(), nil
 }
 
 func (cl *nodeClient) SendTransaction(ctx context.Context, txSigned []byte) (txId string, err error) {
@@ -168,7 +173,7 @@ func (cl *nodeClient) SendTransaction(ctx context.Context, txSigned []byte) (txI
 
 func (cl *nodeClient) GetTransactionByTxId(ctx context.Context, txId string) ([]byte, error) {
 	log := logger.FromContext(ctx)
-	log.Info("call service method 'GetTransactionByTxId' for txID %s", txId)
+	log.Infof("call service method 'GetTransactionByTxId' for txID %s", txId)
 
 	id, err := crypto.NewDigestFromBase58(txId)
 	tr, _, err := cl.nodeClient.Transactions.Info(ctx, id)
@@ -182,18 +187,69 @@ func (cl *nodeClient) GetTransactionByTxId(ctx context.Context, txId string) ([]
 	return b, nil
 }
 
+func (cl *nodeClient) TransactionByHash(ctx context.Context, txId string) (*models.TxInfo, error) {
+	log := logger.FromContext(ctx)
+	log.Infof("call service method 'TransactionByHash' for txID %s", txId)
+	tr, status, err := cl.getTxAndStatus(ctx, txId)
+	if err != nil {
+		return nil, err
+	}
+	switch tr.(type) {
+	case *proto.TransferV2:
+		tx := tr.(*proto.TransferV2)
+		senderAddress, err := proto.NewAddressFromPublicKey(cl.chainID.Schema(), tx.SenderPK)
+		if err != nil {
+			return nil, err
+		}
+		var assetId = ""
+		if tx.AmountAsset.Present {
+			assetId = tx.AmountAsset.ID.String()
+		}
+		txInfo := models.TxInfo{
+			SenderPublicKey: tx.SenderPK.String(),
+			From:            senderAddress.String(),
+			To:              tx.Recipient.String(),
+			Amount:          strconv.FormatUint(tx.Amount, decimalBase),
+			Fee:             strconv.FormatUint(tx.Fee, decimalBase),
+			AssetId:         assetId,
+			TxHash:          tx.ID.String(),
+			Data:            tx.Attachment.String(),
+			Status:          status,
+		}
+		log.Infof("service method 'TransactionByHash' return %+v", txInfo)
+		return &txInfo, nil
+	default:
+		txInfo := models.TxInfo{
+			Status: status,
+		}
+		return &txInfo, fmt.Errorf("not supported type of transaction %v", tr)
+	}
+}
+
 func (cl *nodeClient) GetTransactionStatus(ctx context.Context, txId string) (models.TxStatus, error) {
 	log := logger.FromContext(ctx)
 	log.Infof("call service method 'GetTransactionStatus' for txID %s", txId)
+	_, status, err := cl.getTxAndStatus(ctx, txId)
+	return status, err
+}
+
+func (cl *nodeClient) getTxAndStatus(ctx context.Context, txId string) (proto.Transaction, models.TxStatus, error) {
+	log := logger.FromContext(ctx)
 	id, err := crypto.NewDigestFromBase58(txId)
-	unTr, _, err := cl.nodeClient.Transactions.UnconfirmedInfo(ctx, id)
-	if err == nil && unTr != nil {
-		return models.TxStatusPending, nil
-	}
-	_, _, err = cl.nodeClient.Transactions.Info(ctx, id)
 	if err != nil {
-		log.Errorf("getting tx %s fails: %s", id, err)
-		return models.TxStatusUnKnown, nil
+		return nil, "", err
 	}
-	return models.TxStatusSuccess, nil
+	var tr proto.Transaction
+	var status models.TxStatus
+	tr, _, err = cl.nodeClient.Transactions.UnconfirmedInfo(ctx, id)
+	if err == nil && tr != nil {
+		return tr, models.TxStatusPending, nil
+	}
+	tr, _, err = cl.nodeClient.Transactions.Info(ctx, id)
+	if err != nil || tr == nil {
+		log.Errorf("getting tx %s fails: %s", id, err)
+		return nil, models.TxStatusUnKnown, err
+	}
+	status = models.TxStatusSuccess
+	return tr, status, nil
 }

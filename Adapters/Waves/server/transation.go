@@ -52,12 +52,12 @@ func (s *grpcServer) SignTransaction(ctx context.Context, in *pb.SignTransaction
 	log := logger.FromContext(ctx)
 	log.Info("SignTransaction")
 
-	tx, err := s.nodeClient.SignTxWithKeepedSecretKey(ctx, in.SenderAddress, in.Tx)
+	tx, hash, err := s.nodeClient.SignTxWithKeepedSecretKey(ctx, in.SenderAddress, in.Tx)
 	if err != nil {
 		log.Errorf("signing of transaction fails: %s", err)
 		return nil, err
 	}
-	return &pb.SignTransactionReply{Tx: tx}, nil
+	return &pb.SignTransactionReply{Tx: tx, TxHash: hash}, nil
 }
 
 // sing transaction with private key keeped in adapter
@@ -67,12 +67,12 @@ func (s *grpcServer) SignTransactionBySecretKey(ctx context.Context, in *pb.Sign
 	log := logger.FromContext(ctx)
 	log.Info("SignTransactionBySecretKey")
 
-	tx, err := s.nodeClient.SignTxWithSecretKey(ctx, in.SenderSecretKey, in.Tx)
+	tx, hash, err := s.nodeClient.SignTxWithSecretKey(ctx, in.SenderSecretKey, in.Tx)
 	if err != nil {
 		log.Errorf("signing of transaction fails: %s", err)
 		return nil, err
 	}
-	return &pb.SignTransactionReply{Tx: tx}, nil
+	return &pb.SignTransactionReply{Tx: tx, TxHash: hash}, nil
 }
 
 // send transaction
@@ -103,4 +103,27 @@ func (s *grpcServer) GetTransactionStatus(ctx context.Context, in *pb.GetTransac
 	}
 
 	return &pb.GetTransactionStatusReply{Status: string(status)}, nil
+}
+
+// get transaction by hash
+func (s *grpcServer) TransactionByHash(ctx context.Context, in *pb.TransactionByHashRequest) (*pb.TransactionByHashReply, error) {
+
+	log := logger.FromContext(ctx)
+	log.Infof("TransactionByHash for %s", in.TxHash)
+	tx, err := s.nodeClient.TransactionByHash(ctx, in.TxHash)
+	if err != nil {
+		log.Errorf("getting transaction by hash fails: %s", err)
+		return nil, err
+	}
+	return &pb.TransactionByHashReply{
+		SenderAddress:    tx.From,
+		SendersPublicKey: tx.SenderPublicKey,
+		RecipientAddress: tx.To,
+		Amount:           tx.Amount,
+		Fee:              tx.Fee,
+		AssetId:          tx.AssetId,
+		Status:           string(tx.Status),
+		TxHash:           tx.TxHash,
+		Data:             tx.Data,
+	}, nil
 }

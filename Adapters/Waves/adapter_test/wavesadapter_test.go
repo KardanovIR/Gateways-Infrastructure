@@ -105,10 +105,32 @@ func TestGrpcClient(t *testing.T) {
 		log.Error(err)
 		t.FailNow()
 	}
+	txByHashPending, err := clientgrpc.GetClient().TransactionByHash(ctx, &wavesAdapter.TransactionByHashRequest{TxHash: sendTxReply.TxId})
+	assert.Nil(t, err)
+	assert.NotNil(t, txByHashPending)
+	if txByHashPending != nil {
+		assert.Equal(t, "PENDING", txByHashPending.Status)
+		assert.Equal(t, "1000000", txByHashPending.Amount)
+		assert.Equal(t, address2, txByHashPending.RecipientAddress)
+		assert.Equal(t, address, txByHashPending.SenderAddress)
+		assert.Equal(t, publicKey, txByHashPending.SendersPublicKey)
+		assert.Equal(t, "", txByHashPending.AssetId)
+	}
 	log.Infof("send transaction %s", sendTxReply.TxId)
 	if err := waitForTxComplete(ctx, sendTxReply.TxId); err != nil {
 		log.Error(err)
 		t.FailNow()
+	}
+	txByHashComplete, err := clientgrpc.GetClient().TransactionByHash(ctx, &wavesAdapter.TransactionByHashRequest{TxHash: sendTxReply.TxId})
+	assert.Nil(t, err)
+	assert.NotNil(t, txByHashComplete)
+	if txByHashComplete != nil {
+		assert.Equal(t, "SUCCESS", txByHashComplete.Status)
+		assert.Equal(t, "1000000", txByHashComplete.Amount)
+		assert.Equal(t, address2, txByHashComplete.RecipientAddress)
+		assert.Equal(t, address, txByHashComplete.SenderAddress)
+		assert.Equal(t, publicKey, txByHashComplete.SendersPublicKey)
+		assert.Equal(t, "", txByHashComplete.AssetId)
 	}
 
 	// check receiver's balance
