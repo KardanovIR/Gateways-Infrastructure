@@ -44,6 +44,9 @@ service Adapter {
     // Get transaction status
     rpc GetTransactionStatus (GetTransactionStatusRequest) returns (GetTransactionStatusReply) {
     }
+    // Get transaction
+    rpc TransactionByHash (TransactionByHashRequest) returns (TransactionByHashReply) {
+    }
 }
 
 // The request message for getting last block
@@ -139,6 +142,7 @@ message SignTransactionBySecretKeyRequest {
 // The response message containing signed transaction
 message SignTransactionReply {
     bytes tx = 1;
+    string txHash = 2;
 }
 
 // The request message for singing transaction
@@ -159,4 +163,22 @@ message GetTransactionStatusRequest {
 // The response message containing transaction's status: UNKNOWN, PENDING, SUCCESS
 message GetTransactionStatusReply {
     string status = 1;
+}
+
+// The request message for getting transaction by hash
+message TransactionByHashRequest {
+    string txHash = 1;
+}
+
+// The response message for getting transaction by hash
+message TransactionByHashReply {
+    string senderAddress = 1;
+    string sendersPublicKey = 2;
+    string recipientAddress = 3;
+    string amount = 4;
+    string assetId = 5;
+    string txHash = 6;
+    string fee = 7;
+    string data = 8;
+    string status = 9;
 }

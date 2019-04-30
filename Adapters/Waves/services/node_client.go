@@ -26,11 +26,12 @@ type INodeClient interface {
 
 	CreateRawTxBySendersAddress(ctx context.Context, addressFrom string, addressTo string, amount uint64) ([]byte, error)
 	CreateRawTxBySendersPublicKey(ctx context.Context, sendersPublicKey string, addressTo string, amount uint64, assetId string) ([]byte, error)
-	SignTxWithKeepedSecretKey(ctx context.Context, sendersAddress string, txUnsigned []byte) ([]byte, error)
-	SignTxWithSecretKey(ctx context.Context, secretKeyInBase58 string, txUnsigned []byte) ([]byte, error)
+	SignTxWithKeepedSecretKey(ctx context.Context, sendersAddress string, txUnsigned []byte) ([]byte, string, error)
+	SignTxWithSecretKey(ctx context.Context, secretKeyInBase58 string, txUnsigned []byte) ([]byte, string, error)
 	SendTransaction(ctx context.Context, txSigned []byte) (txId string, err error)
 	GetTransactionByTxId(ctx context.Context, txId string) ([]byte, error)
 	GetTransactionStatus(ctx context.Context, txId string) (models.TxStatus, error)
+	TransactionByHash(ctx context.Context, txId string) (*models.TxInfo, error)
 }
 
 type nodeClient struct {
