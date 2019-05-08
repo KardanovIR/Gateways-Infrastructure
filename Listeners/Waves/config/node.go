@@ -7,5 +7,5 @@ type Node struct {
 	StartBlockHeight int64            `mapstructure:"STARTBLOCK"`
 	Confirmations    string           `mapstructure:"CONFIRMATIONS"`
 	ChainType        models.ChainType `mapstructure:"CHAIN"`
-	ApiKey           string           `mapstructure: "API_KEY"`
+	ApiKey           string           `mapstructure: "APIKEY"`
 }
