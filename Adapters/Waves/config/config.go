@@ -24,7 +24,7 @@ type Config struct {
 type Node struct {
 	Host    string             `mapstructure:"HOST"`
 	ChainID models.NetworkType `mapstructure:"CHAINID"`
-	ApiKey  string             `mapstructure: "API_KEY"`
+	ApiKey  string             `mapstructure: "APIKEY"`
 }
 
 // Load set configuration parameters.
