@@ -7,7 +7,7 @@ node:
 db:
   name: block_db_test
   host: localhost:27017
-port: 5002
+port: 5102
 callbackUrl: localhost:5020
 #config for vostok
 #node:

@@ -73,7 +73,7 @@ func TestNodeClient(t *testing.T) {
 		log.Error(err)
 		t.Fail()
 	}
-	signedTx, err := GetNodeClient().SignTxWithSecretKey(ctx, privateKey, tx)
+	signedTx, _, err := GetNodeClient().SignTxWithSecretKey(ctx, privateKey, tx)
 	if err != nil {
 		log.Error(err)
 		t.Fail()
@@ -111,7 +111,7 @@ func TestNodeClient(t *testing.T) {
 		log.Error(err)
 		t.Fail()
 	}
-	signedTx2, err := GetNodeClient().SignTxWithKeepedSecretKey(ctx, address2, tx2)
+	signedTx2, _, err := GetNodeClient().SignTxWithKeepedSecretKey(ctx, address2, tx2)
 	if err != nil {
 		log.Error(err)
 		t.Fail()
