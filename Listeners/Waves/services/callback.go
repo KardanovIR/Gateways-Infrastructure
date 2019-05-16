@@ -19,7 +19,7 @@ type ICallbackService interface {
 	SendRequest(ctx context.Context, task *models.Task, txId string) error
 }
 
-func NewCallbackService(ctx context.Context, callbackUrl string) error {
+func NewCallbackService(ctx context.Context, callbackUrl string, chainType models.ChainType) error {
 	log := logger.FromContext(ctx)
 	var err error
 	callbackServiceOnce.Do(func() {
@@ -28,7 +28,7 @@ func NewCallbackService(ctx context.Context, callbackUrl string) error {
 			err = e
 			return
 		}
-		service = callbackService{pb.NewCoreServiceClient(conn), models.Waves}
+		service = callbackService{pb.NewCoreServiceClient(conn), chainType}
 	})
 	if err != nil {
 		log.Errorf("error during initialize callback service: %s", err)
