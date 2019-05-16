@@ -38,7 +38,7 @@ func main() {
 		log.Fatal("Can't create db connection: ", err)
 	}
 
-	if err := services.NewCallbackService(ctx, config.Cfg.CallbackUrl); err != nil {
+	if err := services.NewCallbackService(ctx, config.Cfg.CallbackUrl, config.Cfg.Node.ChainType); err != nil {
 		log.Fatal("Can't create callback service: ", err)
 	}
 
