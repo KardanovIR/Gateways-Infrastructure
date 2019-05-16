@@ -44,7 +44,7 @@ func TestNodeClient_SendWBtc(t *testing.T) {
 	var (
 		privateKey1 = "DyjaYCk9U1CMNbUgcq64WHeasnqAxw58gBkxwKmZJ3ob"
 		publicKey1  = "3TQRApHb85CR8A1eWKgRdkgLqbkUCb3BFXQhw8bx79Wb"
-	//	address1    = "3N378WXBCUFVesBsqof5ra9EHbvwJPYPtYM"
+		//	address1    = "3N378WXBCUFVesBsqof5ra9EHbvwJPYPtYM"
 	)
 	var (
 		//	privateKey2 = "DwCHooqdi9rsbLy87bvT8ywuNvZbmvJURYgGJqGjaDKH"
@@ -57,7 +57,7 @@ func TestNodeClient_SendWBtc(t *testing.T) {
 		log.Error(err)
 		t.FailNow()
 	}
-	signedTx, err := GetNodeClient().SignTxWithSecretKey(ctx, privateKey1, tx)
+	signedTx, _, err := GetNodeClient().SignTxWithSecretKey(ctx, privateKey1, tx)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()

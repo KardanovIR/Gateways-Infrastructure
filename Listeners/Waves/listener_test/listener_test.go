@@ -207,6 +207,10 @@ type coreServerMock struct {
 	t              *testing.T
 }
 
+func (c coreServerMock) InitInTx(context.Context, *corePb.InitInTxRequest) (*corePb.Empty, error) {
+	panic("implement me")
+}
+
 func (c coreServerMock) InitOutTx(ctx context.Context, in *corePb.Request) (*corePb.Empty, error) {
 	assert.True(c.t, len(in.ProcessId) > 0)
 	switch in.ProcessId {

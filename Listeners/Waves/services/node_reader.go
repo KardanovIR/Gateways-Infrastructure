@@ -74,7 +74,6 @@ func GetNodeReader() INodeReader {
 
 func (service *nodeReader) Start(ctx context.Context) (err error) {
 	log := logger.FromContext(ctx)
-	client := service.nodeClient
 
 	confirmations, err := strconv.ParseUint(service.conf.Confirmations, 10, 64)
 	if err != nil {
@@ -104,14 +103,13 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 
 			log.Infof("Process Waves block %d", startBlock)
 
-			block, _, err := client.Blocks.At(ctx, startBlock.Uint64())
+			block, err := service.blockAt(ctx, startBlock.Uint64())
 			if err != nil {
 				log.Errorf("BlockByNumber(%d) error: %s", startBlock, err)
 				time.Sleep(30 * time.Second)
 				continue
 			}
-
-			lastBlock, _, err := client.Blocks.Last(ctx)
+			lastBlock, err := service.blockLast(ctx)
 			if err != nil {
 				log.Errorf("Last block error: %s", err)
 				time.Sleep(15 * time.Second)
@@ -161,13 +159,12 @@ func (service *nodeReader) Stop(ctx context.Context) {
 	return
 }
 
-func (service *nodeReader) processBlock(ctx context.Context, block *client.Block) (err error) {
+func (service *nodeReader) processBlock(ctx context.Context, block *models.Block) (err error) {
 	log := logger.FromContext(ctx)
-
 	log.Infof("Start processing transactions of block %d...", block.Height)
 	txs := block.Transactions
 	for _, rawTx := range txs {
-		switch t := rawTx.(type) {
+		switch t := rawTx.Tx.(type) {
 		case *proto.TransferV1:
 			log.Debugf("parse transaction type %d ('TransferV1'). ID %s", proto.TransferTransaction, t.ID)
 			tt := *t
