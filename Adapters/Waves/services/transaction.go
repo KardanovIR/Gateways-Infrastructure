@@ -102,8 +102,8 @@ func createRawTransactionWithoutFee(ctx context.Context, senderPublic crypto.Pub
 		feeAsset.Present = true
 	}
 	timestamp := time.Now().Unix() * millisecondsInSec
-	tx, err := proto.NewUnsignedTransferV2(senderPublic, amountAsset, feeAsset, uint64(timestamp), amount, 1,
-		recipientAddress, "")
+	tx := proto.NewUnsignedTransferV2(senderPublic, amountAsset, feeAsset, uint64(timestamp), amount, 1,
+		proto.NewRecipientFromAddress(recipientAddress), "")
 	if err != nil {
 		log.Error(err)
 		return nil, err

@@ -40,5 +40,5 @@ func (cl *nodeClient) ValidateAddress(ctx context.Context, address string) (bool
 		return false, fmt.Errorf("address for network %s, client connected with %s",
 			string(a[1]), string(cl.chainID.Schema()))
 	}
-	return a.Validate()
+	return a.Valid()
 }

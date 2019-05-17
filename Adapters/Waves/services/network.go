@@ -12,7 +12,7 @@ import (
 	"github.com/wavesplatform/gowaves/pkg/proto"
 )
 
-const calculateFeeUrl = "transactions/calculateFee"
+const calculateFeeUrl = "/transactions/calculateFee"
 
 type FeeResponse struct {
 	FeeAssetId *string `json:"feeAssetId"`
