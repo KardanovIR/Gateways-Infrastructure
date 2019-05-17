@@ -35,7 +35,7 @@
 
 [[constraint]]
   name = "github.com/wavesplatform/gowaves"
-  version = "0.2.0"
+  branch = "master"
 
 [[constraint]]
   name = "go.uber.org/zap"

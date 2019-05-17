@@ -219,7 +219,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:21bb1c515b2d7710372b258a5d22eefd3c1eb05b0212e9a704a840d6202d9b3c"
+  digest = "1:51dd345ade001a12c9b620b9cfe89e98f6b10d6d2ff255c5bc585ae1417f0646"
   name = "github.com/wavesplatform/gowaves"
   packages = [
     "pkg/client",
@@ -229,7 +229,7 @@
     "pkg/util/collect_writes",
   ]
   pruneopts = "UT"
-  revision = "b667b3f3f789007b3b6f94529425d5bc234121b6"
+  revision = "c945d21e7670ec7109a3168d3b638cc74ca39b67"
 
 [[projects]]
   branch = "master"
@@ -315,14 +315,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:00a3a12527dd7a3af0d24260fd14887ebd69aaf924303b6a4a67f35eb9b6c012"
+  digest = "1:dc6f8baa48474aa1652f038dbae44d4eb6b314f0579cbca3efc13558f48cf1d6"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
     "unix",
   ]
   pruneopts = "UT"
-  revision = "06a5c494443846f634903706cba8f993687d3ff5"
+  revision = "61b9204099cb1bebc803c9ffb9b2d3acd9d457d9"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -355,7 +355,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "d00d292a067ce1aa0017b40ca75437b42461fa61"
+  revision = "bb713bdc0e5239f2b68e560efbe1c701a6fe78f9"
 
 [[projects]]
   digest = "1:707c3a5d10ed430ea767d73df122d9eb3dfb6312bbacc9f2e39204390686d1d0"
