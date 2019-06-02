@@ -62,7 +62,9 @@ func (cs callbackService) callback(ctx context.Context, txHash string, processId
 	case models.FinishProcess:
 		return cs.grpcClient.FinishProcess(ctx, &pb.Request{TxHash: txHash, ProcessId: processId})
 	case models.InitInTx:
-		return cs.grpcClient.InitInTx(ctx, &pb.InitInTxRequest{TxHash: txHash, BlockchainType: string(cs.chainType)})
+		return cs.grpcClient.InitInTx(ctx, &pb.TxRequest{TxHash: txHash, BlockchainType: string(cs.chainType)})
+	case models.CompleteTx:
+		return cs.grpcClient.CompleteTx(ctx, &pb.TxRequest{TxHash: txHash, BlockchainType: string(cs.chainType)})
 	default:
 		log := logger.FromContext(ctx)
 		log.Errorf("not implemented callback %s was requested", callbackType)
