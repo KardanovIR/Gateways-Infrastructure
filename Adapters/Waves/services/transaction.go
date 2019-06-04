@@ -2,7 +2,9 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/wavesplatform/gowaves/pkg/client"
 	"strconv"
 	"time"
 
@@ -13,8 +15,9 @@ import (
 )
 
 const (
-	millisecondsInSec = 1000
-	decimalBase       = 10
+	millisecondsInSec   = 1000
+	decimalBase         = 10
+	txIsNotInBlockchain = "Transaction is not in blockchain"
 )
 
 // CreateRawTxBySendersAddress creates transaction for senders address if private key keeps in adapter
@@ -194,6 +197,12 @@ func (cl *nodeClient) TransactionByHash(ctx context.Context, txId string) (*mode
 	if err != nil {
 		return nil, err
 	}
+	if status == models.TxStatusUnKnown {
+		txInfo := models.TxInfo{
+			Status: status,
+		}
+		return &txInfo, nil
+	}
 	switch tr.(type) {
 	case *proto.TransferV2:
 		tx := tr.(*proto.TransferV2)
@@ -245,10 +254,21 @@ func (cl *nodeClient) getTxAndStatus(ctx context.Context, txId string) (proto.Tr
 	if err == nil && tr != nil {
 		return tr, models.TxStatusPending, nil
 	}
-	tr, _, err = cl.nodeClient.Transactions.Info(ctx, id)
-	if err != nil || tr == nil {
+	tr, resp, err := cl.nodeClient.Transactions.Info(ctx, id)
+	if err != nil {
+		if resp.StatusCode == 404 {
+			if e, ok := err.(*client.RequestError); ok {
+				nr := &models.NodeResponse{}
+				if unErr := json.Unmarshal([]byte(e.Body), nr); unErr != nil {
+					return nil, "", err
+				}
+				if nr.Details == txIsNotInBlockchain {
+					return nil, models.TxStatusUnKnown, nil
+				}
+			}
+		}
 		log.Errorf("getting tx %s fails: %s", id, err)
-		return nil, models.TxStatusUnKnown, err
+		return nil, "", err
 	}
 	status = models.TxStatusSuccess
 	return tr, status, nil
