@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/config"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/server"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/services"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/config"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/server"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/services"
 )
 
 func main() {
@@ -27,7 +27,7 @@ func main() {
 	if err := config.Load(configPath); err != nil {
 		log.Fatal("loading of configuration failed with error:", err)
 	}
-	log.Infof("waves adapter will be started with configuration %s", config.Cfg.String())
+	log.Infof("ergo adapter will be started with configuration %s", config.Cfg.String())
 	ctx := context.Background()
 	ctx = logger.ToContext(ctx, log)
 

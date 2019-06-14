@@ -1,0 +1,5 @@
+node:
+  host: "http://127.0.0.1:9052"
+  chainId: 0x10
+  apiKey:
+port: 5005
