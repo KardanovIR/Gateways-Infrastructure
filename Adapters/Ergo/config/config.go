@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/models"
 )
 
 const (
@@ -22,16 +22,16 @@ type Config struct {
 	Port string `mapstructure:"PORT"`
 }
 
-func (c *Config) String() string {
-	return fmt.Sprintf("NODE_HOST: %s, NODE_CHAINID: %s, PORT: %s",
-		c.Node.Host, c.Node.ChainID, c.Port,
-	)
-}
-
 type Node struct {
 	Host    string             `mapstructure:"HOST"`
 	ChainID models.NetworkType `mapstructure:"CHAINID"`
 	ApiKey  string             `mapstructure: "APIKEY"`
+}
+
+func (c *Config) String() string {
+	return fmt.Sprintf("NODE_HOST: %s, NODE_CHAINID: %s, PORT: %s",
+		c.Node.Host, c.Node.ChainID, c.Port,
+	)
 }
 
 // Load set configuration parameters.
