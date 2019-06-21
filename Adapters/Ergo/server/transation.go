@@ -13,13 +13,12 @@ func (s *grpcServer) GetRawTransaction(ctx context.Context, in *pb.RawTransactio
 	*pb.RawTransactionReply, error) {
 
 	log := logger.FromContext(ctx)
-	log.Infof("GetRawTransactionBySendersPublicKey: pk %s to %s send %s (asset %s)", in.SendersPublicKey,
-		in.AddressTo, in.Amount, in.AssetId)
+	log.Infof("GetRawTransaction: address %s to %s send %s ergo", in.AddressFrom, in.AddressTo, in.Amount)
 	amount, err := strconv.Atoi(in.Amount)
 	if err != nil {
 		return nil, err
 	}
-	tx, err := s.nodeClient.CreateRawTxBySendersPublicKey(ctx, in.SendersPublicKey, in.AddressTo, uint64(amount), in.AssetId)
+	tx, err := s.nodeClient.CreateRawTxBySendersAddress(ctx, in.AddressFrom, in.AddressTo, uint64(amount))
 	if err != nil {
 		log.Errorf("get raw transaction fails: %s", err)
 		return nil, err

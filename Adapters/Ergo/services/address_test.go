@@ -5,6 +5,7 @@ import (
 )
 
 func TestNodeClient_ValidateAddress(t *testing.T) {
+	// todo implement ValidateAddress method - test data valid
 	ctx, log := beforeTest()
 	ok, err := GetNodeClient().ValidateAddress(ctx, "3WwHhExDYkWrkjpqe3BuH4FSAzMeMkxZiuhwRpNUoBJrD7BbJpzs")
 	if err != nil || !ok {

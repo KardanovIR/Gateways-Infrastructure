@@ -1,42 +1,41 @@
 package services
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"net/http"
+	"strings"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/models"
 )
 
 const (
-	decimalBase         = 10
 	txIsNotInBlockchain = "Transaction is not in blockchain"
+	sendTxUrl           = "/transactions"
 )
 
-// CreateRawTxBySendersAddress creates transaction for senders address if private key keeps in adapter
-func (cl *nodeClient) CreateRawTxBySendersAddress(ctx context.Context, addressFrom string,
-	addressTo string, amount uint64) ([]byte, error) {
-	log := logger.FromContext(ctx)
-	log.Infof("call service method 'CreateRawTxBySendersAddress' from %s to %s amount %d",
-		addressFrom, addressTo, amount)
-	// todo implementation
-	return []byte{}, nil
-}
-
-// CreateRawTxBySendersPublicKey creates transaction using public key. Private key is not used
-func (cl *nodeClient) CreateRawTxBySendersPublicKey(ctx context.Context, sendersPublicKey string,
-	addressTo string, amount uint64, assetId string) ([]byte, error) {
-	log := logger.FromContext(ctx)
-	log.Info("call service method 'CreateRawTxBySendersPublicKey' pk %s send amount %d to %s",
-		sendersPublicKey, amount, addressTo)
-	// todo implementation
-	return []byte{}, nil
+type SendTxResponse struct {
+	ID string `json:"id"`
 }
 
 func (cl *nodeClient) SendTransaction(ctx context.Context, txSigned []byte) (txId string, err error) {
 	log := logger.FromContext(ctx)
 	log.Info("call service method 'SendTransaction'")
-	// todo implementation
-	return
+	sendTxResp, _ := cl.Request(ctx, http.MethodPost, cl.conf.ExplorerUrl+sendTxUrl, bytes.NewReader(txSigned))
+	sendTxResponse := SendTxResponse{}
+	if err := json.Unmarshal(sendTxResp, &sendTxResponse); err != nil {
+		log.Errorf("failed to send tx %s: %s", string(txSigned), err)
+		return "", err
+	}
+	// explorer returns tx id with quotes - replace them
+	txId = replaceQuotesFromSides(sendTxResponse.ID)
+	return txId, nil
+}
+
+func replaceQuotesFromSides(s string) string {
+	return strings.Replace(s, "\"", "", 2)
 }
 
 func (cl *nodeClient) GetTransactionByTxId(ctx context.Context, txId string) ([]byte, error) {
