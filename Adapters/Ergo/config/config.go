@@ -26,12 +26,12 @@ type Node struct {
 	Host        string             `mapstructure:"HOST"`
 	ExplorerUrl string             `mapstructure:"EXPLORER_URL"`
 	ChainID     models.NetworkType `mapstructure:"CHAINID"`
-	ApiKey      string             `mapstructure: "APIKEY"`
+	ApiKey      string             `mapstructure:"APIKEY"`
 }
 
 func (c *Config) String() string {
-	return fmt.Sprintf("NODE_HOST: %s, NODE_CHAINID: %v, PORT: %s",
-		c.Node.Host, c.Node.ChainID, c.Port,
+	return fmt.Sprintf("NODE_HOST: %s, EXPLORER_URL: %s, NODE_CHAINID: %v, PORT: %s",
+		c.Node.Host, c.Node.ExplorerUrl, c.Node.ChainID, c.Port,
 	)
 }
 

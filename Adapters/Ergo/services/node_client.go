@@ -67,6 +67,7 @@ func (cl *nodeClient) Request(ctx context.Context, method, url string, body io.R
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("Content-Type", "application/json")
 	resp, err := cl.httpClient.Do(req)
 	if err != nil {
 		return nil, err
