@@ -174,6 +174,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:73f9bd0a36bd49a7a46061dd5d6370fbf7c7afcd92a31dcb18661497610672aa"
+  name = "golang.org/x/crypto"
+  packages = ["blake2b"]
+  pruneopts = "UT"
+  revision = "ea8f1a30c4438cc8b13f05538385ad8dc6049b43"
+
+[[projects]]
+  branch = "master"
   digest = "1:d31a812696686f0059241fa6c3b56d89ada56dddde4db1d5036de5c1084000c5"
   name = "golang.org/x/net"
   packages = [
@@ -189,9 +197,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:010311506e3917b54487c35a4277e2709678a40c1587d82492c40b78b6a0a01d"
+  digest = "1:0beb3839ca69f4a32c40d753a8cd60b273c2ba266329d1a9957731fc4cdb5478"
   name = "golang.org/x/sys"
-  packages = ["unix"]
+  packages = [
+    "cpu",
+    "unix",
+  ]
   pruneopts = "UT"
   revision = "d442b75600c5d6484576502b3c53a55c54311be9"
 
@@ -287,6 +298,7 @@
     "github.com/stretchr/testify/assert",
     "go.uber.org/zap",
     "go.uber.org/zap/zapcore",
+    "golang.org/x/crypto/blake2b",
     "google.golang.org/grpc",
   ]
   solver-name = "gps-cdcl"
