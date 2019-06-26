@@ -11,6 +11,7 @@ import (
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/services/converter"
 )
 
 const (
@@ -104,12 +105,12 @@ func parseTx(tx *models.Tx) *models.TxInfo {
 				hasOut = true
 				if in.Value > out.Value {
 					inputs = append(inputs, models.InputOutputInfo{
-						Amount:  strconv.FormatUint(in.Value-out.Value, decimalBase),
+						Amount:  strconv.FormatUint(converter.ToTargetAmount(in.Value-out.Value), decimalBase),
 						Address: in.Address,
 					})
 				} else if in.Value < out.Value {
 					outputs = append(outputs, models.InputOutputInfo{
-						Amount:  strconv.FormatUint(out.Value-in.Value, decimalBase),
+						Amount:  strconv.FormatUint(converter.ToTargetAmount(out.Value-in.Value), decimalBase),
 						Address: out.Address,
 					})
 				}
@@ -118,7 +119,7 @@ func parseTx(tx *models.Tx) *models.TxInfo {
 		}
 		if !hasOut {
 			inputs = append(inputs, models.InputOutputInfo{
-				Amount:  strconv.FormatUint(in.Value, decimalBase),
+				Amount:  strconv.FormatUint(converter.ToTargetAmount(in.Value), decimalBase),
 				Address: in.Address,
 			})
 		}
@@ -126,7 +127,7 @@ func parseTx(tx *models.Tx) *models.TxInfo {
 	for _, out := range txOutputs {
 		if !hasAddress(out.Address, txInputs) {
 			outputs = append(outputs, models.InputOutputInfo{
-				Amount:  strconv.FormatUint(out.Value, decimalBase),
+				Amount:  strconv.FormatUint(converter.ToTargetAmount(out.Value), decimalBase),
 				Address: out.Address,
 			})
 		}
@@ -145,7 +146,7 @@ func parseTx(tx *models.Tx) *models.TxInfo {
 	return &models.TxInfo{
 		From:    sender,
 		To:      recipient,
-		Fee:     strconv.FormatUint(fee, decimalBase),
+		Fee:     strconv.FormatUint(converter.ToTargetAmount(fee), decimalBase),
 		Amount:  amount,
 		TxHash:  tx.Summary.ID,
 		Status:  models.TxStatusSuccess,

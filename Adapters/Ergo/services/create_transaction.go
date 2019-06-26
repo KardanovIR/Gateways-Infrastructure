@@ -10,6 +10,7 @@ import (
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/services/converter"
 )
 
 const (
@@ -40,6 +41,7 @@ func (cl *nodeClient) CreateRawTxBySendersAddress(ctx context.Context, addressFr
 	if len(addressFrom) == 0 || len(addressTo) == 0 || amount == 0 {
 		return nil, fmt.Errorf("wrong parameters addressFrom %s or addressTo %s or amount %d", addressFrom, addressTo, amount)
 	}
+	amount = converter.ToNodeAmount(amount)
 	// get unspent input from explorer
 	unspentTxList, err := cl.requestUnSpentInputs(ctx, addressFrom)
 	if err != nil {

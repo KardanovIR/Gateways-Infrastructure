@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/services/converter"
 	"github.com/wavesplatform/GatewaysInfrastructure/Router/logger"
 )
 
@@ -21,6 +22,7 @@ func TestNodeClient_replaceQuotesFromSides(t *testing.T) {
 func TestNodeClient_parseTx(t *testing.T) {
 	ctx := context.Background()
 	log := logger.FromContext(ctx)
+	converter.Init(ctx, 8)
 	tx := models.Tx{}
 	//parseTx_1.json - 2 inputs with same addresses with charge
 
@@ -36,17 +38,17 @@ func TestNodeClient_parseTx(t *testing.T) {
 	txInfo := parseTx(&tx)
 	assert.Equal(t, 1, len(txInfo.Inputs))
 	assert.Equal(t, 1, len(txInfo.Outputs))
-	assert.Equal(t, "1300000", txInfo.Outputs[0].Amount)
+	assert.Equal(t, "130000", txInfo.Outputs[0].Amount)
 	assert.Equal(t, "3WwHhExDYkWrkjpqe3BuH4FSAzMeMkxZiuhwRpNUoBJrD7BbJpzs", txInfo.Outputs[0].Address)
 
-	assert.Equal(t, "2300000", txInfo.Inputs[0].Amount)
+	assert.Equal(t, "230000", txInfo.Inputs[0].Amount)
 	assert.Equal(t, "3WwgqLMBZhUWVHQUoYakSmcJwte8TPYM3gFkYeJ84S3NP21T2uJg", txInfo.Inputs[0].Address)
 
-	assert.Equal(t, "1000000", txInfo.Fee)
+	assert.Equal(t, "100000", txInfo.Fee)
 	assert.Equal(t, "3WwHhExDYkWrkjpqe3BuH4FSAzMeMkxZiuhwRpNUoBJrD7BbJpzs", txInfo.To)
 	assert.Equal(t, "3WwgqLMBZhUWVHQUoYakSmcJwte8TPYM3gFkYeJ84S3NP21T2uJg", txInfo.From)
 	assert.Equal(t, "bbd9118ce330aeea59f9768bc0d1b9d0e73fec63abc7c60ed7b5f444ba16c8e0", txInfo.TxHash)
-	assert.Equal(t, "1300000", txInfo.Amount)
+	assert.Equal(t, "130000", txInfo.Amount)
 
 	// case2
 	//parseTx_2.json - 2 inputs with same addresses without charge
@@ -63,17 +65,17 @@ func TestNodeClient_parseTx(t *testing.T) {
 	txInfo2 := parseTx(&tx2)
 	assert.Equal(t, 1, len(txInfo2.Inputs))
 	assert.Equal(t, 1, len(txInfo2.Outputs))
-	assert.Equal(t, "1400000", txInfo2.Outputs[0].Amount)
+	assert.Equal(t, "140000", txInfo2.Outputs[0].Amount)
 	assert.Equal(t, "3WwHhExDYkWrkjpqe3BuH4FSAzMeMkxZiuhwRpNUoBJrD7BbJpzs", txInfo2.Outputs[0].Address)
 
-	assert.Equal(t, "2400000", txInfo2.Inputs[0].Amount)
+	assert.Equal(t, "240000", txInfo2.Inputs[0].Amount)
 	assert.Equal(t, "3WwgqLMBZhUWVHQUoYakSmcJwte8TPYM3gFkYeJ84S3NP21T2uJg", txInfo2.Inputs[0].Address)
 
-	assert.Equal(t, "1000000", txInfo2.Fee)
+	assert.Equal(t, "100000", txInfo2.Fee)
 	assert.Equal(t, "3WwHhExDYkWrkjpqe3BuH4FSAzMeMkxZiuhwRpNUoBJrD7BbJpzs", txInfo2.To)
 	assert.Equal(t, "3WwgqLMBZhUWVHQUoYakSmcJwte8TPYM3gFkYeJ84S3NP21T2uJg", txInfo2.From)
 	assert.Equal(t, "cd52cac69416be9205096d02a1fe59ef17aae6afb03fbec8ff91406e95b1318d", txInfo2.TxHash)
-	assert.Equal(t, "1400000", txInfo2.Amount)
+	assert.Equal(t, "140000", txInfo2.Amount)
 
 	//parseTx_3.json - 1 input with charge
 	tx3 := models.Tx{}
@@ -89,17 +91,17 @@ func TestNodeClient_parseTx(t *testing.T) {
 	txInfo3 := parseTx(&tx3)
 	assert.Equal(t, 1, len(txInfo3.Inputs))
 	assert.Equal(t, 1, len(txInfo3.Outputs))
-	assert.Equal(t, "1200000", txInfo3.Outputs[0].Amount)
+	assert.Equal(t, "120000", txInfo3.Outputs[0].Amount)
 	assert.Equal(t, "3WwgqLMBZhUWVHQUoYakSmcJwte8TPYM3gFkYeJ84S3NP21T2uJg", txInfo3.Outputs[0].Address)
 
-	assert.Equal(t, "2200000", txInfo3.Inputs[0].Amount)
+	assert.Equal(t, "220000", txInfo3.Inputs[0].Amount)
 	assert.Equal(t, "3WwHhExDYkWrkjpqe3BuH4FSAzMeMkxZiuhwRpNUoBJrD7BbJpzs", txInfo3.Inputs[0].Address)
 
-	assert.Equal(t, "1000000", txInfo3.Fee)
+	assert.Equal(t, "100000", txInfo3.Fee)
 	assert.Equal(t, "3WwgqLMBZhUWVHQUoYakSmcJwte8TPYM3gFkYeJ84S3NP21T2uJg", txInfo3.To)
 	assert.Equal(t, "3WwHhExDYkWrkjpqe3BuH4FSAzMeMkxZiuhwRpNUoBJrD7BbJpzs", txInfo3.From)
 	assert.Equal(t, "1857c4e2490ff80cec9dc2ffdf64fb367744130c39641106562f88cf696f5096", txInfo3.TxHash)
-	assert.Equal(t, "1200000", txInfo3.Amount)
+	assert.Equal(t, "120000", txInfo3.Amount)
 
 	//parseTx_4.json - 2 different address in input with charge on 1 input and output to 1 input
 	tx4 := models.Tx{}

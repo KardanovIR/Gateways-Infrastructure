@@ -10,6 +10,7 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/server"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/services"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/services/converter"
 )
 
 func main() {
@@ -30,6 +31,8 @@ func main() {
 	log.Infof("ergo adapter will be started with configuration %s", config.Cfg.String())
 	ctx := context.Background()
 	ctx = logger.ToContext(ctx, log)
+
+	converter.Init(ctx, config.Cfg.Decimals)
 
 	if err := services.New(ctx, config.Cfg.Node); err != nil {
 		log.Fatal("can't create node's client: ", err)
