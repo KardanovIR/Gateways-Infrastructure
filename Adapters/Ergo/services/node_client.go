@@ -2,9 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"sync"
 	"time"
@@ -24,8 +21,6 @@ type INodeClient interface {
 
 	CreateRawTxBySendersAddress(ctx context.Context, addressFrom string, addressTo string, amount uint64) ([]byte, error)
 	SendTransaction(ctx context.Context, txSigned []byte) (txId string, err error)
-	GetTransactionByTxId(ctx context.Context, txId string) ([]byte, error)
-	GetTransactionStatus(ctx context.Context, txId string) (models.TxStatus, error)
 	TransactionByHash(ctx context.Context, txId string) (*models.TxInfo, error)
 }
 
@@ -60,25 +55,4 @@ func GetNodeClient() INodeClient {
 		panic("try to get node client before it's creation!")
 	})
 	return cl
-}
-
-func (cl *nodeClient) Request(ctx context.Context, method, url string, body io.Reader) ([]byte, error) {
-	req, err := http.NewRequest(method, url, body)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	resp, err := cl.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(resp.Body)
-		err := fmt.Errorf("wrong http status code %d, body %s", resp.StatusCode, body)
-		return nil, err
-
-	}
-	return ioutil.ReadAll(resp.Body)
 }
