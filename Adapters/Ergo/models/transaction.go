@@ -18,9 +18,17 @@ type TxInfo struct {
 	Fee             string
 	Data            string
 	Status          TxStatus
+	Inputs          []InputOutputInfo
+	Outputs         []InputOutputInfo
+}
+
+type InputOutputInfo struct {
+	Address string
+	Amount  string
 }
 
 type UnSignedTx struct {
+	ID         string        `json:"id,omitempty"`
 	Inputs     []TxInput     `json:"inputs"`
 	DataInputs []interface{} `json:"dataInputs"`
 	Outputs    []TxOutput    `json:"outputs"`
@@ -54,4 +62,21 @@ type UnSpentTx struct {
 	Address             string        `json:"address"`
 	SpentTransactionID  string        `json:"spentTransactionId"`
 	MainChain           bool          `json:"mainChain"`
+}
+
+type Tx struct {
+	Summary    Summary       `json:"summary"`
+	Inputs     []InputOutput `json:"inputs"`
+	DataInputs []interface{} `json:"dataInputs"`
+	Outputs    []InputOutput `json:"outputs"`
+}
+
+type Summary struct {
+	ID string `json:"id,omitempty"`
+}
+
+type InputOutput struct {
+	Address  string `json:"address"`
+	Value    uint64 `json:"value"`
+	ErgoTree string `json:"ergoTree"`
 }
