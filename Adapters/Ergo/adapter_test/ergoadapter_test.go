@@ -10,6 +10,7 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/server"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/services"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/services/converter"
 	"google.golang.org/grpc"
 )
 
@@ -25,17 +26,17 @@ func TestGrpcClient_TransactionByHash(t *testing.T) {
 	}
 	assert.Equal(t, 1, len(txInfo.Inputs))
 	assert.Equal(t, 1, len(txInfo.Outputs))
-	assert.Equal(t, "1200000", txInfo.Outputs[0].Amount)
+	assert.Equal(t, "120000", txInfo.Outputs[0].Amount)
 	assert.Equal(t, "3WwgqLMBZhUWVHQUoYakSmcJwte8TPYM3gFkYeJ84S3NP21T2uJg", txInfo.Outputs[0].Address)
 
-	assert.Equal(t, "2200000", txInfo.Inputs[0].Amount)
+	assert.Equal(t, "220000", txInfo.Inputs[0].Amount)
 	assert.Equal(t, "3WwHhExDYkWrkjpqe3BuH4FSAzMeMkxZiuhwRpNUoBJrD7BbJpzs", txInfo.Inputs[0].Address)
 
-	assert.Equal(t, "1000000", txInfo.Fee)
+	assert.Equal(t, "100000", txInfo.Fee)
 	assert.Equal(t, "3WwHhExDYkWrkjpqe3BuH4FSAzMeMkxZiuhwRpNUoBJrD7BbJpzs", txInfo.SenderAddress)
 	assert.Equal(t, "3WwgqLMBZhUWVHQUoYakSmcJwte8TPYM3gFkYeJ84S3NP21T2uJg", txInfo.RecipientAddress)
 	assert.Equal(t, "1857c4e2490ff80cec9dc2ffdf64fb367744130c39641106562f88cf696f5096", txInfo.TxHash)
-	assert.Equal(t, "1200000", txInfo.Amount)
+	assert.Equal(t, "120000", txInfo.Amount)
 	assert.Equal(t, "SUCCESS", txInfo.Status)
 
 	// unknown tx id
@@ -55,6 +56,7 @@ func beforeTests() (context.Context, logger.ILogger) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	converter.Init(ctx, config.Cfg.Decimals)
 	err = services.New(ctx, config.Cfg.Node)
 	if err != nil {
 		log.Fatal(err)

@@ -6,11 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/services/converter"
 )
 
 const (
@@ -18,7 +18,6 @@ const (
 	sendTxUrl           = "/transactions"
 	unconfirmedTxUrl    = "/transactions/unconfirmed"
 	TxByIdUrlTemplate   = "/transactions/%s"
-	decimalBase         = 10
 )
 
 type SendTxResponse struct {
@@ -104,12 +103,12 @@ func parseTx(tx *models.Tx) *models.TxInfo {
 				hasOut = true
 				if in.Value > out.Value {
 					inputs = append(inputs, models.InputOutputInfo{
-						Amount:  strconv.FormatUint(in.Value-out.Value, decimalBase),
+						Amount:  converter.ToTargetAmountStr(in.Value - out.Value),
 						Address: in.Address,
 					})
 				} else if in.Value < out.Value {
 					outputs = append(outputs, models.InputOutputInfo{
-						Amount:  strconv.FormatUint(out.Value-in.Value, decimalBase),
+						Amount:  converter.ToTargetAmountStr(out.Value - in.Value),
 						Address: out.Address,
 					})
 				}
@@ -118,7 +117,7 @@ func parseTx(tx *models.Tx) *models.TxInfo {
 		}
 		if !hasOut {
 			inputs = append(inputs, models.InputOutputInfo{
-				Amount:  strconv.FormatUint(in.Value, decimalBase),
+				Amount:  converter.ToTargetAmountStr(in.Value),
 				Address: in.Address,
 			})
 		}
@@ -126,7 +125,7 @@ func parseTx(tx *models.Tx) *models.TxInfo {
 	for _, out := range txOutputs {
 		if !hasAddress(out.Address, txInputs) {
 			outputs = append(outputs, models.InputOutputInfo{
-				Amount:  strconv.FormatUint(out.Value, decimalBase),
+				Amount:  converter.ToTargetAmountStr(out.Value),
 				Address: out.Address,
 			})
 		}
@@ -145,7 +144,7 @@ func parseTx(tx *models.Tx) *models.TxInfo {
 	return &models.TxInfo{
 		From:    sender,
 		To:      recipient,
-		Fee:     strconv.FormatUint(fee, decimalBase),
+		Fee:     converter.ToTargetAmountStr(fee),
 		Amount:  amount,
 		TxHash:  tx.Summary.ID,
 		Status:  models.TxStatusSuccess,

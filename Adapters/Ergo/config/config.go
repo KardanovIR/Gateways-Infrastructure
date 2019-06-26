@@ -18,8 +18,9 @@ const (
 var Cfg *Config
 
 type Config struct {
-	Node Node   `mapstructure:"NODE"`
-	Port string `mapstructure:"PORT"`
+	Node     Node   `mapstructure:"NODE"`
+	Port     string `mapstructure:"PORT"`
+	Decimals int    `mapstructure:"DECIMALS"`
 }
 
 type Node struct {
