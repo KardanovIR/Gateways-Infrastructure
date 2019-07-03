@@ -58,7 +58,7 @@ func connect(ctx context.Context, url, dbName string) (IRepository, error) {
 		return nil, err
 	}
 	for i := 1; i < 6; i++ {
-		log.Debugf("Attempt %d to connect to MongoDB at %s", i, url)
+		log.Infof("Attempt %d to connect to MongoDB at %s", i, url)
 		err := mongoClient.Ping(ctx, nil)
 		if err != nil {
 			log.Errorf("Failed to connect to MongoDB at %s: %v", url, err)
