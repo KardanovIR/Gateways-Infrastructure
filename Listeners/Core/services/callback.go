@@ -51,18 +51,24 @@ type callbackService struct {
 func (cs callbackService) SendRequest(ctx context.Context, task *models.Task, txId string) error {
 	log := logger.FromContext(ctx)
 	log.Debugf("send callback request %s for processId %s (txId %s)", task.Callback.Type, task.Callback.ProcessId, txId)
-	_, err := cs.callback(ctx, txId, task.Callback.ProcessId, task.Callback.Type)
+	address := ""
+	if task.ListenTo.Type == models.ListenTypeAddress {
+		address = task.ListenTo.Value
+	}
+	_, err := cs.callback(ctx, txId, task.Callback.ProcessId, task.Callback.Type, address)
 	return err
 }
 
-func (cs callbackService) callback(ctx context.Context, txHash string, processId string, callbackType models.CallbackType) (*pb.Empty, error) {
+func (cs callbackService) callback(ctx context.Context, txHash string, processId string, callbackType models.CallbackType,
+	address string) (*pb.Empty, error) {
 	switch callbackType {
 	case models.InitOutTx:
 		return cs.grpcClient.InitOutTx(ctx, &pb.Request{TxHash: txHash, ProcessId: processId})
 	case models.FinishProcess:
 		return cs.grpcClient.FinishProcess(ctx, &pb.Request{TxHash: txHash, ProcessId: processId})
 	case models.InitInTx:
-		return cs.grpcClient.InitInTx(ctx, &pb.TxRequest{TxHash: txHash, BlockchainType: string(cs.chainType)})
+		return cs.grpcClient.InitInTx(ctx,
+			&pb.InitInTxRequest{TxHash: txHash, BlockchainType: string(cs.chainType), Address: address})
 	case models.CompleteTx:
 		return cs.grpcClient.CompleteTx(ctx, &pb.TxRequest{TxHash: txHash, BlockchainType: string(cs.chainType)})
 	default:
