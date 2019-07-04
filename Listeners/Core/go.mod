@@ -1,1 +1,1 @@
-module github.com/gateways/ListenerCore
+module github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core
