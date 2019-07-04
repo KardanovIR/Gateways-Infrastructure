@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
@@ -40,6 +41,8 @@ func (s *grpcServer) AddTask(ctx context.Context, in *pb.AddTaskRequest) (*pb.Ad
 		return nil, err
 	}
 	var newTask = models.Task{
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
 		ListenTo:       models.ListenObject{Type: models.ListenType(in.ListenTo.Type), Value: strings.ToLower(in.ListenTo.Value)},
 		Callback:       models.Callback{Type: models.CallbackType(in.CallbackType), ProcessId: in.ProcessId},
 		BlockchainType: s.chainType,
