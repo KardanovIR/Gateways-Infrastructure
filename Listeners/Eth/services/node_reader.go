@@ -10,10 +10,11 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
+	coreServices "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
 )
 
 type INodeReader interface {
@@ -76,29 +77,29 @@ func newRPCClient(log logger.ILogger, host string) (*rpc.Client, error) {
 	return c, nil
 }
 
-func (service *nodeReader) Start(ctx context.Context) (err error) {
+func (nr *nodeReader) Start(ctx context.Context) (err error) {
 	log := logger.FromContext(ctx)
-	client := service.nodeClient
+	client := nr.nodeClient
 
 	confirmations := new(big.Int)
-	confirmations.SetString(service.conf.Confirmations, 10)
+	confirmations.SetString(nr.conf.Confirmations, 10)
 
 	//to do add saving chainState
 	//example below
-	chainState, errorChainState := service.rp.GetLastChainState(ctx, models.ChainType(service.conf.ChainType))
+	chainState, errorChainState := nr.rp.GetLastChainState(ctx, models.ChainType(nr.conf.ChainType))
 	if errorChainState == nil && chainState != nil {
-		if (*chainState).LastBlock > service.conf.StartBlockHeight {
-			service.conf.StartBlockHeight = chainState.LastBlock
+		if (*chainState).LastBlock > nr.conf.StartBlockHeight {
+			nr.conf.StartBlockHeight = chainState.LastBlock
 		}
 	}
 
-	startBlock := big.NewInt(service.conf.StartBlockHeight)
+	startBlock := big.NewInt(nr.conf.StartBlockHeight)
 
 	log.Infof("Start listening ETH from %d block.", startBlock)
 	go func() {
 		for {
 			select {
-			case <-service.stopListen:
+			case <-nr.stopListen:
 				log.Infof("Stop listening ETH.")
 				return
 			default:
@@ -125,7 +126,7 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 			difference.Sub(difference, startBlock)
 			var compare = difference.Cmp(confirmations)
 			if compare < 0 {
-				log.Infof("Confirmations of %d < %d. Waiting a minute...", startBlock, service.conf.Confirmations)
+				log.Infof("Confirmations of %d < %d. Waiting a minute...", startBlock, nr.conf.Confirmations)
 				time.Sleep(time.Minute)
 				continue
 			}
@@ -137,7 +138,7 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 				continue
 			}
 
-			err = service.processBlock(ctx, block)
+			err = nr.processBlock(ctx, block)
 			if err != nil {
 				log.Errorf("processBTCBlock(%s) error: %s", startBlock, err)
 				log.Debugf("Waiting a half minute.")
@@ -147,15 +148,15 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 
 			if chainState == nil {
 				chainState = new(models.ChainState)
-				chainState.ChainType = models.ChainType(service.conf.ChainType)
+				chainState.ChainType = models.ChainType(nr.conf.ChainType)
 			}
 
 			chainState.LastBlock = block.Number().Int64() + 1
 			chainState.Timestamp = time.Now()
 
-			chainState, err = service.rp.PutChainState(ctx, chainState)
+			chainState, err = nr.rp.PutChainState(ctx, chainState)
 			if err != nil {
-				log.Errorf("Updating chainState for %s error: %s", service.conf.ChainType, err)
+				log.Errorf("Updating chainState for %s error: %s", nr.conf.ChainType, err)
 			}
 
 			startBlock = big.NewInt(chainState.LastBlock)
@@ -166,15 +167,15 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 	return
 }
 
-func (service *nodeReader) Stop(ctx context.Context) {
+func (nr *nodeReader) Stop(ctx context.Context) {
 	log := logger.FromContext(ctx)
 	log.Info("Stop listening ETH.")
 
-	service.stopListen <- struct{}{}
+	nr.stopListen <- struct{}{}
 	return
 }
 
-func (service *nodeReader) processBlock(ctx context.Context, block *types.Block) (err error) {
+func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err error) {
 	log := logger.FromContext(ctx)
 
 	log.Infof("Start processing transactions of block %d...", block.Number())
@@ -189,7 +190,7 @@ func (service *nodeReader) processBlock(ctx context.Context, block *types.Block)
 		}
 
 		var adr = strings.ToLower(outAddresses.String())
-		tasks, err := service.rp.FindByAddressOrTxId(ctx, models.ChainType(service.conf.ChainType), adr, tx.Hash().Hex())
+		tasks, err := nr.rp.FindByAddressOrTxId(ctx, models.ChainType(nr.conf.ChainType), adr, tx.Hash().Hex())
 		if err != nil {
 			log.Errorf("error: %s", err)
 			return err
@@ -204,7 +205,7 @@ func (service *nodeReader) processBlock(ctx context.Context, block *types.Block)
 
 		for _, task := range tasks {
 			log.Infof("->   Start processing task id %s for %v ...", task.Id.Hex(), task.ListenTo)
-			err = GetCallbackService().SendRequest(ctx, task, tx.Hash().String())
+			err = coreServices.GetCallbackService().SendRequest(ctx, task, tx.Hash().String())
 			if err != nil {
 				log.Errorf("->   Error: send callback %s for task %v for tx %s: %s", task.Callback.Type,
 					task.ListenTo, tx.Hash().String(), err)
@@ -213,14 +214,14 @@ func (service *nodeReader) processBlock(ctx context.Context, block *types.Block)
 
 			switch task.Type {
 			case models.OneTime:
-				err := service.rp.RemoveTask(ctx, task.Id.Hex())
+				err := nr.rp.RemoveTask(ctx, task.Id.Hex())
 				if err != nil {
 					log.Errorf("->   Error: removing task %s", err)
 					return err
 				}
 			}
 
-			log.Infof("->   Task id %s for %s has been proceed successful!", task.Id.Hex(), service.conf.ChainType)
+			log.Infof("->   Task id %s for %s has been proceed successful!", task.Id.Hex(), nr.conf.ChainType)
 		}
 
 	}

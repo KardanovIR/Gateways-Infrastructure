@@ -1,0 +1,12 @@
+node:
+  host: "https://api-testnet.ergoplatform.com"
+  startBlock: 84185
+  confirmations: 6
+  chain: ERGO
+  apiKey:
+
+db:
+  name: block_db
+  host: localhost:27017
+port: 5006
+callbackUrl: localhost:5020

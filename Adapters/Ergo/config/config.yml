@@ -1,0 +1,7 @@
+node:
+  host: "http://127.0.0.1:9052"
+  explorer_url: "https://api-testnet.ergoplatform.com"
+  chainId: 0x10
+  apiKey:
+decimals: 8
+port: 5005

@@ -1,0 +1,62 @@
+{
+  "summary": {
+    "id": "1857c4e2490ff80cec9dc2ffdf64fb367744130c39641106562f88cf696f5096",
+    "timestamp": 1561117348178,
+    "size": 297,
+    "confirmationsCount": 3680,
+    "block": {
+      "id": "191dfc80c100ec4d6de973e33cd69949cc12684a3de86d0d8a424dd0a4a87622",
+      "height": 74853
+    }
+  },
+  "ioSummary": {
+    "totalCoinsTransferred": 935800000,
+    "totalFee": 0,
+    "feePerByte": 0
+  },
+  "inputs": [
+    {
+      "id": "f60243065be2f949f16fc72c9ec9f8792d954c1566d6329647620220573549bb",
+      "address": "3WwHhExDYkWrkjpqe3BuH4FSAzMeMkxZiuhwRpNUoBJrD7BbJpzs",
+      "spendingProof": "eaeb4b36f9a7c134d064eee69df8189bb8543004c68f9ab98e7b5da85881dc987b5e8b6550639324781ae73b8421b16ec170ff6cbd81d6d8",
+      "value": 935800000,
+      "transactionId": "1857c4e2490ff80cec9dc2ffdf64fb367744130c39641106562f88cf696f5096",
+      "outputTransactionId": "9a42f858c80120611a5c0f173f526fe0d1ed5eaf0a8103d4b0eaf8c1e34169f0"
+    }
+  ],
+  "outputs": [
+    {
+      "id": "10ff57ed7fae8d17fead2da040d344f459431182836ba02231208ace3760b983",
+      "value": 1000000,
+      "creationHeight": 74851,
+      "ergoTree": "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304",
+      "address": "Bf1X9JgQTUtgntaer91B24n6kP8L2kqEiQqNf1z97BKo9UbnW3WRP9VXu8BXd1LsYCiYbHJEdWKxkF5YNx5n7m31wsDjbEuB3B13ZMDVBWkepGmWfGa71otpFViHDCuvbw1uNicAQnfuWfnj8fbCa4",
+      "assets": [],
+      "additionalRegisters": {},
+      "spentTransactionId": "672c8c08fc50ff9c5242424e21cede184c33440dbf9b60e42b84f9cbb304411b",
+      "mainChain": true
+    },
+    {
+      "id": "ebdf26c847a49e85755bac4ed4f608e21d12a2938347afaaf065b3f737b3c84a",
+      "value": 933600000,
+      "creationHeight": 74851,
+      "ergoTree": "0008cd0259a7f4ba52065bbb8ff7f5faa5b0bb372c2ab9008c633be0a7fe72aadabef6cd",
+      "address": "3WwHhExDYkWrkjpqe3BuH4FSAzMeMkxZiuhwRpNUoBJrD7BbJpzs",
+      "assets": [],
+      "additionalRegisters": {},
+      "spentTransactionId": "fe31242180b0a2e3550c69df16c9d56e20e79fc6691c2cb8141517b062b6b8d8",
+      "mainChain": true
+    },
+    {
+      "id": "bf39326c8150ba988497d5001b9f62535c97abba2b1be4c4725fc6bd9521f583",
+      "value": 1200000,
+      "creationHeight": 74851,
+      "ergoTree": "0008cd028e327d36801fbdb5f367f92a66c0de24137a36f8060f85d82468d33b1941b392",
+      "address": "3WwgqLMBZhUWVHQUoYakSmcJwte8TPYM3gFkYeJ84S3NP21T2uJg",
+      "assets": [],
+      "additionalRegisters": {},
+      "spentTransactionId": "cd52cac69416be9205096d02a1fe59ef17aae6afb03fbec8ff91406e95b1318d",
+      "mainChain": true
+    }
+  ]
+}

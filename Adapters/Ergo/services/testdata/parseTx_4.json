@@ -1,0 +1,89 @@
+{
+  "summary": {
+    "id": "bbd9118ce330aeea59f9768bc0d1b9d0e73fec63abc7c60ed7b5f444ba16c8e0",
+    "timestamp": 1561461057236,
+    "size": 386,
+    "confirmationsCount": 14,
+    "block": {
+      "id": "86b6ddfbbb920fc73f482feee9ef4fbad20699e1926111794aac3d9e47383466",
+      "height": 78383
+    }
+  },
+  "ioSummary": {
+    "totalCoinsTransferred": 19200000,
+    "totalFee": 0,
+    "feePerByte": 0
+  },
+  "inputs": [
+    {
+      "id": "aa97946ea2c28a366231af29debb5cc8b530385a9169b6aa18021f8d0fcaadeb",
+      "address": "3WwgqLMBZhUWVHQUoYakSmcJwte8TPYM3gFkYeJ84S3NP21T2uJg",
+      "spendingProof": "82a972a878a1b4f738eec9df6bd0b8c0521d77b7e4bdfa8d61cf1ed00479feb1f89a0a5783a5186acb2810aca0d761a3e7b82adab98f9b62",
+      "value": 120,
+      "transactionId": "bbd9118ce330aeea59f9768bc0d1b9d0e73fec63abc7c60ed7b5f444ba16c8e0",
+      "outputTransactionId": "9a42f858c80120611a5c0f173f526fe0d1ed5eaf0a8103d4b0eaf8c1e34169f0"
+    },
+    {
+      "id": "eaa947b6eb15da5916643806f5655ba76ada7ef6786c5246a9a21d40e95e71ad",
+      "address": "3WwgqLMBZhUWVHQUoYakSmcJwte8TPYM3gFkYeJ84S3NP21T2uJg",
+      "spendingProof": "adc2a185dd953bd75d404d7e8d1a88ab04a7c40de5ef95804bbebe4d2444731734bc0812942e8a4bb971f97a49d0baa48d0b742c344fea1d",
+      "value": 1800,
+      "transactionId": "bbd9118ce330aeea59f9768bc0d1b9d0e73fec63abc7c60ed7b5f444ba16c8e0",
+      "outputTransactionId": "dcaa16a5d2a3f115c0ac40e54d0c6987f31b66a081e138bc43019f1a5f5228ea"
+    },
+    {
+      "id": "eaa947b6eb15da5916643806f5655ba76ada7ef6786c5246a9a21d40e95e62ad",
+      "address": "3WvsT2Gm4EpsM9Pg18PdY6XyhNNMqXDsvJTbbf6ihLvAmSb7u5RN",
+      "spendingProof": "adc2a185dd8bc0d1b9404d7e8d1a88ab04a7c40de5ef95804bbebe4d2444731734bc0812942e8a4bb971f97a49d0baa48d0b742c344fea1d",
+      "value": 250,
+      "transactionId": "bbd9118ce330aeea59f9768bc0d1b9d0e73fec63abc7c60ed7b5f444ba16c8e0",
+      "outputTransactionId": "dcaa16a5d2a3f115c0ac40e54d0c6987f31b66a081e138bc43019f1a5f5228ea"
+    }
+  ],
+  "outputs": [
+    {
+      "id": "d02aee1ce42f99067be8ecb86915f8f7cf2c775a9c1a6651c0cf62b654a228a7",
+      "value": 10,
+      "creationHeight": 78381,
+      "ergoTree": "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304",
+      "address": "Bf1X9JgQTUtgntaer91B24n6kP8L2kqEiQqNf1z97BKo9UbnW3WRP9VXu8BXd1LsYCiYbHJEdWKxkF5YNx5n7m31wsDjbEuB3B13ZMDVBWkepGmWfGa71otpFViHDCuvbw1uNicAQnfuWfnj8fbCa4",
+      "assets": [],
+      "additionalRegisters": {},
+      "spentTransactionId": "b5e729dba14982223dbc06345e88db81c101a0e6347f0b18c1d4c6a64144eae5",
+      "mainChain": true
+    },
+    {
+      "id": "ac6295da383a2be02b037c1649e59520ec7c26cb534ebf8bca6d3a0a1ba2eea8",
+      "value": 1700,
+      "creationHeight": 78381,
+      "ergoTree": "0008cd028e327d36801fbdb5f367f92a66c0de24137a36f8060f85d82468d33b1941b392",
+      "address": "3WwgqLMBZhUWVHQUoYakSmcJwte8TPYM3gFkYeJ84S3NP21T2uJg",
+      "assets": [],
+      "additionalRegisters": {},
+      "spentTransactionId": null,
+      "mainChain": true
+    },
+    {
+      "id": "ac6295da383a2be02b037c1649e59520ec7c26cb534ebf8bca6d3a0a1ba2eea8",
+      "value": 250,
+      "creationHeight": 78381,
+      "ergoTree": "0008cd028e327d36801fbdb5f367f92a66c0de24137a36f8060f85d82468d33b1941b392",
+      "address": "3WwgqLMBZhUWVHQUoYakSmcJwte8TPYM3gFkYeJ84S3NP21T2uJg",
+      "assets": [],
+      "additionalRegisters": {},
+      "spentTransactionId": null,
+      "mainChain": true
+    },
+    {
+      "id": "565839b5f38bdca92502d730203fa800dc4ad065b5d174f4f02ebb4c244f086c",
+      "value": 210,
+      "creationHeight": 78381,
+      "ergoTree": "0008cd0259a7f4ba52065bbb8ff7f5faa5b0bb372c2ab9008c633be0a7fe72aadabef6cd",
+      "address": "3WwHhExDYkWrkjpqe3BuH4FSAzMeMkxZiuhwRpNUoBJrD7BbJpzs",
+      "assets": [],
+      "additionalRegisters": {},
+      "spentTransactionId": null,
+      "mainChain": true
+    }
+  ]
+}
