@@ -8,7 +8,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/config"
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
@@ -21,8 +20,9 @@ type IGrpcServer interface {
 }
 
 type grpcServer struct {
-	port string
-	rp   repositories.IRepository
+	port      string
+	rp        repositories.IRepository
+	chainType models.ChainType
 }
 
 var (
@@ -42,7 +42,7 @@ func (s *grpcServer) AddTask(ctx context.Context, in *pb.AddTaskRequest) (*pb.Ad
 	var newTask = models.Task{
 		ListenTo:       models.ListenObject{Type: models.ListenType(in.ListenTo.Type), Value: strings.ToLower(in.ListenTo.Value)},
 		Callback:       models.Callback{Type: models.CallbackType(in.CallbackType), ProcessId: in.ProcessId},
-		BlockchainType: config.Cfg.Node.ChainType,
+		BlockchainType: s.chainType,
 		Type:           models.TaskType(taskType),
 	}
 
@@ -68,11 +68,11 @@ func (s *grpcServer) RemoveTask(ctx context.Context, in *pb.RemoveTaskRequest) (
 	return &pb.Empty{}, nil
 }
 
-func InitAndStart(ctx context.Context, port string, db repositories.IRepository) error {
+func InitAndStart(ctx context.Context, port string, db repositories.IRepository, chainType models.ChainType) error {
 	log := logger.FromContext(ctx)
 	var initErr error
 	onceGrpcServertInstance.Do(func() {
-		server = &grpcServer{rp: db, port: ":" + port}
+		server = &grpcServer{rp: db, port: ":" + port, chainType: chainType}
 
 		lis, err := net.Listen("tcp", ":"+port)
 		if err != nil {

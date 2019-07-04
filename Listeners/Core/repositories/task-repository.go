@@ -12,7 +12,7 @@ import (
 
 func (rep *repository) PutTask(ctx context.Context, task *models.Task) (id string, err error) {
 	log := logger.FromContext(ctx)
-	log.Infof("PutTask %+v", task)
+	log.Debugf("PutTask %+v", task)
 	if task.Id.IsZero() {
 		ir, err := rep.tasksC.InsertOne(ctx, task)
 		if err != nil {
@@ -28,7 +28,7 @@ func (rep *repository) PutTask(ctx context.Context, task *models.Task) (id strin
 
 func (rep *repository) RemoveTask(ctx context.Context, id string) (err error) {
 	log := logger.FromContext(ctx)
-	log.Infof("RemoveTask %s", id)
+	log.Debugf("RemoveTask %s", id)
 	if id != "" {
 		objId, err := objectid.FromHex(id)
 		if err != nil {

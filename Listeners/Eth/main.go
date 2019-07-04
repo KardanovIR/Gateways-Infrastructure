@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/server"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
+	coreServices "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/services"
 )
 
 func main() {
@@ -43,7 +45,7 @@ func main() {
 		log.Fatal("Can't create node's client: ", err)
 	}
 
-	if err := services.NewCallbackService(ctx, config.Cfg.CallbackUrl); err != nil {
+	if err := coreServices.NewCallbackService(ctx, config.Cfg.CallbackUrl, config.Cfg.Node.ChainType); err != nil {
 		log.Fatal("Can't create callback service: ", err)
 	}
 
@@ -54,7 +56,7 @@ func main() {
 	}
 	defer nodeReader.Stop(ctx)
 
-	if err := server.InitAndStart(ctx, config.Cfg.Port, repository); err != nil {
+	if err := server.InitAndStart(ctx, config.Cfg.Port, repository, models.Ethereum); err != nil {
 		log.Fatal("Can't start grpc server", err)
 	}
 }
