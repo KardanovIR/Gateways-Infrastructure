@@ -1,0 +1,44 @@
+module github.com/wavesplatform/GatewaysInfrastructure/Listeners/Ergo
+
+require (
+	github.com/allegro/bigcache v0.0.0-20190618191010-69ea0af04088
+	github.com/aristanetworks/goarista v0.0.0-20190628180533-8e7d5b18fe7a
+	github.com/btcsuite/btcd v0.0.0-20190629003639-c26ffa870fd8
+	github.com/davecgh/go-spew v1.1.1
+	github.com/deckarep/golang-set v1.7.1
+	github.com/ethereum/go-ethereum v1.8.27
+	github.com/fsnotify/fsnotify v1.4.7
+	github.com/go-stack/stack v1.8.0
+	github.com/golang/protobuf v1.3.1
+	github.com/golang/snappy v0.0.1
+	github.com/hashicorp/hcl v1.0.0
+	github.com/magiconair/properties v1.8.1
+	github.com/mitchellh/mapstructure v1.1.2
+	github.com/mongodb/mongo-go-driver v0.0.18
+	github.com/pelletier/go-toml v1.4.0
+	github.com/pmezard/go-difflib v1.0.0
+	github.com/rs/cors v1.6.0
+	github.com/spf13/afero v1.2.2
+	github.com/spf13/cast v1.3.0
+	github.com/spf13/jwalterweatherman v1.1.0
+	github.com/spf13/pflag v1.0.3
+	github.com/spf13/viper v1.4.0
+	github.com/stretchr/testify v1.3.0
+	github.com/syndtr/goleveldb v1.0.0
+	github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core v0.0.0-20190704100631-39b2ca6c65d5
+	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c
+	github.com/xdg/stringprep v1.0.0
+	go.uber.org/atomic v1.4.0
+	go.uber.org/multierr v1.1.0
+	go.uber.org/zap v1.10.0
+	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
+	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58
+	golang.org/x/sys v0.0.0-20190626221950-04f50cda93cb
+	golang.org/x/text v0.3.2
+	google.golang.org/appengine v1.4.0 // indirect
+	google.golang.org/genproto v0.0.0-20190701230453-710ae3a149df
+	google.golang.org/grpc v1.21.1
+	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce
+	gopkg.in/yaml.v2 v2.2.2
+)
