@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Ergo/config"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Ergo/config"
 )
 
 const httpRequestTimeoutMs = 2000
@@ -130,7 +131,7 @@ func (cl *nodeClient) BlockAt(ctx context.Context, blockNumber uint64, currentHe
 		log.Error(err)
 		return nil, err
 	}
-	log.Debugf("blockInfo %+v ", blockInfo)
+
 	log.Debugf("request for block with id %s", blockInfo.ID)
 	r, _ := cl.Request(ctx, http.MethodGet, cl.conf.Host+fmt.Sprintf(getBlockByIdUrlTemplate, blockInfo.ID), nil)
 	block := Block{}
