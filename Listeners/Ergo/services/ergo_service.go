@@ -183,5 +183,8 @@ func (cl *nodeClient) Request(ctx context.Context, method, url string, body io.R
 		return nil, fmt.Errorf("wrong response status %d, body %s", resp.StatusCode, string(body))
 
 	}
-	return ioutil.ReadAll(resp.Body)
+	respBody, err := ioutil.ReadAll(resp.Body)
+	log := logger.FromContext(ctx)
+	log.Debugf("response: %s", string(respBody))
+	return respBody, err
 }
