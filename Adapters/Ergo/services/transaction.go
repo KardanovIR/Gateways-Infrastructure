@@ -60,14 +60,19 @@ func (cl *nodeClient) TransactionByHash(ctx context.Context, txId string) (*mode
 		return nil, err
 	}
 	unconfirmedTx := findTxInList(unconfirmedTxList, txId)
+	hasInUnconfirmed := false
 	if unconfirmedTx != nil {
 		// don't parse all info: not used by another service if tx is unconfirmed. But in fact it should be parsed
-		return &models.TxInfo{Status: models.TxStatusPending}, nil
+		hasInUnconfirmed = true
+		// check in executed tx (because case is real: tx was complete but was kept in unconfirmed)
 	}
 	txResp, err := cl.Request(ctx, http.MethodGet, cl.conf.ExplorerUrl+fmt.Sprintf(TxByIdUrlTemplate, txId), nil)
 	if err != nil {
 		if e, ok := err.(*WrongCodeError); ok {
 			if e.Code == 404 && strings.Contains(e.Body, txIsNotInBlockchain) {
+				if hasInUnconfirmed {
+					return &models.TxInfo{Status: models.TxStatusPending}, nil
+				}
 				return &models.TxInfo{Status: models.TxStatusUnKnown}, nil
 			}
 		}

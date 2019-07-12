@@ -3,13 +3,13 @@ package listener_test
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/stretchr/testify/assert"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/grpc"
@@ -21,6 +21,7 @@ import (
 	coreServices "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Ergo/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Ergo/services"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -44,18 +45,18 @@ func TestListener(t *testing.T) {
 		log.Fatal("Can't init grpc client", err)
 	}
 
-	/*mongoDB := mongoConnect(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name)
+	mongoDB := mongoConnect(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name)
 	defer func() {
 		if _, err := mongoDB.Collection(repositories.CChainState).DeleteOne(ctx, bson.D{{"chaintype", models.Ergo}}); err != nil {
 			log.Error(err)
 		}
-	}()*/
+	}()
 
 	// add tasks Transfer
 	_, err = grpcClient.AddTask(ctx,
 		&blockchain.AddTaskRequest{
 			ListenTo:     &blockchain.ListenObject{Type: "Address", Value: addressForSearching},
-			CallbackType: string(models.InitOutTx),
+			CallbackType: string(models.InitInTx),
 			ProcessId:    "111111111",
 			TaskType:     strconv.Itoa(int(models.OneTime))},
 	)
@@ -89,16 +90,15 @@ func TestListener(t *testing.T) {
 	log.Debugf("node reader start  success", err)
 
 	// wait for receiving callback
-	var initOutTx bool
+	var InitInTx bool
 	var finishProcess bool
 
 	for i := 0; i < 2; i++ {
 		select {
 		case callback := <-callBackChannel:
-			if callback == "InitOutTx" {
-				initOutTx = true
+			if callback == "InitInTx" {
+				InitInTx = true
 			}
-		case callback := <-callBackChannel:
 			if callback == "FinishProcess" {
 				finishProcess = true
 			}
@@ -107,13 +107,8 @@ func TestListener(t *testing.T) {
 			t.FailNow()
 		}
 	}
-
-	if !initOutTx {
-		t.Fail()
-	}
-	if !finishProcess {
-		t.Fail()
-	}
+	assert.True(t, InitInTx)
+	assert.True(t, finishProcess)
 
 	services.GetNodeReader().Stop(ctx)
 }
@@ -184,8 +179,11 @@ type coreServerMock struct {
 	t              *testing.T
 }
 
-func (c coreServerMock) InitInTx(context.Context, *core.TxRequest) (*core.Empty, error) {
-	panic("implement me")
+func (c coreServerMock) InitInTx(ctx context.Context, in *core.InitInTxRequest) (*core.Empty, error) {
+	assert.Equal(c.t, txHashForSearchingByAddress, in.TxHash)
+	assert.Equal(c.t, addressForSearching, in.Address)
+	callBackChannel <- "InitInTx"
+	return &core.Empty{}, nil
 }
 
 func (c coreServerMock) CompleteTx(context.Context, *core.TxRequest) (*core.Empty, error) {
@@ -193,17 +191,12 @@ func (c coreServerMock) CompleteTx(context.Context, *core.TxRequest) (*core.Empt
 }
 
 func (c coreServerMock) InitOutTx(ctx context.Context, in *core.Request) (*core.Empty, error) {
-	assert.Equal(c.t, "111111111", in.ProcessId)
-	assert.Equal(c.t, txHashForSearchingByAddress, in.TxHash)
-	fmt.Println("InitOutTx ", in.TxHash, in.ProcessId)
-	callBackChannel <- "InitOutTx"
-	return &core.Empty{}, nil
+	return nil, nil
 }
 
 func (c coreServerMock) FinishProcess(ctx context.Context, in *core.Request) (*core.Empty, error) {
 	assert.Equal(c.t, "22222", in.ProcessId)
 	assert.Equal(c.t, txHashForSearchingByTxHash, in.TxHash)
-	fmt.Println("FinishProcess ", in.TxHash, in.ProcessId)
 	callBackChannel <- "FinishProcess"
 	return &core.Empty{}, nil
 }

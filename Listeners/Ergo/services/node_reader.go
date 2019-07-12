@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"strings"
 	"sync"
 	"time"
 
@@ -144,8 +143,7 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *Block) (err error
 	log.Debugf("start process block %d", block.Height())
 	for _, tx := range block.Transactions() {
 		for _, output := range tx.TxOutputs {
-			address := strings.ToLower(output.Address)
-			if err := nr.findAndExecuteTasks(ctx, address, tx.ID); err != nil {
+			if err := nr.findAndExecuteTasks(ctx, output.Address, tx.ID); err != nil {
 				return err
 			}
 		}

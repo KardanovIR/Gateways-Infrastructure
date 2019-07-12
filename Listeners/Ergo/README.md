@@ -1,5 +1,7 @@
 # GatewaysInfrastructure
 
+## Ergo listener
+
 Run :
 
     go run main.go [parameters...] 
@@ -8,11 +10,6 @@ Run :
        -config-path     path to config, by default "./config/config.yml"
        -config-path=./Listeners/Ergo/config/config.yml for debug in JetBrains Goland
        
-Recompile protobuf :
-    
-    protoc -I grpc/ grpc/ergo_listener.proto --go_out=plugins=grpc:grpc
-    protoc -I grpc/client grpc/client/callback_service.proto --go_out=plugins=grpc:grpc/client
-
 Docker :
     
     Build container:

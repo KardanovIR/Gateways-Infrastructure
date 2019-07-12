@@ -256,7 +256,7 @@ func (cl *nodeClient) getTxAndStatus(ctx context.Context, txId string) (proto.Tr
 	}
 	tr, resp, err := cl.nodeClient.Transactions.Info(ctx, id)
 	if err != nil {
-		if resp.StatusCode == 404 {
+		if resp != nil && resp.StatusCode == 404 {
 			if e, ok := err.(*client.RequestError); ok {
 				nr := &models.NodeResponse{}
 				if unErr := json.Unmarshal([]byte(e.Body), nr); unErr != nil {
