@@ -19,7 +19,7 @@ type INodeClient interface {
 
 	Fee(ctx context.Context, senderPublicKey string, feeAssetId string) (uint64, error)
 
-	CreateRawTxBySendersAddress(ctx context.Context, addressFrom string, addressTo string, amount uint64) ([]byte, error)
+	CreateRawTx(ctx context.Context, addressFrom string, outs []*models.Output) ([]byte, error)
 	SendTransaction(ctx context.Context, txSigned []byte) (txId string, err error)
 	TransactionByHash(ctx context.Context, txId string) (*models.TxInfo, error)
 }
