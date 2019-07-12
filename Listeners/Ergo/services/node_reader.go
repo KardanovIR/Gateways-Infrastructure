@@ -66,6 +66,7 @@ func (nr *nodeReader) Start(ctx context.Context) (err error) {
 	lastBlock, err := nr.nodeClient.BlockLast(ctx)
 	if err != nil {
 		log.Errorf("Last block error: %s", err)
+		return err
 	}
 	if uint64(startBlock) > lastBlock.Height {
 		log.Errorf("Configuration start block error: start block %d, current block %d.", startBlock, lastBlock.Height)
