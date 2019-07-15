@@ -37,8 +37,13 @@ func (cl *nodeClient) SendTransaction(ctx context.Context, txSigned []byte) (txI
 		log.Errorf("failed to send tx %s: %s", string(txSigned), err)
 		return "", err
 	}
+	log.Debugf("node return %s", string(sendTxResp))
 	// explorer returns tx id with quotes - replace them
 	txId = replaceQuotesFromSides(sendTxResponse.ID)
+	// explorer returns status code 200 with error response
+	if len(txId) == 0 {
+		return txId, fmt.Errorf("send tx fails with response %s", string(sendTxResp))
+	}
 	return txId, nil
 }
 

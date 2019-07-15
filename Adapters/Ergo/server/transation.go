@@ -2,25 +2,53 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/models"
 )
 
-// create raw transaction by senders's public key
+// create raw transaction with one recipient
 func (s *grpcServer) GetRawTransaction(ctx context.Context, in *pb.RawTransactionRequest) (
 	*pb.RawTransactionReply, error) {
-
 	log := logger.FromContext(ctx)
 	log.Infof("GetRawTransaction: address %s to %s send %s ergo", in.AddressFrom, in.AddressTo, in.Amount)
-	amount, err := strconv.Atoi(in.Amount)
+	outputs := make([]*models.Output, 1)
+	amount, err := strconv.ParseUint(in.Amount, 10, 64)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
-	tx, err := s.nodeClient.CreateRawTxBySendersAddress(ctx, in.AddressFrom, in.AddressTo, uint64(amount))
+	outputs[0] = &models.Output{Address: in.AddressTo, Amount: amount}
+	tx, err := s.nodeClient.CreateRawTx(ctx, in.AddressFrom, outputs)
 	if err != nil {
 		log.Errorf("get raw transaction fails: %s", err)
+		return nil, err
+	}
+	return &pb.RawTransactionReply{Tx: tx}, nil
+}
+
+// create raw transaction with many recipients
+func (s *grpcServer) GetRawMassTransaction(ctx context.Context, in *pb.RawMassTransactionRequest) (*pb.RawTransactionReply, error) {
+	log := logger.FromContext(ctx)
+	log.Infof("GetRawMassTransaction: address %s to %v ergo", in.AddressFrom, in.Outs)
+	if len(in.AddressFrom) == 0 || len(in.Outs) == 0 {
+		return nil, fmt.Errorf("wrong parameters %s, %+v", in.AddressFrom, in.Outs)
+	}
+	outputs := make([]*models.Output, len(in.Outs))
+	for i, o := range in.Outs {
+		amount, err := strconv.ParseUint(o.Amount, 10, 64)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		outputs[i] = &models.Output{Address: o.AddressTo, Amount: amount}
+	}
+	tx, err := s.nodeClient.CreateRawTx(ctx, in.AddressFrom, outputs)
+	if err != nil {
+		log.Errorf("GetRawMassTransaction fails: %s", err)
 		return nil, err
 	}
 	return &pb.RawTransactionReply{Tx: tx}, nil
