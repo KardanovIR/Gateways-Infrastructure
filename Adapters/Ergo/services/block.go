@@ -19,7 +19,11 @@ type Block struct {
 func (cl *nodeClient) getCurrentHeight(ctx context.Context) (uint64, error) {
 	log := logger.FromContext(ctx)
 	log.Info("get current height")
-	r, _ := cl.Request(ctx, http.MethodGet, cl.conf.ExplorerUrl+getCurrentBlockUrl, nil)
+	r, err := cl.Request(ctx, http.MethodGet, cl.conf.ExplorerUrl+getCurrentBlockUrl, nil)
+	if err != nil {
+		log.Errorf("failed to get current block: %s", err)
+		return 0, err
+	}
 	getCurrentBlockResp := BlocksResponse{}
 	if err := json.Unmarshal(r, &getCurrentBlockResp); err != nil {
 		log.Errorf("failed to get current height: %s", err)
