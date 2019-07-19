@@ -49,6 +49,17 @@ func TestGrpcClient_TransactionByHash(t *testing.T) {
 
 }
 
+func TestGrpcClient_AccountBalance(t *testing.T) {
+	ctx, _ := beforeTests()
+
+	balance, err := grpcCl.GetAllBalances(ctx, &adapter.AddressRequest{Address: "3WwHhExDYkWrkjpqe3BuH4FSAzMeMkxZiuhwRpNUoBJrD7BbJpzs"})
+	assert.Nil(t, err)
+	if err != nil {
+		t.FailNow()
+	}
+	assert.Equal(t, "92430000", balance.Amount)
+}
+
 func beforeTests() (context.Context, logger.ILogger) {
 	ctx := context.Background()
 	log, _ := logger.Init(false, logger.DEBUG)
