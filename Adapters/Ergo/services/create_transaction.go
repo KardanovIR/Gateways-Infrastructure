@@ -150,8 +150,12 @@ func (cl *nodeClient) requestUnSpentInputs(ctx context.Context, address string) 
 	log := logger.FromContext(ctx)
 	log.Infof("request unspent inputs for address %s", address)
 	// /transactions/boxes/byAddress/unspent/${address}
-	respUnspent, _ := cl.Request(ctx, http.MethodGet,
+	respUnspent, err := cl.Request(ctx, http.MethodGet,
 		cl.conf.ExplorerUrl+fmt.Sprintf(getUnspentTxByAddressUrlTemplate, address), nil)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
 	unspentTxList := make([]models.UnSpentTx, 0)
 	if err := json.Unmarshal(respUnspent, &unspentTxList); err != nil {
 		log.Errorf("failed to get unspent inputs for address %s: %s", address, err)
