@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Ergo/config"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Ergo/config"
 )
 
 const httpRequestTimeoutMs = 2000
@@ -102,7 +103,11 @@ type TxOutput struct {
 func (cl *nodeClient) BlockLast(ctx context.Context) (*BlockShortInfo, error) {
 	log := logger.FromContext(ctx)
 	log.Debug("get current height")
-	r, _ := cl.Request(ctx, http.MethodGet, cl.conf.Host+getCurrentBlockUrl, nil)
+	r, err := cl.Request(ctx, http.MethodGet, cl.conf.Host+getCurrentBlockUrl, nil)
+	if err != nil {
+		log.Errorf("failed to get last block: %s", err)
+		return nil, err
+	}
 	getCurrentBlockResp := BlocksResponse{}
 	if err := json.Unmarshal(r, &getCurrentBlockResp); err != nil {
 		log.Errorf("failed to get current height: %s", err)
@@ -130,9 +135,12 @@ func (cl *nodeClient) BlockAt(ctx context.Context, blockNumber uint64, currentHe
 		log.Error(err)
 		return nil, err
 	}
-	log.Debugf("blockInfo %+v ", blockInfo)
 	log.Debugf("request for block with id %s", blockInfo.ID)
-	r, _ := cl.Request(ctx, http.MethodGet, cl.conf.Host+fmt.Sprintf(getBlockByIdUrlTemplate, blockInfo.ID), nil)
+	r, err := cl.Request(ctx, http.MethodGet, cl.conf.Host+fmt.Sprintf(getBlockByIdUrlTemplate, blockInfo.ID), nil)
+	if err != nil {
+		log.Errorf("failed to get block by id %s: %s", blockInfo.ID, err)
+		return nil, err
+	}
 	block := Block{}
 	if err := json.Unmarshal(r, &block); err != nil {
 		log.Errorf("failed to get block by id %s: %s", blockInfo.ID, err)
@@ -147,7 +155,11 @@ func (cl *nodeClient) BlockByNumber(ctx context.Context, targetBlockNumber uint6
 	// calculate how much blocks will be skipped
 	offset := lastBlockHeight - targetBlockNumber
 	// request 2 blocks because height can be increased between requests
-	r, _ := cl.Request(ctx, http.MethodGet, cl.conf.Host+fmt.Sprintf(getBlockByNumberUrlTemplate, offset), nil)
+	r, err := cl.Request(ctx, http.MethodGet, cl.conf.Host+fmt.Sprintf(getBlockByNumberUrlTemplate, offset), nil)
+	if err != nil {
+		log.Errorf("failed to get block by number %d: %s", targetBlockNumber, err)
+		return nil, err
+	}
 	blockResp := BlocksResponse{}
 	if err := json.Unmarshal(r, &blockResp); err != nil {
 		log.Errorf("failed to get current height: %s", err)
@@ -182,5 +194,8 @@ func (cl *nodeClient) Request(ctx context.Context, method, url string, body io.R
 		return nil, fmt.Errorf("wrong response status %d, body %s", resp.StatusCode, string(body))
 
 	}
-	return ioutil.ReadAll(resp.Body)
+	respBody, err := ioutil.ReadAll(resp.Body)
+	log := logger.FromContext(ctx)
+	log.Debugf("response: %s", string(respBody))
+	return respBody, err
 }

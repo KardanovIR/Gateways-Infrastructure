@@ -25,23 +25,21 @@ var (
 	ergoTreePrefix = []byte{0x00, 0x08, 0xcd}
 )
 
-type Output struct {
-	address string
-	amount  uint64
-}
-
 type emptyObject struct{}
 
-// CreateRawTxBySendersAddress creates transaction for senders address if private key keeps in adapter
-func (cl *nodeClient) CreateRawTxBySendersAddress(ctx context.Context, addressFrom string,
-	addressTo string, amount uint64) ([]byte, error) {
+// CreateRawTx creates transaction
+func (cl *nodeClient) CreateRawTx(ctx context.Context, addressFrom string, outs []*models.Output) ([]byte, error) {
 	log := logger.FromContext(ctx)
-	log.Infof("call service method 'CreateRawTxBySendersAddress' from %s to %s amount %d",
-		addressFrom, addressTo, amount)
-	if len(addressFrom) == 0 || len(addressTo) == 0 || amount == 0 {
-		return nil, fmt.Errorf("wrong parameters addressFrom %s or addressTo %s or amount %d", addressFrom, addressTo, amount)
+	log.Infof("call service method 'CreateRawTx' from %s to %v",
+		addressFrom, outs)
+	if len(addressFrom) == 0 || len(outs) == 0 {
+		return nil, fmt.Errorf("wrong parameters addressFrom %s or outs", addressFrom)
 	}
-	amount = converter.ToNodeAmount(amount)
+	amount := uint64(0)
+	for _, r := range outs {
+		r.Amount = converter.ToNodeAmount(r.Amount)
+		amount += r.Amount
+	}
 	// get unspent input from explorer
 	unspentTxList, err := cl.requestUnSpentInputs(ctx, addressFrom)
 	if err != nil {
@@ -55,12 +53,12 @@ func (cl *nodeClient) CreateRawTxBySendersAddress(ctx context.Context, addressFr
 		return nil, err
 	}
 
-	outputs := make([]*Output, 0)
+	outputs := make([]*models.Output, 0)
 	// output for recipient
-	outputs = append(outputs, &Output{address: addressTo, amount: amount})
+	outputs = append(outputs, outs...)
 	if inputsAmount > amount+fee {
 		// output for charge (senders address)
-		outputs = append(outputs, &Output{address: addressFrom, amount: inputsAmount - amount - fee})
+		outputs = append(outputs, &models.Output{Address: addressFrom, Amount: inputsAmount - amount - fee})
 	}
 
 	// get current height
@@ -82,6 +80,7 @@ func (cl *nodeClient) CreateRawTxBySendersAddress(ctx context.Context, addressFr
 		log.Error(err)
 		return []byte{}, err
 	}
+	log.Debugf("created tx %+v", string(txBinary))
 	return txBinary, nil
 }
 
@@ -124,12 +123,12 @@ func createTxInputs(ctx context.Context, unspentTxList []models.UnSpentTx, neede
 	return txInputsList, inputsAmount, nil
 }
 
-func (cl *nodeClient) createTxOutputs(ctx context.Context, outputs []*Output, fee, height uint64) []models.TxOutput {
+func (cl *nodeClient) createTxOutputs(ctx context.Context, outputs []*models.Output, fee, height uint64) []models.TxOutput {
 	outputTxList := make([]models.TxOutput, 0)
 	for _, o := range outputs {
 		outputTxList = append(outputTxList, models.TxOutput{
-			ErgoTree:            cl.ergoTreeByAddress(ctx, o.address),
-			Value:               o.amount,
+			ErgoTree:            cl.ergoTreeByAddress(ctx, o.Address),
+			Value:               o.Amount,
 			CreationHeight:      height,
 			Assets:              make([]interface{}, 0),
 			AdditionalRegisters: emptyObject{},
@@ -151,8 +150,12 @@ func (cl *nodeClient) requestUnSpentInputs(ctx context.Context, address string) 
 	log := logger.FromContext(ctx)
 	log.Infof("request unspent inputs for address %s", address)
 	// /transactions/boxes/byAddress/unspent/${address}
-	respUnspent, _ := cl.Request(ctx, http.MethodGet,
+	respUnspent, err := cl.Request(ctx, http.MethodGet,
 		cl.conf.ExplorerUrl+fmt.Sprintf(getUnspentTxByAddressUrlTemplate, address), nil)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
 	unspentTxList := make([]models.UnSpentTx, 0)
 	if err := json.Unmarshal(respUnspent, &unspentTxList); err != nil {
 		log.Errorf("failed to get unspent inputs for address %s: %s", address, err)

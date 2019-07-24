@@ -37,8 +37,13 @@ func (cl *nodeClient) SendTransaction(ctx context.Context, txSigned []byte) (txI
 		log.Errorf("failed to send tx %s: %s", string(txSigned), err)
 		return "", err
 	}
+	log.Debugf("node return %s", string(sendTxResp))
 	// explorer returns tx id with quotes - replace them
 	txId = replaceQuotesFromSides(sendTxResponse.ID)
+	// explorer returns status code 200 with error response
+	if len(txId) == 0 {
+		return txId, fmt.Errorf("send tx fails with response %s", string(sendTxResp))
+	}
 	return txId, nil
 }
 
@@ -60,14 +65,19 @@ func (cl *nodeClient) TransactionByHash(ctx context.Context, txId string) (*mode
 		return nil, err
 	}
 	unconfirmedTx := findTxInList(unconfirmedTxList, txId)
+	hasInUnconfirmed := false
 	if unconfirmedTx != nil {
 		// don't parse all info: not used by another service if tx is unconfirmed. But in fact it should be parsed
-		return &models.TxInfo{Status: models.TxStatusPending}, nil
+		hasInUnconfirmed = true
+		// check in executed tx (because case is real: tx was complete but was kept in unconfirmed)
 	}
 	txResp, err := cl.Request(ctx, http.MethodGet, cl.conf.ExplorerUrl+fmt.Sprintf(TxByIdUrlTemplate, txId), nil)
 	if err != nil {
 		if e, ok := err.(*WrongCodeError); ok {
 			if e.Code == 404 && strings.Contains(e.Body, txIsNotInBlockchain) {
+				if hasInUnconfirmed {
+					return &models.TxInfo{Status: models.TxStatusPending}, nil
+				}
 				return &models.TxInfo{Status: models.TxStatusUnKnown}, nil
 			}
 		}

@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"strings"
 	"sync"
 	"time"
 
@@ -67,6 +66,7 @@ func (nr *nodeReader) Start(ctx context.Context) (err error) {
 	lastBlock, err := nr.nodeClient.BlockLast(ctx)
 	if err != nil {
 		log.Errorf("Last block error: %s", err)
+		return err
 	}
 	if uint64(startBlock) > lastBlock.Height {
 		log.Errorf("Configuration start block error: start block %d, current block %d.", startBlock, lastBlock.Height)
@@ -143,8 +143,7 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *Block) (err error
 	log.Debugf("start process block %d", block.Height())
 	for _, tx := range block.Transactions() {
 		for _, output := range tx.TxOutputs {
-			address := strings.ToLower(output.Address)
-			if err := nr.findAndExecuteTasks(ctx, address, tx.ID); err != nil {
+			if err := nr.findAndExecuteTasks(ctx, output.Address, tx.ID); err != nil {
 				return err
 			}
 		}
