@@ -2,3 +2,4 @@ node:
   host: https://ropsten.infura.io/v3/165e981477d146ecb702fce1ffbef166
   chainId: 3
 port: 5001
+decimals: 8
