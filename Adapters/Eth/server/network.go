@@ -5,6 +5,7 @@ import (
 
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/server/converter"
 )
 
 func (s *grpcServer) GasPrice(ctx context.Context, in *pb.GasPriceRequest) (*pb.GasPriceReply, error) {
@@ -17,7 +18,7 @@ func (s *grpcServer) GasPrice(ctx context.Context, in *pb.GasPriceRequest) (*pb.
 		return nil, err
 	}
 
-	return &pb.GasPriceReply{GasPrice: gasPrice.String()}, nil
+	return &pb.GasPriceReply{GasPrice: converter.ToTargetAmountStr(gasPrice)}, nil
 }
 
 // Get suggested transaction's fee
@@ -31,5 +32,5 @@ func (s *grpcServer) SuggestFee(ctx context.Context, in *pb.EmptyRequest) (*pb.S
 		return nil, err
 	}
 
-	return &pb.SuggestFeeReply{Fee: fee.String()}, nil
+	return &pb.SuggestFeeReply{Fee: converter.ToTargetAmountStr(fee)}, nil
 }

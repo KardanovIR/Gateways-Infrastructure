@@ -8,6 +8,7 @@ import (
 
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/server/converter"
 )
 
 // create raw transaction
@@ -20,6 +21,7 @@ func (s *grpcServer) GetRawTransaction(ctx context.Context, in *pb.RawTransactio
 		log.Error(err)
 		return nil, err
 	}
+	amount = converter.ToNodeAmount(amount)
 	var tx []byte
 	var err error
 	if len(in.Contract) > 0 {
@@ -44,6 +46,7 @@ func (s *grpcServer) GetErc20RawTransaction(ctx context.Context, in *pb.Erc20Raw
 		log.Error(err)
 		return nil, err
 	}
+	amount = converter.ToNodeAmount(amount)
 	var tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount)
 	if err != nil {
 		log.Errorf("transaction's creation fails: %s", err)
@@ -115,8 +118,8 @@ func (s *grpcServer) TransactionByHash(ctx context.Context, in *pb.TransactionBy
 	return &pb.TransactionByHashReply{
 		SenderAddress:    tx.From,
 		RecipientAddress: tx.To,
-		Amount:           tx.Amount,
-		Fee:              tx.Fee,
+		Amount:           converter.ToTargetAmountStr(tx.Amount),
+		Fee:              converter.ToTargetAmountStr(tx.Fee),
 		AssetId:          tx.Contract,
 		Status:           string(tx.Status),
 		TxHash:           tx.TxHash,

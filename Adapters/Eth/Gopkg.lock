@@ -91,10 +91,12 @@
   digest = "1:529d738b7976c3848cae5cf3a8036440166835e389c1f617af701eeb12a0518d"
   name = "github.com/golang/protobuf"
   packages = [
+    "jsonpb",
     "proto",
     "ptypes",
     "ptypes/any",
     "ptypes/duration",
+    "ptypes/struct",
     "ptypes/timestamp",
   ]
   pruneopts = ""
@@ -127,6 +129,14 @@
   pruneopts = ""
   revision = "8cb6e5b959231cc1119e43259c4a608f9c51a241"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:9d4a421989dc8e974f84083adcbb0770774d66e25ad5f81c4c0d177a259f318d"
+  name = "github.com/jnewmano/grpc-json-proxy"
+  packages = ["codec"]
+  pruneopts = ""
+  revision = "844ea2b143ffa2aa1b8dd424ea02e832398d7c6f"
+  version = "0.0.1"
 
 [[projects]]
   digest = "1:961dc3b1d11f969370533390fdf203813162980c858e1dabe827b60940c909a5"
@@ -408,6 +418,7 @@
     "github.com/ethereum/go-ethereum/rlp",
     "github.com/ethereum/go-ethereum/rpc",
     "github.com/golang/protobuf/proto",
+    "github.com/jnewmano/grpc-json-proxy/codec",
     "github.com/magiconair/properties/assert",
     "github.com/spf13/viper",
     "github.com/stretchr/testify/assert",

@@ -159,8 +159,8 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 	txInfo := models.TxInfo{
 		From:     sender.String(),
 		To:       tx.To().String(),
-		Amount:   tx.Value().String(),
-		Fee:      fee.String(),
+		Amount:   tx.Value(),
+		Fee:      fee,
 		Contract: "",
 		TxHash:   tx.Hash().String(),
 		Data:     string(tx.Data()),

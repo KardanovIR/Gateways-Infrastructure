@@ -1,5 +1,7 @@
 package models
 
+import "math/big"
+
 type TxStatus string
 
 const (
@@ -11,10 +13,10 @@ const (
 type TxInfo struct {
 	From     string
 	To       string
-	Amount   string
+	Amount   *big.Int
 	Contract string
 	TxHash   string
-	Fee      string
+	Fee      *big.Int
 	Data     string
 	Status   TxStatus
 }
