@@ -9,6 +9,7 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/server"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/server/converter"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/services"
 )
 
@@ -30,7 +31,7 @@ func main() {
 	log.Infof("eth adapter will be started with configuration %+v", *config.Cfg)
 	ctx := context.Background()
 	ctx = logger.ToContext(ctx, log)
-
+	converter.Init(ctx, config.Cfg.Decimals)
 	if err := services.New(ctx, config.Cfg.Node); err != nil {
 		log.Fatal("can't create node's client: ", err)
 	}

@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/mongodb/mongo-go-driver/bson/objectid"
+	"go.mongodb.org/mongo-driver/bson/objectid"
 )
 
 type ChainState struct {

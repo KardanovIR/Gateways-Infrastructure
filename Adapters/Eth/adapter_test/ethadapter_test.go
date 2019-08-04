@@ -14,6 +14,7 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/server"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/server/converter"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/services"
 )
 
@@ -40,7 +41,7 @@ const (
 // 12) GetNextNonce method: check nonce on generated account: it must be equal 1
 func TestGrpcClient(t *testing.T) {
 	ctx, log := beforeTests()
-	amount, _ := new(big.Int).SetString("100000000000000", 10)
+	amount, _ := new(big.Int).SetString("10000", 10)
 
 	// check fee and transfered amount on predefined address
 	feeReply, err := clientgrpc.GetClient().SuggestFee(ctx, &ethAdapter.EmptyRequest{})
@@ -178,15 +179,15 @@ func TestTokenBalance(t *testing.T) {
 		log.Error(err)
 		t.FailNow()
 	}
-	assert.Equal(t, balances.Amount, "4200000000000000")
+	assert.Equal(t, balances.Amount, "420000")
 	assert.Equal(t, len(balances.TokenBalances), 2)
 	if balances.TokenBalances[0].Contract == contract1 {
-		assert.Equal(t, balances.TokenBalances[0].Amount, "325000000000000000")
-		assert.Equal(t, balances.TokenBalances[1].Amount, "19000000000000000000")
+		assert.Equal(t, balances.TokenBalances[0].Amount, "32500000")
+		assert.Equal(t, balances.TokenBalances[1].Amount, "1900000000")
 		assert.Equal(t, balances.TokenBalances[1].Contract, contract2)
 	} else {
-		assert.Equal(t, balances.TokenBalances[0].Amount, "19000000000000000000")
-		assert.Equal(t, balances.TokenBalances[1].Amount, "325000000000000000")
+		assert.Equal(t, balances.TokenBalances[0].Amount, "19000000")
+		assert.Equal(t, balances.TokenBalances[1].Amount, "32500000")
 		assert.Equal(t, balances.TokenBalances[1].Contract, contract1)
 	}
 }
@@ -220,6 +221,7 @@ func beforeTests() (context.Context, logger.ILogger) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	converter.Init(ctx, config.Cfg.Decimals)
 	err = services.New(ctx, config.Cfg.Node)
 	if err != nil {
 		log.Fatal(err)
