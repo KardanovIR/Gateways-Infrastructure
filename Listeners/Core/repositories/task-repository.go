@@ -30,7 +30,7 @@ func (rep *repository) RemoveTask(ctx context.Context, id string) (err error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("RemoveTask %s", id)
 	if id != "" {
-		objId, err := primitive.FromHex(id)
+		objId, err := primitive.ObjectIDFromHex(id)
 		if err != nil {
 			log.Errorf("task id %s has wrong format: %s", id, err)
 			return err
