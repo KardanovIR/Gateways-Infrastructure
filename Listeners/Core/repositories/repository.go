@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"sync"
 	"time"
 
@@ -52,7 +53,7 @@ func New(ctx context.Context, url, dbName string) error {
 
 func connect(ctx context.Context, url, dbName string) (IRepository, error) {
 	log := logger.FromContext(ctx)
-	mongoClient, err := mongo.Connect(ctx, "mongodb://"+url)
+	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+url))
 	if err != nil {
 		log.Errorf("Failed to create connect configuration to MongoDB %s: %v", url, err)
 		return nil, err
