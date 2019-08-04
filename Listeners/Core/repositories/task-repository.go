@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/objectid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 )
@@ -19,7 +19,7 @@ func (rep *repository) PutTask(ctx context.Context, task *models.Task) (id strin
 			log.Errorf("Inserting task to DB fails: %s", err)
 			return "", err
 		}
-		id := ir.InsertedID.(objectid.ObjectID)
+		id := ir.InsertedID.(primitive.ObjectID)
 		task.Id = id
 		return id.Hex(), nil
 	}
@@ -30,7 +30,7 @@ func (rep *repository) RemoveTask(ctx context.Context, id string) (err error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("RemoveTask %s", id)
 	if id != "" {
-		objId, err := objectid.FromHex(id)
+		objId, err := primitive.FromHex(id)
 		if err != nil {
 			log.Errorf("task id %s has wrong format: %s", id, err)
 			return err

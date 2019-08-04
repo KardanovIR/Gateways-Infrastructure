@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive/objectid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/options"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 )
@@ -37,7 +37,7 @@ func (rep *repository) PutChainState(ctx context.Context, state *models.ChainSta
 		return nil, err
 	}
 	if ur.UpsertedID != nil {
-		state.Id = ur.UpsertedID.(objectid.ObjectID)
+		state.Id = ur.UpsertedID.(primitive.ObjectID)
 	}
 	return state, err
 }
