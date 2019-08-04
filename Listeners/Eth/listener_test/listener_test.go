@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/config"
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/grpc"
 	corePb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/grpc/client"
