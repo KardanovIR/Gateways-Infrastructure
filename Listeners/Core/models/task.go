@@ -1,13 +1,12 @@
 package models
 
 import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
-
-	"go.mongodb.org/mongo-driver/bson/objectid"
 )
 
 type Task struct {
-	Id             objectid.ObjectID `bson:"_id,omitempty"`
+	Id             primitive.ObjectID `bson:"_id,omitempty"`
 	CreatedAt      time.Time         `bson:"createdAt"`
 	UpdatedAt      time.Time         `bson:"updatedAt"`
 	ListenTo       ListenObject      `bson:"listenTo"`
