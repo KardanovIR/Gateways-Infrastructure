@@ -18,6 +18,6 @@ type TxInfo struct {
 	Fee         *big.Int
 	Data        string
 	Status      TxStatus
-	Contract     string
+	Contract    string
 	AssetAmount *big.Int
 }

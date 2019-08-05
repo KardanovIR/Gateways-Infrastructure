@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"github.com/stretchr/testify/assert"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestRepository_PutChainState(t *testing.T) {
