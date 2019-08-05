@@ -19,7 +19,7 @@ func (s *grpcServer) GetNextNonce(ctx context.Context, in *pb.AddressRequest) (*
 		return nil, err
 	}
 
-	return &pb.GetNextNonceReply{Nonce: int64(nonce)}, nil
+	return &pb.GetNextNonceReply{Nonce: nonce}, nil
 }
 
 // Get account's balance

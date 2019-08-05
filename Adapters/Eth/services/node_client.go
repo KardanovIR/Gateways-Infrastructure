@@ -25,9 +25,9 @@ type INodeClient interface {
 	IsAddressValid(ctx context.Context, address string) bool
 
 	// create transaction and return it on RPL encoding
-	CreateRawTransaction(ctx context.Context, addressFrom string, addressTo string, amount *big.Int) ([]byte, error)
+	CreateRawTransaction(ctx context.Context, addressFrom string, addressTo string, amount *big.Int, nonce uint64) ([]byte, error)
 	CreateErc20TokensRawTransaction(ctx context.Context, addressFrom string, contractAddress string, addressTo string,
-		amount *big.Int) ([]byte, error)
+		amount *big.Int, nonce uint64) ([]byte, error)
 	// sign transaction if has private key. rlpTx is transaction for signing on RPL encoding (returned by CreateRawTransaction function)
 	SignTransaction(ctx context.Context, senderAddr string, rlpTx []byte) ([]byte, error)
 	SignTransactionWithPrivateKey(ctx context.Context, privateKey string, rlpTx []byte) ([]byte, error)

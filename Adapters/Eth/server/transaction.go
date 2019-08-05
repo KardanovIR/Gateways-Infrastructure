@@ -25,9 +25,9 @@ func (s *grpcServer) GetRawTransaction(ctx context.Context, in *pb.RawTransactio
 	var tx []byte
 	var err error
 	if len(in.Contract) > 0 {
-		tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount)
+		tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount, in.Nonce)
 	} else {
-		tx, err = s.nodeClient.CreateRawTransaction(ctx, in.AddressFrom, in.AddressTo, amount)
+		tx, err = s.nodeClient.CreateRawTransaction(ctx, in.AddressFrom, in.AddressTo, amount, in.Nonce)
 	}
 	if err != nil {
 		log.Errorf("transaction's creation fails: %s", err)
@@ -47,7 +47,7 @@ func (s *grpcServer) GetErc20RawTransaction(ctx context.Context, in *pb.Erc20Raw
 		return nil, err
 	}
 	amount = converter.ToNodeAmount(amount)
-	var tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount)
+	var tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount, in.Nonce)
 	if err != nil {
 		log.Errorf("transaction's creation fails: %s", err)
 		return nil, err
