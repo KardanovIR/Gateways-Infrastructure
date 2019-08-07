@@ -2,8 +2,9 @@ package converter
 
 import (
 	"context"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/logger"
 	"math/big"
+
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 )
 
 const (
