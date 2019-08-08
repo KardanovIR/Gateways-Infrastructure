@@ -22,7 +22,7 @@ type INodeClient interface {
 	GetNextNonce(ctx context.Context, address string) (uint64, error)
 
 	GenerateAddress(ctx context.Context) (publicAddress string, err error)
-	IsAddressValid(ctx context.Context, address string) bool
+	IsAddressValid(ctx context.Context, address string) (bool, string, error)
 
 	// create transaction and return it on RPL encoding
 	CreateRawTransaction(ctx context.Context, addressFrom string, addressTo string, amount *big.Int) ([]byte, error)

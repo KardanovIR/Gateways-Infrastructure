@@ -25,9 +25,19 @@ func (cl *nodeClient) GenerateAddress(ctx context.Context) (publicAddress string
 	return
 }
 
-func (cl *nodeClient) IsAddressValid(ctx context.Context, address string) bool {
+// check recipient address
+func (cl *nodeClient) IsAddressValid(ctx context.Context, address string) (bool, string, error) {
 	if !common.IsHexAddress(address) {
-		return false
+		return false, "", nil
 	}
-	return true
+	addr := common.HexToAddress(address)
+	code, err := cl.ethClient.CodeAt(ctx, addr, nil)
+	if err != nil {
+		return false, "", err
+	}
+	// is it smart contract
+	if len(code) > 0 {
+		return false, "address is smart contract", err
+	}
+	return true, "", nil
 }
