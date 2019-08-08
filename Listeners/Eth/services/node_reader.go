@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"math/big"
-	"strings"
 	"sync"
 	"time"
 
@@ -189,8 +188,7 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err
 			continue
 		}
 
-		var adr = strings.ToLower(outAddresses.String())
-		tasks, err := nr.rp.FindByAddressOrTxId(ctx, models.ChainType(nr.conf.ChainType), adr, tx.Hash().Hex())
+		tasks, err := nr.rp.FindByAddressOrTxId(ctx, models.ChainType(nr.conf.ChainType), outAddresses.Hex(), tx.Hash().Hex())
 		if err != nil {
 			log.Errorf("error: %s", err)
 			return err
@@ -201,7 +199,7 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err
 			continue
 		}
 
-		log.Infof("-> tx %s has %d tasks, start processing...", tx.Hash().String(), len(tasks))
+		log.Debugf("-> tx %s has %d tasks, start processing...", tx.Hash().String(), len(tasks))
 
 		for _, task := range tasks {
 			log.Infof("->   Start processing task id %s for %v ...", task.Id.Hex(), task.ListenTo)
@@ -221,7 +219,7 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err
 				}
 			}
 
-			log.Infof("->   Task id %s for %s has been proceed successful!", task.Id.Hex(), nr.conf.ChainType)
+			log.Debugf("->   Task id %s for %s has been proceed successful!", task.Id.Hex(), nr.conf.ChainType)
 		}
 
 	}

@@ -3,7 +3,6 @@ package listener_test
 import (
 	"context"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"net"
 	"strconv"
@@ -11,16 +10,19 @@ import (
 	"testing"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/config"
+	"github.com/stretchr/testify/assert"
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/grpc"
 	corePb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/grpc/client"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/server"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
+	coreServ "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/services"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const (
@@ -45,7 +47,7 @@ func TestListener(t *testing.T) {
 	// add tasks Transfer
 	_, err = grpcClient.AddTask(ctx,
 		&pb.AddTaskRequest{
-			ListenTo:     &pb.ListenObject{Type: "Address", Value: "0x9515735d60e8ff4036efaffaf3370f3097615d19"},
+			ListenTo:     &pb.ListenObject{Type: "Address", Value: "0x9515735d60E8fF4036EFAFFAf3370F3097615d19"},
 			CallbackType: string(models.InitOutTx),
 			ProcessId:    "111111111",
 			TaskType:     strconv.Itoa(int(models.OneTime))},
@@ -111,7 +113,7 @@ func beforeTests(ctx context.Context, t *testing.T) {
 			log.Fatal(err)
 		}
 
-		if err := services.NewCallbackService(ctx, config.Cfg.CallbackUrl); err != nil {
+		if err := coreServ.NewCallbackService(ctx, config.Cfg.CallbackUrl, models.Ethereum); err != nil {
 			log.Fatal("Can't create callback service: ", err)
 		}
 
@@ -122,7 +124,7 @@ func beforeTests(ctx context.Context, t *testing.T) {
 
 		go func() {
 			// start grpc server
-			if err := server.InitAndStart(ctx, config.Cfg.Port, repositories.GetRepository()); err != nil {
+			if err := server.InitAndStart(ctx, config.Cfg.Port, repositories.GetRepository(), models.Ethereum); err != nil {
 				log.Fatal("Can't start grpc server", err)
 			}
 		}()
@@ -158,6 +160,14 @@ type coreServerMock struct {
 	t              *testing.T
 }
 
+func (c coreServerMock) InitInTx(context.Context, *corePb.InitInTxRequest) (*corePb.Empty, error) {
+	panic("implement me")
+}
+
+func (c coreServerMock) CompleteTx(context.Context, *corePb.TxRequest) (*corePb.Empty, error) {
+	panic("implement me")
+}
+
 func (c coreServerMock) InitOutTx(ctx context.Context, in *corePb.Request) (*corePb.Empty, error) {
 	assert.Equal(c.t, "111111111", in.ProcessId)
 	assert.Equal(c.t, "0x48094cb5687722d386909162257fa3b07c74e9fca5d03c38331fbcd818544f5b", in.TxHash)
@@ -172,7 +182,7 @@ func (coreServerMock) FinishProcess(context.Context, *corePb.Request) (*corePb.E
 
 func mongoConnect(ctx context.Context, url string, dbName string) *mongo.Database {
 	log := logger.FromContext(ctx)
-	mongoClient, err := mongo.Connect(ctx, "mongodb://"+url)
+	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+url))
 	if err != nil {
 		log.Fatal("Failed to connect to MongoDB at %s: %v", url, err)
 	}
