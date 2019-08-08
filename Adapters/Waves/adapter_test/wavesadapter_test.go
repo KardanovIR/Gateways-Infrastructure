@@ -227,7 +227,7 @@ func beforeTests() (context.Context, logger.ILogger) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = services.New(ctx, config.Cfg.Node)
+	err = services.New(ctx, config.Cfg.Node, config.Cfg.CheckAddressUrl)
 	if err != nil {
 		log.Fatal(err)
 	}
