@@ -17,7 +17,7 @@ import (
 )
 
 func (cl *nodeClient) CreateRawTransaction(ctx context.Context, addressFrom string, addressTo string,
-	amount *big.Int) ([]byte, error) {
+	amount *big.Int, nonce uint64) ([]byte, error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("call service method 'CreateRawTransaction': send %s from %s to %s", amount, addressFrom, addressTo)
 	ok, _, err := cl.IsAddressValid(ctx, addressTo)
@@ -32,11 +32,6 @@ func (cl *nodeClient) CreateRawTransaction(ctx context.Context, addressFrom stri
 		return nil, fmt.Errorf("can't get suggected gas price %s", err)
 	}
 	log.Debugf("suggest gas price %s", gasPrice)
-	nonce, err := cl.GetNextNonce(ctx, addressFrom)
-	if err != nil {
-		return nil, fmt.Errorf("can't get next nonce for address %s: %s", addressFrom, err)
-	}
-	log.Debugf("nonce will be %d", nonce)
 	tx := types.NewTransaction(
 		nonce,
 		common.HexToAddress(addressTo),
@@ -53,7 +48,7 @@ func (cl *nodeClient) CreateRawTransaction(ctx context.Context, addressFrom stri
 }
 
 func (cl *nodeClient) CreateErc20TokensRawTransaction(ctx context.Context, addressFrom string, contractAddress string,
-	addressTo string, amount *big.Int) ([]byte, error) {
+	addressTo string, amount *big.Int, nonce uint64) ([]byte, error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("call service method 'CreateErc20TokensRawTransaction': send %s tokens from %s to %s; contract %s",
 		amount, addressFrom, addressTo, contractAddress)
@@ -69,11 +64,6 @@ func (cl *nodeClient) CreateErc20TokensRawTransaction(ctx context.Context, addre
 		return nil, fmt.Errorf("can't get suggected gas price %s", err)
 	}
 	log.Debugf("suggest gas price %s", gasPrice)
-	nonce, err := cl.GetNextNonce(ctx, addressFrom)
-	log.Debugf("nonce will be %d", nonce)
-	if err != nil {
-		return nil, fmt.Errorf("can't get next nonce for address %s: %s", addressFrom, err)
-	}
 	sender := common.HexToAddress(addressFrom)
 	tokenAddress := common.HexToAddress(contractAddress)
 	data := cl.contractProvider.CreateTransferTokenData(ctx, addressTo, amount)

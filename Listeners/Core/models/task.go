@@ -7,12 +7,12 @@ import (
 
 type Task struct {
 	Id             primitive.ObjectID `bson:"_id,omitempty"`
-	CreatedAt      time.Time         `bson:"createdAt"`
-	UpdatedAt      time.Time         `bson:"updatedAt"`
-	ListenTo       ListenObject      `bson:"listenTo"`
-	Callback       Callback          `bson:"callback"`
-	Type           TaskType          `bson:"taskType"`
-	BlockchainType ChainType         `bson:"blockchainType"`
+	CreatedAt      time.Time          `bson:"createdAt"`
+	UpdatedAt      time.Time          `bson:"updatedAt"`
+	ListenTo       ListenObject       `bson:"listenTo"`
+	Callback       Callback           `bson:"callback"`
+	Type           TaskType           `bson:"taskType"`
+	BlockchainType ChainType          `bson:"blockchainType"`
 }
 
 type Callback struct {
