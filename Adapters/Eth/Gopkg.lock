@@ -291,14 +291,6 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:df9598560d34092bd7c2f0e849fba15a27035c55abfe3bab032c3d25f14d1a4b"
-  name = "github.com/wavesplatform/GatewaysInfrastructure"
-  packages = ["Adapters/Ergo/logger"]
-  pruneopts = "UT"
-  revision = "b2200571afa27463e15cdc6d80673d709d033774"
-  version = "v1.1.5"
-
-[[projects]]
   digest = "1:777e729b475d3895c7229552aa10076f0d177daf37c0a72258006d046d329960"
   name = "go.uber.org/atomic"
   packages = ["."]
@@ -473,7 +465,6 @@
     "github.com/magiconair/properties/assert",
     "github.com/spf13/viper",
     "github.com/stretchr/testify/assert",
-    "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/logger",
     "go.uber.org/zap",
     "go.uber.org/zap/zapcore",
     "golang.org/x/crypto/sha3",

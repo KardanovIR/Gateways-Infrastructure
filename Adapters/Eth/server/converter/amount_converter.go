@@ -2,7 +2,7 @@ package converter
 
 import (
 	"context"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 	"math/big"
 )
 
