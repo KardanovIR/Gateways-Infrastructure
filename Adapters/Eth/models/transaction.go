@@ -16,7 +16,7 @@ type TxInfo struct {
 	Amount      *big.Int
 	TxHash      string
 	Fee         *big.Int
-	Data        string
+	Data        []byte
 	Status      TxStatus
 	Contract    string
 	AssetAmount *big.Int
