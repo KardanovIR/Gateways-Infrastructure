@@ -20,6 +20,13 @@ func (cl *nodeClient) CreateRawTransaction(ctx context.Context, addressFrom stri
 	amount *big.Int, nonce uint64) ([]byte, error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("call service method 'CreateRawTransaction': send %s from %s to %s", amount, addressFrom, addressTo)
+	ok, _, err := cl.IsAddressValid(ctx, addressTo)
+	if err != nil {
+		return nil, fmt.Errorf("check address %s fails: %s", addressTo, err)
+	}
+	if !ok {
+		return nil, fmt.Errorf("address %s is not valid", addressTo)
+	}
 	gasPrice, err := cl.SuggestGasPrice(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("can't get suggected gas price %s", err)
@@ -45,7 +52,13 @@ func (cl *nodeClient) CreateErc20TokensRawTransaction(ctx context.Context, addre
 	log := logger.FromContext(ctx)
 	log.Debugf("call service method 'CreateErc20TokensRawTransaction': send %s tokens from %s to %s; contract %s",
 		amount, addressFrom, addressTo, contractAddress)
-
+	ok, _, err := cl.IsAddressValid(ctx, addressTo)
+	if err != nil {
+		return nil, fmt.Errorf("check address %s fails: %s", addressTo, err)
+	}
+	if !ok {
+		return nil, fmt.Errorf("address %s is not valid", addressTo)
+	}
 	gasPrice, err := cl.SuggestGasPrice(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("can't get suggected gas price %s", err)

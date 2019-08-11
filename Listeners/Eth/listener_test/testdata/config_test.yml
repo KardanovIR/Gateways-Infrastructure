@@ -5,7 +5,7 @@ node:
   chain: ETH
 
 db:
-  name: block_db
+  name: block_db_test
   host: localhost:27017
 port: 5001
 callbackUrl: localhost:5020
