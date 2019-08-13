@@ -65,8 +65,14 @@ func (cl *nodeClient) CreateErc20TokensRawTransaction(ctx context.Context, addre
 	}
 	log.Debugf("suggest gas price %s", gasPrice)
 	sender := common.HexToAddress(addressFrom)
+	recipient := common.HexToAddress(addressTo)
 	tokenAddress := common.HexToAddress(contractAddress)
-	data := cl.contractProvider.CreateTransferTokenData(ctx, addressTo, amount)
+
+	data, err := ERC20TransferData(recipient, amount)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
 
 	gasLimit, err := cl.ethClient.EstimateGas(context.Background(), ethereum.CallMsg{
 		From: sender,
@@ -157,17 +163,31 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 		log.Errorf("can't get sender for tx %s: %s", txID, err)
 		return nil, err
 	}
-	// Todo do for erc-20 tokens: another implementation for recipient, amount
+
 	fee := new(big.Int).Mul(big.NewInt(int64(tx.Gas())), tx.GasPrice())
 	txInfo := models.TxInfo{
-		From:     sender.String(),
-		To:       tx.To().String(),
-		Amount:   tx.Value(),
-		Fee:      fee,
-		Contract: "",
-		TxHash:   tx.Hash().String(),
-		Data:     string(tx.Data()),
-		Status:   status,
+		From:   sender.String(),
+		Amount: tx.Value(),
+		Fee:    fee,
+		TxHash: tx.Hash().String(),
+		Data:   tx.Data(),
+		Status: status,
+	}
+	isERC20Transfers, err := CheckERC20Transfers(tx.Data())
+	if err != nil {
+		return nil, err
+	}
+	if isERC20Transfers {
+		log.Infof("there are not erc20 transfers in tx %s: %s", txID, err)
+		txInfo.To = tx.To().Hex()
+	} else {
+		transferParams, err := ParseERC20TransferParams(tx.Data())
+		if err != nil {
+			return nil, err
+		}
+		txInfo.To = transferParams.To.Hex()
+		txInfo.AssetAmount = transferParams.Value
+		txInfo.Contract = tx.To().Hex()
 	}
 	return &txInfo, nil
 }

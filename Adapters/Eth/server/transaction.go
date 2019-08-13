@@ -121,6 +121,7 @@ func (s *grpcServer) TransactionByHash(ctx context.Context, in *pb.TransactionBy
 		Amount:           converter.ToTargetAmountStr(tx.Amount),
 		Fee:              converter.ToTargetAmountStr(tx.Fee),
 		AssetId:          tx.Contract,
+		AssetAmount:      converter.ToTargetAmountStr(tx.AssetAmount),
 		Status:           string(tx.Status),
 		TxHash:           tx.TxHash,
 		Data:             tx.Data,

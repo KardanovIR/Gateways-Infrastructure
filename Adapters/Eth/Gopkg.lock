@@ -59,10 +59,11 @@
   revision = "37f05ff46ffa7a825d1b24cf2b62d4a4c1a9d2e8"
 
 [[projects]]
-  digest = "1:33aaff868560013c5384e9052441b8c8e101e2a290db264980ab86603ed7b20b"
+  digest = "1:afec88c54160fb8f79e1fea56187d8c6471d8f89f4fb713b87f24bf24a5e563f"
   name = "github.com/ethereum/go-ethereum"
   packages = [
     ".",
+    "accounts/abi",
     "common",
     "common/hexutil",
     "common/math",
@@ -81,7 +82,7 @@
     "rpc",
     "trie",
   ]
-  pruneopts = "T"
+  pruneopts = "UT"
   revision = "b7b2f60f866d92e75db5bfe5be51b48eadeb3150"
   version = "v1.9.1"
 
@@ -452,6 +453,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/ethereum/go-ethereum",
+    "github.com/ethereum/go-ethereum/accounts/abi",
     "github.com/ethereum/go-ethereum/common",
     "github.com/ethereum/go-ethereum/core/types",
     "github.com/ethereum/go-ethereum/crypto",
