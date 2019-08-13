@@ -173,11 +173,18 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 		Data:   tx.Data(),
 		Status: status,
 	}
-	transferParams, err := ParseERC20TransferParams(tx.Data())
+	isERC20Transfers, err := CheckERC20Transfers(tx.Data())
 	if err != nil {
-		log.Infof("there is erc20 transfers", txID, err)
+		return nil, err
+	}
+	if isERC20Transfers {
+		log.Infof("there are not erc20 transfers in tx %s: %s", txID, err)
 		txInfo.To = tx.To().Hex()
 	} else {
+		transferParams, err := ParseERC20TransferParams(tx.Data())
+		if err != nil {
+			return nil, err
+		}
 		txInfo.To = transferParams.To.Hex()
 		txInfo.AssetAmount = transferParams.Value
 		txInfo.Contract = tx.To().Hex()

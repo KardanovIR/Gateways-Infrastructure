@@ -183,10 +183,17 @@ message TransactionByHashReply {
     string sendersPublicKey = 2;
     string recipientAddress = 3;
     string amount = 4;
-    string assetAmount = 5;
-    string assetId = 6;
-    string txHash = 7;
-    string fee = 8;
-    bytes  data = 9;
-    string status = 10;
+    string assetId = 5;
+    string txHash = 6;
+    string fee = 7;
+    bytes data = 8;
+    string status = 9;
+    repeated InputOutput inputs = 10;
+    repeated InputOutput outputs = 11;
+    string assetAmount = 12;
+}
+
+message InputOutput {
+    string address = 1;
+    string amount = 2;
 }

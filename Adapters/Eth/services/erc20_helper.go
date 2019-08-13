@@ -51,6 +51,20 @@ func ParseERC20TransferParams(data []byte) (*ERC20TransferParams, error) {
 	return transferParams, nil
 }
 
+func CheckERC20Transfers(data []byte)(bool, error){
+	if (len(data) < 4) {
+		return false, nil
+	}
+	method, err := erc20TokenABI.MethodById(data)
+	if err != nil {
+		return false, err
+	}
+	if (method.Name == "transfer") {
+		return true, nil
+	}
+	return false, nil
+}
+
 // TransferEvent is used by abi.unpack
 type TransferEvent struct {
 	From  common.Address
