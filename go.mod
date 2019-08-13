@@ -11,6 +11,7 @@ require (
 	github.com/golang/protobuf v1.3.2
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/jnewmano/grpc-json-proxy v0.0.0-20190711184636-c105eed9ab4a
+	github.com/magiconair/properties v1.8.0
 	github.com/mongodb/mongo-go-driver v1.0.4
 	github.com/mr-tron/base58 v1.1.2 // indirect
 	github.com/rs/cors v1.6.0 // indirect
