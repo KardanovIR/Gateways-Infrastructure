@@ -64,8 +64,13 @@ func TestNodeClient_Transactions(t *testing.T) {
 	log.Infof("Private hex %s, public address %s",
 		hex.EncodeToString(crypto.FromECDSA(cl.(*nodeClient).privateKeys[address2])), address2)
 
+	nonce, err := GetNodeClient().GetNextNonce(ctx, address)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
 	// send 0.000001 ETH to receiver
-	tx, err := GetNodeClient().CreateRawTransaction(ctx, address, address2, amount)
+	tx, err := GetNodeClient().CreateRawTransaction(ctx, address, address2, amount, nonce)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -102,7 +107,12 @@ func TestNodeClient_Transactions(t *testing.T) {
 		t.FailNow()
 	}
 	amountBack := new(big.Int).Sub(balance, fee2)
-	tx2, err := GetNodeClient().CreateRawTransaction(ctx, address2, address, amountBack)
+	nonce, err = GetNodeClient().GetNextNonce(ctx, address2)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	tx2, err := GetNodeClient().CreateRawTransaction(ctx, address2, address, amountBack, nonce)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -134,8 +144,12 @@ func TestNodeClient_SendErc20(t *testing.T) {
 
 	address2 := "0x7D7EB567Df197471A3C43e504844883538356635"
 	//privateKey2 := "f0229190763eb29915c40f1e439f510461ec31d6228eceb434fad13659aef0c1"
-
-	tx, err := GetNodeClient().CreateErc20TokensRawTransaction(ctx, address1, contractAddress, address2, amount)
+	nonce, err := GetNodeClient().GetNextNonce(ctx, address1)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	tx, err := GetNodeClient().CreateErc20TokensRawTransaction(ctx, address1, contractAddress, address2, amount, nonce)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
