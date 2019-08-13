@@ -29,3 +29,14 @@ func (s *grpcServer) ValidateAddress(ctx context.Context, in *pb.AddressRequest)
 	}
 	return &pb.ValidateAddressReply{Valid: ok}, nil
 }
+
+func (s *grpcServer) CheckAddress(ctx context.Context, in *pb.CheckAddressRequest) (*pb.ValidateAddressReply, error) {
+	log := logger.FromContext(ctx)
+	log.Infof("CheckAddress %s for asset id %s", in.Address, in.AssetId)
+	var ok, err = s.nodeClient.CheckAddress(ctx, in.Address, in.AssetId)
+	if err != nil {
+		log.Debugf("check address fails: %s", err)
+		return nil, err
+	}
+	return &pb.ValidateAddressReply{Valid: ok}, nil
+}

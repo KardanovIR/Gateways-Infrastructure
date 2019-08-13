@@ -3,6 +3,7 @@ node:
   chainId: W
   apiKey:
 port: 5002
+check_address_url:
 
 #config for vostok
 #node:

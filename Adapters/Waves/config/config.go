@@ -18,13 +18,14 @@ const (
 var Cfg *Config
 
 type Config struct {
-	Node Node   `mapstructure:"NODE"`
-	Port string `mapstructure:"PORT"`
+	Node            Node   `mapstructure:"NODE"`
+	Port            string `mapstructure:"PORT"`
+	CheckAddressUrl string `mapstructure:"CHECK_ADDRESS_URL"`
 }
 
 func (c *Config) String() string {
-	return fmt.Sprintf("NODE_HOST: %s, NODE_CHAINID: %s, PORT: %s",
-		c.Node.Host, c.Node.ChainID, c.Port,
+	return fmt.Sprintf("NODE_HOST: %s, NODE_CHAINID: %s, PORT: %s, CHECK_ADDRESS_URL: %s",
+		c.Node.Host, c.Node.ChainID, c.Port, c.CheckAddressUrl,
 	)
 }
 
