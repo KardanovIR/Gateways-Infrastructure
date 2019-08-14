@@ -183,11 +183,6 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err
 	for _, tx := range txs {
 		outAddresses := tx.To()
 
-		if outAddresses == nil {
-			log.Debugf("nil address:", err)
-			continue
-		}
-
 		isERC20Transfers, err := CheckERC20Transfers(tx.Data())
 		if err != nil {
 			log.Debugf("error checking erc20 tx", err)
@@ -199,6 +194,11 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err
 				continue
 			}
 			outAddresses = &transferParams.To
+		}
+
+		if outAddresses == nil {
+			log.Debugf("nil address:", err)
+			continue
 		}
 
 		tasks, err := nr.rp.FindByAddressOrTxId(ctx, models.ChainType(nr.conf.ChainType), outAddresses.Hex(), tx.Hash().Hex())
