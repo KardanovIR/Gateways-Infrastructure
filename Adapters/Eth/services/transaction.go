@@ -172,7 +172,7 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 	if err != nil {
 		return nil, err
 	}
-	if isERC20Transfers {
+	if !isERC20Transfers {
 		log.Infof("there are not erc20 transfers in tx %s: %s", txID, err)
 		txInfo.To = tx.To().Hex()
 		signer := types.NewEIP155Signer(big.NewInt(cl.chainID))
