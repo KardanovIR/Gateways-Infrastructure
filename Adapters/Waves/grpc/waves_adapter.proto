@@ -47,6 +47,9 @@ service Adapter {
     // Get transaction
     rpc TransactionByHash (TransactionByHashRequest) returns (TransactionByHashReply) {
     }
+    // Check address
+    rpc CheckAddress (CheckAddressRequest) returns (ValidateAddressReply) {
+    }
 }
 
 // The request message for getting last block
@@ -189,4 +192,10 @@ message TransactionByHashReply {
 message InputOutput {
     string address = 1;
     string amount = 2;
+}
+
+// The request message for check address
+message CheckAddressRequest {
+    string address = 1;
+    string assetId = 2;
 }

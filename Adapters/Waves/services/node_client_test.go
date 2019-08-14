@@ -147,7 +147,7 @@ func beforeTest() (context.Context, logger.ILogger) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := New(ctx, config.Cfg.Node); err != nil {
+	if err := New(ctx, config.Cfg.Node, config.Cfg.CheckAddressUrl); err != nil {
 		log.Fatal("can't create node's client: ", err)
 	}
 	return ctx, log

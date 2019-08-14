@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io"
+	"net/http"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
 	"github.com/wavesplatform/gowaves/pkg/crypto"
@@ -41,4 +42,30 @@ func (cl *nodeClient) ValidateAddress(ctx context.Context, address string) (bool
 			string(a[1]), string(cl.chainID.Schema()))
 	}
 	return a.Valid()
+}
+
+func (cl *nodeClient) CheckAddress(ctx context.Context, address string, assetID string) (bool, error) {
+	log := logger.FromContext(ctx)
+	log.Infof("call service method 'CheckAddress' for %s", address)
+	if len(cl.CheckAddressUrl) == 0 {
+		return true, nil
+	}
+	url := fmt.Sprintf("%s/%s", cl.CheckAddressUrl, address)
+	log.Infof("call external service for check address for %s", url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return false, err
+	}
+	req.Header.Set("X-API-Key", cl.nodeClient.GetOptions().ApiKey)
+	assetsList := make([]string, 0)
+	if _, err := cl.nodeClient.Do(ctx, req, &assetsList); err != nil {
+		log.Errorf("CheckAddress fails: %s", err)
+		return false, err
+	}
+	for _, a := range assetsList {
+		if a == assetID {
+			return false, nil
+		}
+	}
+	return true, nil
 }

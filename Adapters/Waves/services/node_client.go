@@ -17,6 +17,7 @@ import (
 type INodeClient interface {
 	GenerateAddress(ctx context.Context) (publicAddress string, err error)
 	ValidateAddress(ctx context.Context, address string) (bool, error)
+	CheckAddress(ctx context.Context, address string, assetID string) (bool, error)
 	GetBalance(ctx context.Context, address string) (uint64, error)
 	GetAllBalances(ctx context.Context, address string) (*models.AccountBalance, error)
 
@@ -38,7 +39,8 @@ type nodeClient struct {
 	nodeClient *client.Client
 	chainID    models.NetworkType
 	// private keys for addresses
-	privateKeys map[string]crypto.SecretKey
+	privateKeys     map[string]crypto.SecretKey
+	CheckAddressUrl string
 }
 
 var (
@@ -47,7 +49,7 @@ var (
 )
 
 // New create node's client with connection to Waves node
-func New(ctx context.Context, conf config.Node) error {
+func New(ctx context.Context, conf config.Node, checkAddressUrl string) error {
 	log := logger.FromContext(ctx)
 	var err error
 	onceRPCClientInstance.Do(func() {
@@ -62,7 +64,14 @@ func New(ctx context.Context, conf config.Node) error {
 			return
 		}
 
-		cl = &nodeClient{nodeClient: wavesClient, chainID: conf.ChainID, privateKeys: make(map[string]crypto.SecretKey)}
+		cl = &nodeClient{
+			nodeClient:      wavesClient,
+			chainID:         conf.ChainID,
+			privateKeys:     make(map[string]crypto.SecretKey),
+			CheckAddressUrl: checkAddressUrl}
+		if len(checkAddressUrl) == 0 {
+			log.Warn("node's client will be created without additional address check function")
+		}
 	})
 	return err
 }
