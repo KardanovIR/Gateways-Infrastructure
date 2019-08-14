@@ -158,15 +158,10 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 	if status == models.TxStatusUnKnown {
 		return &models.TxInfo{Status: status}, nil
 	}
-	sender, err := types.Sender(types.NewEIP155Signer(big.NewInt(cl.chainID)), tx)
-	if err != nil {
-		log.Errorf("can't get sender for tx %s: %s", txID, err)
-		return nil, err
-	}
+
 
 	fee := new(big.Int).Mul(big.NewInt(int64(tx.Gas())), tx.GasPrice())
 	txInfo := models.TxInfo{
-		From:   sender.String(),
 		Amount: tx.Value(),
 		Fee:    fee,
 		TxHash: tx.Hash().String(),
@@ -177,9 +172,16 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 	if err != nil {
 		return nil, err
 	}
-	if isERC20Transfers {
+	if !isERC20Transfers {
 		log.Infof("there are not erc20 transfers in tx %s: %s", txID, err)
 		txInfo.To = tx.To().Hex()
+		signer := types.NewEIP155Signer(big.NewInt(cl.chainID))
+		sender, err := types.Sender(signer, tx)
+		if err != nil {
+			log.Errorf("can't get sender for tx %s: %s", txID, err)
+			return nil, err
+		}
+		txInfo.From = sender.String()
 	} else {
 		transferParams, err := ParseERC20TransferParams(tx.Data())
 		if err != nil {
@@ -188,6 +190,7 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 		txInfo.To = transferParams.To.Hex()
 		txInfo.AssetAmount = transferParams.Value
 		txInfo.Contract = tx.To().Hex()
+		txInfo.From = transferParams.From.Hex()
 	}
 	return &txInfo, nil
 }
