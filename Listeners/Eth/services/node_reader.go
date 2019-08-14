@@ -188,6 +188,18 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err
 			continue
 		}
 
+		isERC20Transfers, err := CheckERC20Transfers(tx.Data())
+		if err != nil {
+			return err
+		}
+		if isERC20Transfers {
+			transferParams, err := ParseERC20TransferParams(tx.Data())
+			if err != nil {
+				return err
+			}
+			outAddresses = &transferParams.To
+		}
+
 		tasks, err := nr.rp.FindByAddressOrTxId(ctx, models.ChainType(nr.conf.ChainType), outAddresses.Hex(), tx.Hash().Hex())
 		if err != nil {
 			log.Errorf("error: %s", err)
