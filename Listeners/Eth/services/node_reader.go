@@ -184,18 +184,19 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err
 		outAddresses := tx.To()
 
 		if outAddresses == nil {
-			log.Debugf("nil address", err)
+			log.Debugf("nil address:", err)
 			continue
 		}
 
 		isERC20Transfers, err := CheckERC20Transfers(tx.Data())
 		if err != nil {
-			return err
+			log.Debugf("error checking erc20 tx", err)
 		}
 		if isERC20Transfers {
 			transferParams, err := ParseERC20TransferParams(tx.Data())
 			if err != nil {
-				return err
+				log.Debugf("can't parse tx:", err)
+				continue
 			}
 			outAddresses = &transferParams.To
 		}
