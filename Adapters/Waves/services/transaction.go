@@ -222,7 +222,7 @@ func (cl *nodeClient) TransactionByHash(ctx context.Context, txId string) (*mode
 			Fee:             strconv.FormatUint(tx.Fee, decimalBase),
 			AssetId:         assetId,
 			TxHash:          tx.ID.String(),
-			Data:            tx.Attachment.String(),
+			Data:            []byte(tx.Attachment.String()),
 			Status:          status,
 		}
 		log.Infof("service method 'TransactionByHash' return %+v", txInfo)
