@@ -1,5 +1,5 @@
 node:
-  host: https://ropsten.infura.io/v3/165e981477d146ecb702fce1ffbef166
+  host: https://ropsten.infura.io/v3/3b59a3e5f8ff42ee8cd1aa1b2fc8b335
   startBlock: 5202062
   confirmations: 6
   chain: ETH
