@@ -96,6 +96,15 @@ func TestGrpcClient(t *testing.T) {
 		log.Fatal(err)
 	}
 	log.Infof("send transaction %s", sendTxReply.TxHash)
+
+	time.Sleep(1 * time.Second)
+	txByHashReply, err := clientgrpc.GetClient().TransactionByHash(ctx, &ethAdapter.TransactionByHashRequest{TxHash: sendTxReply.TxHash})
+	if err != nil {
+		log.Fatal(err)
+	}
+	assert.Equal(t, "PENDING", string(txByHashReply.Status))
+	assert.Equal(t, "10000", string(txByHashReply.Amount))
+
 	if err := waitForTxComplete(ctx, sendTxReply.TxHash); err != nil {
 		log.Fatal(err)
 	}
@@ -161,7 +170,40 @@ func TestGrpcClient(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	assert.Equal(t, uint64(1), nonceReply.Nonce)
+	assert.Equal(t, int64(1), nonceReply.Nonce)
+}
+
+func TestTransactionByHash(t *testing.T) {
+	ctx, log := beforeTests()
+	reply, err := clientgrpc.GetClient().TransactionByHash(ctx, &ethAdapter.TransactionByHashRequest{
+		TxHash: "0x9552c6303ae43bd9b4d96bd31eca00faac6abe9c68511b8591ca74c588bb1e52",
+	})
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	assert.Equal(t, "0", reply.Amount)
+	assert.Equal(t, "1300000000", reply.AssetAmount)
+	assert.Equal(t, "0x1ea5462eD38dDAB891de647b24fBD664a050635C", reply.SenderAddress)
+	assert.Equal(t, "0x8ec23aCbe3Eed99E92d6D7a85a27A45dA3A04e7d", reply.RecipientAddress)
+	assert.Equal(t, "SUCCESS", reply.Status)
+	assert.Equal(t, "36590", reply.Fee)
+	assert.Equal(t, "0x722dd3F80BAC40c951b51BdD28Dd19d435762180", reply.AssetId)
+
+	reply2, err := clientgrpc.GetClient().TransactionByHash(ctx, &ethAdapter.TransactionByHashRequest{
+		TxHash: "0xeba0f8235cd19537f85912ec48b533301bf3ba9c69cb47f3aaf9f5d4dda96a08",
+	})
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	assert.Equal(t, "0", reply2.Amount)
+	assert.Equal(t, "191910", reply2.AssetAmount)
+	assert.Equal(t, "0x1ea5462eD38dDAB891de647b24fBD664a050635C", reply2.SenderAddress)
+	assert.Equal(t, "0x8ec23aCbe3Eed99E92d6D7a85a27A45dA3A04e7d", reply2.RecipientAddress)
+	assert.Equal(t, "FAILED", reply2.Status)
+	assert.Equal(t, "35610", reply2.Fee)
+	assert.Equal(t, "0x722dd3F80BAC40c951b51BdD28Dd19d435762180", reply2.AssetId)
 }
 
 func TestTokenBalance(t *testing.T) {

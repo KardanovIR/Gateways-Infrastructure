@@ -64,13 +64,8 @@ func TestNodeClient_Transactions(t *testing.T) {
 	log.Infof("Private hex %s, public address %s",
 		hex.EncodeToString(crypto.FromECDSA(cl.(*nodeClient).privateKeys[address2])), address2)
 
-	nonce, err := GetNodeClient().GetNextNonce(ctx, address)
-	if err != nil {
-		log.Error(err)
-		t.FailNow()
-	}
 	// send 0.000001 ETH to receiver
-	tx, err := GetNodeClient().CreateRawTransaction(ctx, address, address2, amount, nonce)
+	tx, err := GetNodeClient().CreateRawTransaction(ctx, address, address2, amount)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -107,12 +102,7 @@ func TestNodeClient_Transactions(t *testing.T) {
 		t.FailNow()
 	}
 	amountBack := new(big.Int).Sub(balance, fee2)
-	nonce, err = GetNodeClient().GetNextNonce(ctx, address2)
-	if err != nil {
-		log.Error(err)
-		t.FailNow()
-	}
-	tx2, err := GetNodeClient().CreateRawTransaction(ctx, address2, address, amountBack, nonce)
+	tx2, err := GetNodeClient().CreateRawTransaction(ctx, address2, address, amountBack)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -144,12 +134,8 @@ func TestNodeClient_SendErc20(t *testing.T) {
 
 	address2 := "0x7D7EB567Df197471A3C43e504844883538356635"
 	//privateKey2 := "f0229190763eb29915c40f1e439f510461ec31d6228eceb434fad13659aef0c1"
-	nonce, err := GetNodeClient().GetNextNonce(ctx, address1)
-	if err != nil {
-		log.Error(err)
-		t.FailNow()
-	}
-	tx, err := GetNodeClient().CreateErc20TokensRawTransaction(ctx, address1, contractAddress, address2, amount, nonce)
+
+	tx, err := GetNodeClient().CreateErc20TokensRawTransaction(ctx, address1, contractAddress, address2, amount)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -165,6 +151,16 @@ func TestNodeClient_SendErc20(t *testing.T) {
 		log.Error(err)
 		t.FailNow()
 	}
+	time.Sleep(1 * time.Second)
+	info, err := GetNodeClient().TransactionInfo(ctx, txId)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	assert.Equal(t, "PENDING", string(info.Status))
+	assert.Equal(t, "100000000000000", info.AssetAmount.String())
+	assert.Equal(t, "0x5F862eff5Fb0F2b6B3d83F714A8fe581a8d78e62", info.From)
+	assert.Equal(t, "0x7D7EB567Df197471A3C43e504844883538356635", info.To)
 	err = waitForTxComplete(ctx, txId)
 	if err != nil {
 		log.Error(err)
