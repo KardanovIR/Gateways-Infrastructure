@@ -77,18 +77,11 @@ func TestGrpcClient(t *testing.T) {
 		return
 	}
 	// send 0.000001 ETH to receiver
-	nonce, err := clientgrpc.GetClient().GetNextNonce(ctx, &ethAdapter.AddressRequest{
-		Address: address,
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
 	address2 := address2Reply.Address
 	tx, err := clientgrpc.GetClient().GetRawTransaction(ctx, &ethAdapter.RawTransactionRequest{
 		AddressFrom: address,
 		AddressTo:   address2,
 		Amount:      amount.String(),
-		Nonce:       nonce.Nonce,
 	})
 	if err != nil {
 		log.Fatal(err)
