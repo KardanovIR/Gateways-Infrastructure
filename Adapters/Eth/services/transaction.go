@@ -16,6 +16,8 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/models"
 )
 
+const FailedTxStatus = 0
+
 func (cl *nodeClient) CreateRawTransaction(ctx context.Context, addressFrom string, addressTo string,
 	amount *big.Int) ([]byte, error) {
 	log := logger.FromContext(ctx)
@@ -168,9 +170,31 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 	if status == models.TxStatusUnKnown {
 		return &models.TxInfo{Status: status}, nil
 	}
-
-	fee := new(big.Int).Mul(big.NewInt(int64(tx.Gas())), tx.GasPrice())
+	// sender
+	signer := types.NewEIP155Signer(big.NewInt(cl.chainID))
+	sender, err := types.Sender(signer, tx)
+	if err != nil {
+		log.Errorf("can't get sender for tx %s: %s", txID, err)
+		return nil, err
+	}
+	var fee *big.Int
+	// used gas and tx status
+	if status == models.TxStatusPending {
+		fee = new(big.Int).Mul(big.NewInt(int64(tx.Gas())), tx.GasPrice())
+	} else {
+		receipt, err := cl.ethClient.TransactionReceipt(ctx, common.HexToHash(txID))
+		if err != nil {
+			log.Errorf("can't TransactionReceipt for tx %s: %s", txID, err)
+			return nil, err
+		}
+		// contract can be failed and be in blockchain
+		if receipt.Status == FailedTxStatus {
+			status = models.TxStatusFailed
+		}
+		fee = new(big.Int).Mul(big.NewInt(int64(receipt.GasUsed)), tx.GasPrice())
+	}
 	txInfo := models.TxInfo{
+		From:   sender.String(),
 		Amount: tx.Value(),
 		Fee:    fee,
 		TxHash: tx.Hash().String(),
@@ -182,15 +206,8 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 		return nil, err
 	}
 	if !isERC20Transfers {
-		log.Infof("there are not erc20 transfers in tx %s: %s", txID, err)
+		log.Debugf("there are not erc20 transfers in tx %s: %s", txID, err)
 		txInfo.To = tx.To().Hex()
-		signer := types.NewEIP155Signer(big.NewInt(cl.chainID))
-		sender, err := types.Sender(signer, tx)
-		if err != nil {
-			log.Errorf("can't get sender for tx %s: %s", txID, err)
-			return nil, err
-		}
-		txInfo.From = sender.String()
 	} else {
 		transferParams, err := ParseERC20TransferParams(tx.Data())
 		if err != nil {
@@ -199,7 +216,6 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 		txInfo.To = transferParams.To.Hex()
 		txInfo.AssetAmount = transferParams.Value
 		txInfo.Contract = tx.To().Hex()
-		txInfo.From = transferParams.From.Hex()
 	}
 	return &txInfo, nil
 }

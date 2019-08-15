@@ -8,6 +8,7 @@ const (
 	TxStatusUnKnown TxStatus = "UNKNOWN"
 	TxStatusPending TxStatus = "PENDING"
 	TxStatusSuccess TxStatus = "SUCCESS"
+	TxStatusFailed  TxStatus = "FAILED"
 )
 
 type TxInfo struct {
