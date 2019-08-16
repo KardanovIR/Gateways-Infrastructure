@@ -44,3 +44,25 @@ func (s *grpcServer) GetAllBalances(ctx context.Context, in *pb.AddressRequest) 
 	result := pb.GetAllBalancesReply{Amount: wb, AssetBalances: assetBalances}
 	return &result, nil
 }
+
+// Get account's balance and balances of requested tokens// Get account's balance
+func (s *grpcServer) GetAllBalance(ctx context.Context, in *pb.GetAllBalanceRequest) (*pb.GetAllBalanceReply, error) {
+	log := logger.FromContext(ctx)
+	log.Infof("GetBalanceIncludedTokens for address %s, balance for contracts %v", in.Address, in.Contracts)
+
+	balance, err := s.nodeClient.GetAllBalances(ctx, in.Address, in.Contracts...)
+	if err != nil {
+		log.Errorf("getting token's balance fails: %s", err)
+		return nil, err
+	}
+	tokenBalances := make([]*pb.GetAllBalanceReply_TokenBalance, 0, len(balance.Assets))
+	for c, amount := range balance.Assets {
+		tokenBalances = append(tokenBalances,
+			&pb.GetAllBalanceReply_TokenBalance{Contract: c, Amount: strconv.FormatUint(amount, 10)},
+		)
+	}
+	return &pb.GetAllBalanceReply{
+		Amount:        strconv.FormatUint(balance.Amount, 10),
+		TokenBalances: tokenBalances,
+	}, nil
+}

@@ -23,9 +23,6 @@ service Adapter {
     // Get account's balance
     rpc GetBalance (AddressRequest) returns (GetBalanceReply) {
     }
-    // Get account's balance with assets balances
-    rpc GetAllBalances (AddressRequest) returns (GetAllBalancesReply) {
-    }
     // request to create raw transaction by senders's address
     rpc GetRawTransactionBySendersAddress (RawTransactionBySendersAddressRequest) returns (RawTransactionReply) {
     }
@@ -49,6 +46,9 @@ service Adapter {
     }
     // Check address
     rpc CheckAddress (CheckAddressRequest) returns (ValidateAddressReply) {
+    }
+
+    rpc GetAllBalance (GetAllBalanceRequest) returns (GetAllBalanceReply) {
     }
 }
 
@@ -198,4 +198,19 @@ message InputOutput {
 message CheckAddressRequest {
     string address = 1;
     string assetId = 2;
+}
+
+message GetAllBalanceRequest {
+    string address = 1;
+    repeated string contracts = 2;
+}
+
+message GetAllBalanceReply {
+    message TokenBalance {
+        string contract = 1;
+        string amount = 2;
+    }
+
+    string amount = 1;
+    repeated TokenBalance tokenBalances = 2;
 }
