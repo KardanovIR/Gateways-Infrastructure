@@ -11,7 +11,7 @@ service Adapter {
     rpc Fee (FeeRequest) returns (FeeReply) {
     }
     // Get account's balance with assets balances
-    rpc GetAllBalances (AddressRequest) returns (GetAllBalancesReply) {
+    rpc GetAllBalances (AddressRequest) returns (GetAllBalanceReply) {
     }
     // request to create raw transaction
     rpc GetRawTransaction (RawTransactionRequest) returns (RawTransactionReply) {
@@ -24,6 +24,9 @@ service Adapter {
     }
     // Get transaction
     rpc TransactionByHash (TransactionByHashRequest) returns (TransactionByHashReply) {
+    }
+
+    rpc GetAllBalance (GetAllBalanceRequest) returns (GetAllBalanceReply) {
     }
 }
 
@@ -45,7 +48,7 @@ message FeeReply {
 }
 
 // The response message containing account's balance with assets balances
-message GetAllBalancesReply {
+message GetAllBalanceReply {
     message AssetBalance {
         string assetId = 1;
         string amount = 2;
@@ -121,4 +124,9 @@ message TransactionByHashReply {
 message InputOutput {
     string address = 1;
     string amount = 2;
+}
+
+message GetAllBalanceRequest {
+    string address = 1;
+    repeated string contracts = 2;
 }
