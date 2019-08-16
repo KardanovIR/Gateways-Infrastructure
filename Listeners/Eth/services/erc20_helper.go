@@ -57,7 +57,7 @@ func CheckERC20Transfers(data []byte) (bool, error) {
 	}
 	method, err := erc20TokenABI.MethodById(data)
 	if err != nil {
-		return false, err
+		return false, nil
 	}
 	if method.Name == "transfer" {
 		return true, nil

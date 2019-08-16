@@ -28,6 +28,8 @@ type nodeReader struct {
 	stopListen chan struct{}
 }
 
+const FailedTxStatus = 0
+
 var (
 	cl             INodeReader
 	onceNodeClient sync.Once
@@ -177,7 +179,7 @@ func (nr *nodeReader) Stop(ctx context.Context) {
 func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err error) {
 	log := logger.FromContext(ctx)
 
-	log.Infof("Start processing transactions of block %d...", block.Number())
+	log.Debugf("Start processing transactions of block %d...", block.Number())
 	txs := block.Transactions()
 
 	for _, tx := range txs {
@@ -185,19 +187,27 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err
 
 		isERC20Transfers, err := CheckERC20Transfers(tx.Data())
 		if err != nil {
-			log.Debugf("error checking erc20 tx", err)
+			log.Errorf("error checking erc20 tx", err)
 		}
 		if isERC20Transfers {
+			receipt, err := nr.nodeClient.TransactionReceipt(ctx, tx.Hash())
+			if err != nil {
+				log.Errorf("get transaction receipt failed", err)
+			}
+			if receipt.Status == FailedTxStatus {
+				log.Debugf("failed tx %s. skip it", tx.Hash().String())
+				continue
+			}
 			transferParams, err := ParseERC20TransferParams(tx.Data())
 			if err != nil {
-				log.Debugf("can't parse tx:", err)
+				log.Errorf("can't parse tx:", err)
 				continue
 			}
 			outAddresses = &transferParams.To
 		}
 
 		if outAddresses == nil {
-			log.Debugf("nil address:", err)
+			log.Debugf("nil address for tx %s", tx.Hash().String())
 			continue
 		}
 

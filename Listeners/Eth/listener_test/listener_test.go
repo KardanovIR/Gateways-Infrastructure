@@ -34,10 +34,10 @@ var (
 	initTestOnce    sync.Once
 )
 
-func TestListener(t *testing.T) {
+func TestListenerEth(t *testing.T) {
 	ctx := context.Background()
 	// setup
-	beforeTests(ctx, t)
+	beforeTests(ctx, t, 5202062)
 	log := logger.FromContext(ctx)
 	grpcClient, err := getGrpcClient()
 	if err != nil {
@@ -95,14 +95,76 @@ func TestListener(t *testing.T) {
 
 	services.GetNodeReader().Stop(ctx)
 }
+func TestListenerErc20(t *testing.T) {
+	ctx := context.Background()
+	// setup
+	beforeTests(ctx, t, 6197315)
+	log := logger.FromContext(ctx)
+	grpcClient, err := getGrpcClient()
+	if err != nil {
+		log.Fatal("Can't init grpc client", err)
+	}
+	mongoDB := mongoConnect(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name)
+	defer func() {
+		if _, err := mongoDB.Collection(repositories.CChainState).DeleteOne(ctx, bson.D{{"chaintype", models.Ethereum}}); err != nil {
+			log.Error(err)
+		}
+	}()
+	// add tasks Transfer
+	_, err = grpcClient.AddTask(ctx,
+		&pb.AddTaskRequest{
+			ListenTo:     &pb.ListenObject{Type: "Address", Value: "0x8ec23aCbe3Eed99E92d6D7a85a27A45dA3A04e7d"},
+			CallbackType: string(models.InitInTx),
+			TaskType:     strconv.Itoa(int(models.OneTime))},
+	)
 
-func beforeTests(ctx context.Context, t *testing.T) {
+	if err != nil {
+		log.Error("adding task fails", err)
+		t.FailNow()
+		return
+	}
+	log.Debugf("adding task success", err)
+
+	// in 6197316 has failed tx for 0x8ec23aCbe3Eed99E92d6D7a85a27A45dA3A04e7d
+	// in 6197336 has success tx for 0x8ec23aCbe3Eed99E92d6D7a85a27A45dA3A04e7d
+	err = services.GetNodeReader().Start(ctx)
+	if err != nil {
+		log.Error("node reader start fails", err)
+		t.Fail()
+		return
+	}
+
+	log.Debugf("node reader start  success", err)
+
+	// wait for receiving callback
+	var isTransfer bool
+
+	select {
+	case callback := <-callBackChannel:
+		log.Info("!!!!!!!!!!!!!", callback)
+		if callback == "InitInTx" {
+			isTransfer = true
+		}
+	case <-time.After(300 * time.Second):
+		log.Error("so long waiting...")
+		t.FailNow()
+	}
+
+	if !isTransfer {
+		t.Fail()
+	}
+
+	services.GetNodeReader().Stop(ctx)
+}
+
+func beforeTests(ctx context.Context, t *testing.T, startBlock int64) {
 	log, _ := logger.Init(false, logger.DEBUG)
 	initTestOnce.Do(func() {
 		err := config.Load("./testdata/config_test.yml")
 		if err != nil {
 			log.Fatal(err)
 		}
+		config.Cfg.Node.StartBlockHeight = startBlock
 
 		if err := repositories.New(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name); err != nil {
 			log.Fatal("Can't create db connection: ", err)
@@ -160,8 +222,11 @@ type coreServerMock struct {
 	t              *testing.T
 }
 
-func (c coreServerMock) InitInTx(context.Context, *corePb.InitInTxRequest) (*corePb.Empty, error) {
-	panic("implement me")
+func (c coreServerMock) InitInTx(ctx context.Context, in *corePb.InitInTxRequest) (*corePb.Empty, error) {
+	assert.Equal(c.t, "0x8ec23aCbe3Eed99E92d6D7a85a27A45dA3A04e7d", in.Address)
+	assert.Equal(c.t, "0x9552c6303ae43bd9b4d96bd31eca00faac6abe9c68511b8591ca74c588bb1e52", in.TxHash)
+	callBackChannel <- "InitInTx"
+	return &corePb.Empty{}, nil
 }
 
 func (c coreServerMock) CompleteTx(context.Context, *corePb.TxRequest) (*corePb.Empty, error) {
