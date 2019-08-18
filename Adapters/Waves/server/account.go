@@ -50,7 +50,7 @@ func (s *grpcServer) GetAllBalance(ctx context.Context, in *pb.GetAllBalanceRequ
 	log := logger.FromContext(ctx)
 	log.Infof("GetBalanceIncludedTokens for address %s, balance for contracts %v", in.Address, in.Contracts)
 
-	balance, err := s.nodeClient.GetAllBalances(ctx, in.Address, in.Contracts...)
+	balance, err := s.nodeClient.GetAllBalances(ctx, in.Address)
 	if err != nil {
 		log.Errorf("getting token's balance fails: %s", err)
 		return nil, err
