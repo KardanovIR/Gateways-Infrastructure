@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/models"
@@ -42,4 +43,30 @@ func (cl *nodeClient) GetAllBalances(ctx context.Context, address string, contra
 		log.Debugf("token balance for contract %s for account %s: %s", c, address, tokenBalance)
 	}
 	return &balances, nil
+}
+
+func (cl *nodeClient) GetErc20AllowanceAmount(ctx context.Context, ownerAddress string, contractAddress string,
+	senderAddress string) (*big.Int, error) {
+	log := logger.FromContext(ctx)
+	log.Debugf("call service method 'CreateErc20Allowance': check sending allowance for sender %s for address %s; contract %s",
+		senderAddress, ownerAddress, contractAddress)
+
+	sender := common.HexToAddress(senderAddress)
+	owner := common.HexToAddress(ownerAddress)
+	data, err := ERC20AllowanceForSender(owner, sender)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	contract := common.HexToAddress(contractAddress)
+	msg := ethereum.CallMsg{
+		To:   &contract,
+		Data: data,
+	}
+	contractResponse, err := cl.ethClient.CallContract(ctx, msg, nil)
+	if err != nil {
+		log.Error("can't get allowance for %s (contract %s) for address %s: %s", sender, contract, ownerAddress, err)
+		return nil, err
+	}
+	return new(big.Int).SetBytes(contractResponse), nil
 }

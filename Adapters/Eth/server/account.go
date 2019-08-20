@@ -19,7 +19,7 @@ func (s *grpcServer) GetNextNonce(ctx context.Context, in *pb.AddressRequest) (*
 		return nil, err
 	}
 
-	return &pb.GetNextNonceReply{Nonce: int64(nonce)}, nil
+	return &pb.GetNextNonceReply{Nonce: nonce}, nil
 }
 
 // Get account's balance
@@ -55,5 +55,21 @@ func (s *grpcServer) GetAllBalance(ctx context.Context, in *pb.GetAllBalanceRequ
 	return &pb.GetAllBalanceReply{
 		Amount:        converter.ToTargetAmountStr(balance.Amount),
 		TokenBalances: tokenBalances,
+	}, nil
+}
+
+func (s *grpcServer) AllowanceAmountForAddress(ctx context.Context, in *pb.AllowanceAmountForAddressRequest) (*pb.AllowanceAmountForAddressReply, error) {
+	log := logger.FromContext(ctx)
+	log.Infof("AllowanceAmountForAddress for owner address %s for address %s (contract %s)", in.OwnerAddress,
+		in.SenderAddress, in.Contract)
+
+	amount, err := s.nodeClient.GetErc20AllowanceAmount(ctx, in.OwnerAddress, in.Contract, in.SenderAddress)
+	if err != nil {
+		log.Errorf("getting allowance amount for %s of owner's address %s failed: %s", in.SenderAddress, in.OwnerAddress, err)
+		return nil, err
+	}
+
+	return &pb.AllowanceAmountForAddressReply{
+		Amount: converter.ToTargetAmountStr(amount),
 	}, nil
 }
