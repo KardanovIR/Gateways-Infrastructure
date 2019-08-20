@@ -20,14 +20,21 @@ type INodeClient interface {
 	GetEthBalance(ctx context.Context, address string) (*big.Int, error)
 	GetAllBalances(ctx context.Context, address string, contracts ...string) (*models.AccountBalance, error)
 	GetNextNonce(ctx context.Context, address string) (uint64, error)
+	GetErc20AllowanceAmount(ctx context.Context, ownerAddress string, contractAddress string, senderAddress string) (*big.Int, error)
 
 	GenerateAddress(ctx context.Context) (publicAddress string, err error)
 	IsAddressValid(ctx context.Context, address string) (bool, string, error)
+	AddressByPublicKey(ctx context.Context, public string) (string, error)
 
 	// create transaction and return it on RPL encoding
 	CreateRawTransaction(ctx context.Context, addressFrom string, addressTo string, amount *big.Int) ([]byte, error)
 	CreateErc20TokensRawTransaction(ctx context.Context, addressFrom string, contractAddress string, addressTo string,
 		amount *big.Int) ([]byte, error)
+	Erc20TokensRawApproveTransaction(ctx context.Context, ownerAddress string, contractAddress string, amount *big.Int,
+		spenderAddress string) ([]byte, *big.Int, error)
+	CreateErc20TokensTransferToTxSender(ctx context.Context, addressFrom string, contractAddress string,
+		txSender string, amount *big.Int) ([]byte, error)
+
 	// sign transaction if has private key. rlpTx is transaction for signing on RPL encoding (returned by CreateRawTransaction function)
 	SignTransaction(ctx context.Context, senderAddr string, rlpTx []byte) ([]byte, error)
 	SignTransactionWithPrivateKey(ctx context.Context, privateKey string, rlpTx []byte) ([]byte, error)

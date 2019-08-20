@@ -4,11 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"math/big"
 
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/server/converter"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/services"
 )
 
 // create raw transaction
@@ -25,11 +28,29 @@ func (s *grpcServer) GetRawTransaction(ctx context.Context, in *pb.RawTransactio
 	var tx []byte
 	var err error
 	if len(in.Contract) > 0 {
-		tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount)
+		if len(in.SendersPublicKey) > 0 {
+			senderAddress, e := s.nodeClient.AddressByPublicKey(ctx, in.SendersPublicKey)
+			if e != nil {
+				log.Error(e)
+				return nil, e
+			}
+			if senderAddress == in.AddressTo && senderAddress != in.AddressFrom {
+				// sender of tx is not owner of account (but have allowance of owner account)
+				tx, err = s.nodeClient.CreateErc20TokensTransferToTxSender(ctx, in.AddressFrom, in.Contract, senderAddress, amount)
+			} else {
+				tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount)
+			}
+		} else {
+			tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount)
+		}
 	} else {
 		tx, err = s.nodeClient.CreateRawTransaction(ctx, in.AddressFrom, in.AddressTo, amount)
 	}
 	if err != nil {
+		if err == services.AllowanceAmountIsNotEnoughError {
+			log.Debug(err)
+			return nil, status.Error(codes.FailedPrecondition, err.Error())
+		}
 		log.Errorf("transaction's creation fails: %s", err)
 		return nil, err
 	}
@@ -53,6 +74,26 @@ func (s *grpcServer) GetErc20RawTransaction(ctx context.Context, in *pb.Erc20Raw
 		return nil, err
 	}
 	return &pb.RawTransactionReply{Tx: tx}, nil
+}
+
+func (s *grpcServer) ApproveAmountForAddressTransaction(ctx context.Context, in *pb.ApproveAmountForAddressRequest) (*pb.ApproveAmountForAddressReply, error) {
+	log := logger.FromContext(ctx)
+	log.Infof("ApproveAmountForAddressTransaction: owner %s, for %s, amount %s for contract %s", in.OwnerAddress, in.SpenderAddress,
+		in.Contract, in.Amount)
+	amount, ok := new(big.Int).SetString(in.Amount, 10)
+	if !ok {
+		err := fmt.Errorf("wrong amount value: %s", in.Amount)
+		log.Error(err)
+		return nil, err
+	}
+	amount = converter.ToNodeAmount(amount)
+	var tx, fee, err = s.nodeClient.Erc20TokensRawApproveTransaction(ctx, in.OwnerAddress, in.Contract, amount, in.SpenderAddress)
+	if err != nil {
+		log.Errorf("erc-20 tokens approve transaction's creation fails: %s", err)
+		return nil, err
+	}
+	feeStr := converter.ToTargetAmountStr(fee)
+	return &pb.ApproveAmountForAddressReply{Tx: tx, Fee: feeStr}, nil
 }
 
 // Sing transaction

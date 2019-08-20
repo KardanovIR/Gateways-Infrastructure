@@ -29,6 +29,21 @@ func ERC20TransferData(to common.Address, value *big.Int) ([]byte, error) {
 	return erc20TokenABI.Pack("transfer", to, value)
 }
 
+// ERC20TransferFromData returns data for a "transfer" tx
+func ERC20TransferFromData(from common.Address, to common.Address, value *big.Int) ([]byte, error) {
+	return erc20TokenABI.Pack("transferFrom", from, to, value)
+}
+
+// ERC20ApproveSender returns data for a "approve" tx - give rights to another account
+func ERC20ApproveSender(spender common.Address, value *big.Int) ([]byte, error) {
+	return erc20TokenABI.Pack("approve", spender, value)
+}
+
+// ERC20ApproveSender returns data for a "allowance" tx - get rights of another account
+func ERC20AllowanceForSender(owner common.Address, spender common.Address) ([]byte, error) {
+	return erc20TokenABI.Pack("allowance", owner, spender)
+}
+
 // ERC20TransferParams is a params for token.transfer method
 type ERC20TransferParams struct {
 	To    common.Address
@@ -103,217 +118,225 @@ func parseBaseTransferEvent(data []byte) (*TransferEvent, error) {
 // erc20TokenABIStr is the input ABI used to generate the binding from.
 const erc20TokenABIStr = `
 [
-   {
-      "constant":true,
-      "inputs":[
-
-      ],
-      "name":"name",
-      "outputs":[
-	 {
-	    "name":"",
-	    "type":"string"
-	 }
-      ],
-      "type":"function"
-   },
-   {
-      "constant":false,
-      "inputs":[
-	 {
-	    "name":"_from",
-	    "type":"address"
-	 },
-	 {
-	    "name":"_to",
-	    "type":"address"
-	 },
-	 {
-	    "name":"_value",
-	    "type":"uint256"
-	 }
-      ],
-      "name":"transferFrom",
-      "outputs":[
-	 {
-	    "name":"success",
-	    "type":"bool"
-	 }
-      ],
-      "type":"function"
-   },
-   {
-      "constant":true,
-      "inputs":[
-
-      ],
-      "name":"decimals",
-      "outputs":[
-	 {
-	    "name":"",
-	    "type":"uint8"
-	 }
-      ],
-      "type":"function"
-   },
-   {
-      "constant":true,
-      "inputs":[
-	 {
-	    "name":"",
-	    "type":"address"
-	 }
-      ],
-      "name":"balanceOf",
-      "outputs":[
-	 {
-	    "name":"",
-	    "type":"uint256"
-	 }
-      ],
-      "type":"function"
-   },
-   {
-      "constant":true,
-      "inputs":[
-
-      ],
-      "name":"symbol",
-      "outputs":[
-	 {
-	    "name":"",
-	    "type":"string"
-	 }
-      ],
-      "type":"function"
-   },
-   {
-      "constant":false,
-      "inputs":[
-	 {
-	    "name":"_to",
-	    "type":"address"
-	 },
-	 {
-	    "name":"_value",
-	    "type":"uint256"
-	 }
-      ],
-      "name":"transfer",
-      "outputs":[
-
-      ],
-      "type":"function"
-   },
-   {
-      "constant":false,
-      "inputs":[
-	 {
-	    "name":"_spender",
-	    "type":"address"
-	 },
-	 {
-	    "name":"_value",
-	    "type":"uint256"
-	 },
-	 {
-	    "name":"_extraData",
-	    "type":"bytes"
-	 }
-      ],
-      "name":"approveAndCall",
-      "outputs":[
-	 {
-	    "name":"success",
-	    "type":"bool"
-	 }
-      ],
-      "type":"function"
-   },
-   {
-      "constant":true,
-      "inputs":[
-	 {
-	    "name":"",
-	    "type":"address"
-	 },
-	 {
-	    "name":"",
-	    "type":"address"
-	 }
-      ],
-      "name":"spentAllowance",
-      "outputs":[
-	 {
-	    "name":"",
-	    "type":"uint256"
-	 }
-      ],
-      "type":"function"
-   },
-   {
-      "constant":true,
-      "inputs":[
-	 {
-	    "name":"",
-	    "type":"address"
-	 },
-	 {
-	    "name":"",
-	    "type":"address"
-	 }
-      ],
-      "name":"allowance",
-      "outputs":[
-	 {
-	    "name":"",
-	    "type":"uint256"
-	 }
-      ],
-      "type":"function"
-   },
-   {
-      "inputs":[
-	 {
-	    "name":"initialSupply",
-	    "type":"uint256"
-	 },
-	 {
-	    "name":"tokenName",
-	    "type":"string"
-	 },
-	 {
-	    "name":"decimalUnits",
-	    "type":"uint8"
-	 },
-	 {
-	    "name":"tokenSymbol",
-	    "type":"string"
-	 }
-      ],
-      "type":"constructor"
-   },
-   {
-      "anonymous":false,
-      "inputs":[
-	 {
-	    "indexed":true,
-	    "name":"from",
-	    "type":"address"
-	 },
-	 {
-	    "indexed":true,
-	    "name":"to",
-	    "type":"address"
-	 },
-	 {
-	    "indexed":false,
-	    "name":"value",
-	    "type":"uint256"
-	 }
-      ],
-      "name":"Transfer",
-      "type":"event"
-   }
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "name",
+        "outputs": [
+            {
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_spender",
+                "type": "address"
+            },
+            {
+                "name": "_value",
+                "type": "uint256"
+            }
+        ],
+        "name": "approve",
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "totalSupply",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_from",
+                "type": "address"
+            },
+            {
+                "name": "_to",
+                "type": "address"
+            },
+            {
+                "name": "_value",
+                "type": "uint256"
+            }
+        ],
+        "name": "transferFrom",
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "decimals",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint8"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "_owner",
+                "type": "address"
+            }
+        ],
+        "name": "balanceOf",
+        "outputs": [
+            {
+                "name": "balance",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "symbol",
+        "outputs": [
+            {
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_to",
+                "type": "address"
+            },
+            {
+                "name": "_value",
+                "type": "uint256"
+            }
+        ],
+        "name": "transfer",
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "_owner",
+                "type": "address"
+            },
+            {
+                "name": "_spender",
+                "type": "address"
+            }
+        ],
+        "name": "allowance",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "payable": true,
+        "stateMutability": "payable",
+        "type": "fallback"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "name": "spender",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "name": "value",
+                "type": "uint256"
+            }
+        ],
+        "name": "Approval",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "name": "from",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "name": "to",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "name": "value",
+                "type": "uint256"
+            }
+        ],
+        "name": "Transfer",
+        "type": "event"
+    }
 ]
 `
