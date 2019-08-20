@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (rep *repository) PutTask(ctx context.Context, task *models.Task) (id string, err error) {

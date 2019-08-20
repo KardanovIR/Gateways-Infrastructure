@@ -16,6 +16,6 @@ type TxInfo struct {
 	AssetId         string
 	TxHash          string
 	Fee             string
-	Data            string
+	Data            []byte
 	Status          TxStatus
 }

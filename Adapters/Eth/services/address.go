@@ -25,9 +25,37 @@ func (cl *nodeClient) GenerateAddress(ctx context.Context) (publicAddress string
 	return
 }
 
-func (cl *nodeClient) IsAddressValid(ctx context.Context, address string) bool {
-	if !common.IsHexAddress(address) {
-		return false
+func (cl *nodeClient) AddressByPublicKey(ctx context.Context, public string) (string, error) {
+	log := logger.FromContext(ctx)
+	log.Debugf("call service method 'AddressByPublicKey' %s", public)
+
+	publicBytes, err := hex.DecodeString(public)
+	if err != nil {
+		log.Errorf("Failed convert public key to bytes %s: %s", public, err)
+		return "", err
 	}
-	return true
+	publicKey, err := crypto.UnmarshalPubkey(publicBytes)
+	if err != nil {
+		log.Errorf("failed to unmarshal public key %s: %s", public, err)
+		return "", err
+	}
+	addr := crypto.PubkeyToAddress(*publicKey)
+	return addr.Hex(), nil
+}
+
+// check recipient address
+func (cl *nodeClient) IsAddressValid(ctx context.Context, address string) (bool, string, error) {
+	if !common.IsHexAddress(address) {
+		return false, "", nil
+	}
+	addr := common.HexToAddress(address)
+	code, err := cl.ethClient.CodeAt(ctx, addr, nil)
+	if err != nil {
+		return false, "", err
+	}
+	// is it smart contract
+	if len(code) > 0 {
+		return false, "address is smart contract", err
+	}
+	return true, "", nil
 }

@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"go.mongodb.org/mongo-driver/mongo"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (

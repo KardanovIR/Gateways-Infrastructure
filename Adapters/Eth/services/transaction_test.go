@@ -20,7 +20,9 @@ const (
 	privateKey = "f8a425216e5b765a3abc829eeb1c0fb8fe291fe9612b23818ee201a7c7a276e8"
 	address    = "0xfFDB407fD780b62f43303cCC1f8B0ecF46c72e5b"
 	// ChainLink Token contract
-	contractAddress = "0x20fE562d797A42Dcb3399062AE9546cd06f63280"
+	contractAddress    = "0x20fE562d797A42Dcb3399062AE9546cd06f63280"
+	contractTSTAddress = "0x722dd3f80bac40c951b51bdd28dd19d435762180"
+	contractBNCAddress = "0x1F573D6Fb3F13d689FF844B4cE37794d79a7FF1C"
 )
 
 var initTest sync.Once
@@ -151,7 +153,96 @@ func TestNodeClient_SendErc20(t *testing.T) {
 		log.Error(err)
 		t.FailNow()
 	}
+	time.Sleep(1 * time.Second)
+	info, err := GetNodeClient().TransactionInfo(ctx, txId)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	assert.Equal(t, "PENDING", string(info.Status))
+	assert.Equal(t, "100000000000000", info.AssetAmount.String())
+	assert.Equal(t, "0x5F862eff5Fb0F2b6B3d83F714A8fe581a8d78e62", info.From)
+	assert.Equal(t, "0x7D7EB567Df197471A3C43e504844883538356635", info.To)
 	err = waitForTxComplete(ctx, txId)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+}
+func TestNodeClient_CheckErc20AllowanceAmount(t *testing.T) {
+	ctx, log := beforeTest()
+	addressWithErc20 := "0x43E735DB4bb21cb253f948e195346f4fB9Bab358"
+	ethAddress := "0x156F10fB9116fa9Cc6C5A644A38Db29daBC92703"
+	amount, err := GetNodeClient().GetErc20AllowanceAmount(ctx, addressWithErc20, contractTSTAddress, ethAddress)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	if amount.String() == "0" {
+		log.Error("amount is zero")
+		t.FailNow()
+	}
+	log.Info(amount)
+}
+
+func TestNodeClient_SendErc20FromAnotherAccount(t *testing.T) {
+	ctx, log := beforeTest()
+	// send 0.01 TST to receiver
+	amount, _ := new(big.Int).SetString("1000000000000000", 10)
+	addressWithErc20 := "0x43E735DB4bb21cb253f948e195346f4fB9Bab358"
+	privateKeyWithErc20 := "f23689d47193817d2b1aafde94ce0dbb65c4ec3bb261768fcab9c1f69785fedb"
+
+	ethAddressPrivate := "c4263cdb2de9f8044fe855022ea2ae1a3b601f84844c0aa1c8fe6da6b61b626f"
+	ethAddress := "0x156F10fB9116fa9Cc6C5A644A38Db29daBC92703"
+
+	amountForApprove, _ := new(big.Int).SetString("1000000000000000", 10)
+	tx, fee, err := GetNodeClient().(*nodeClient).Erc20TokensRawApproveTransaction(ctx, addressWithErc20, contractBNCAddress,
+		amountForApprove, ethAddress)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	if fee.Uint64() == 0 {
+		t.FailNow()
+	}
+	signedTx, err := GetNodeClient().SignTransactionWithPrivateKey(ctx, privateKeyWithErc20, tx)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+
+	txId, err := GetNodeClient().SendTransaction(ctx, signedTx)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	time.Sleep(1 * time.Second)
+
+	err = waitForTxComplete(ctx, txId)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+
+	tx2, err := GetNodeClient().(*nodeClient).CreateErc20TokensTransferToTxSender(ctx, addressWithErc20, contractBNCAddress, ethAddress, amount)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	signedTx2, err := GetNodeClient().SignTransactionWithPrivateKey(ctx, ethAddressPrivate, tx2)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+
+	txId2, err := GetNodeClient().SendTransaction(ctx, signedTx2)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	log.Info("txId2 = ", txId2)
+	time.Sleep(3 * time.Second)
+	err = waitForTxComplete(ctx, txId2)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()

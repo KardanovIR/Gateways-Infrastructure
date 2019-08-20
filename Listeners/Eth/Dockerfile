@@ -7,8 +7,6 @@ RUN apk add build-base
 RUN apk update
 RUN apk add git
 
-RUN dep ensure --vendor-only
-
 RUN CGO_ENABLED=1 GOOS=linux go build -o main .
 
 FROM alpine

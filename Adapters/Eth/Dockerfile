@@ -17,6 +17,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -o main .
 FROM alpine
 COPY --from=0 /go/src/github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth /
 COPY config/config.y*ml /config
+RUN apk add --no-cache ca-certificates && update-ca-certificates 2>/dev/null || true
 
 EXPOSE 5001
 CMD ["/main"]

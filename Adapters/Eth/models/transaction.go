@@ -8,15 +8,17 @@ const (
 	TxStatusUnKnown TxStatus = "UNKNOWN"
 	TxStatusPending TxStatus = "PENDING"
 	TxStatusSuccess TxStatus = "SUCCESS"
+	TxStatusFailed  TxStatus = "FAILED"
 )
 
 type TxInfo struct {
-	From     string
-	To       string
-	Amount   *big.Int
-	Contract string
-	TxHash   string
-	Fee      *big.Int
-	Data     string
-	Status   TxStatus
+	From        string
+	To          string
+	Amount      *big.Int
+	TxHash      string
+	Fee         *big.Int
+	Data        []byte
+	Status      TxStatus
+	Contract    string
+	AssetAmount *big.Int
 }

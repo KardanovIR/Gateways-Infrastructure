@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"math/big"
-	"strings"
 	"sync"
 	"time"
 
@@ -28,6 +27,8 @@ type nodeReader struct {
 	conf       *config.Node
 	stopListen chan struct{}
 }
+
+const FailedTxStatus = 0
 
 var (
 	cl             INodeReader
@@ -178,19 +179,39 @@ func (nr *nodeReader) Stop(ctx context.Context) {
 func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err error) {
 	log := logger.FromContext(ctx)
 
-	log.Infof("Start processing transactions of block %d...", block.Number())
+	log.Debugf("Start processing transactions of block %d...", block.Number())
 	txs := block.Transactions()
 
 	for _, tx := range txs {
 		outAddresses := tx.To()
 
+		isERC20Transfers, err := CheckERC20Transfers(tx.Data())
+		if err != nil {
+			log.Errorf("error checking erc20 tx", err)
+		}
+		if isERC20Transfers {
+			receipt, err := nr.nodeClient.TransactionReceipt(ctx, tx.Hash())
+			if err != nil {
+				log.Errorf("get transaction receipt failed", err)
+			}
+			if receipt.Status == FailedTxStatus {
+				log.Debugf("failed tx %s. skip it", tx.Hash().String())
+				continue
+			}
+			transferParams, err := ParseERC20TransferParams(tx.Data())
+			if err != nil {
+				log.Errorf("can't parse tx:", err)
+				continue
+			}
+			outAddresses = &transferParams.To
+		}
+
 		if outAddresses == nil {
-			log.Debugf("nil address", err)
+			log.Debugf("nil address for tx %s", tx.Hash().String())
 			continue
 		}
 
-		var adr = strings.ToLower(outAddresses.String())
-		tasks, err := nr.rp.FindByAddressOrTxId(ctx, models.ChainType(nr.conf.ChainType), adr, tx.Hash().Hex())
+		tasks, err := nr.rp.FindByAddressOrTxId(ctx, models.ChainType(nr.conf.ChainType), outAddresses.Hex(), tx.Hash().Hex())
 		if err != nil {
 			log.Errorf("error: %s", err)
 			return err
@@ -201,7 +222,7 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err
 			continue
 		}
 
-		log.Infof("-> tx %s has %d tasks, start processing...", tx.Hash().String(), len(tasks))
+		log.Debugf("-> tx %s has %d tasks, start processing...", tx.Hash().String(), len(tasks))
 
 		for _, task := range tasks {
 			log.Infof("->   Start processing task id %s for %v ...", task.Id.Hex(), task.ListenTo)
@@ -221,7 +242,7 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err
 				}
 			}
 
-			log.Infof("->   Task id %s for %s has been proceed successful!", task.Id.Hex(), nr.conf.ChainType)
+			log.Debugf("->   Task id %s for %s has been proceed successful!", task.Id.Hex(), nr.conf.ChainType)
 		}
 
 	}

@@ -7,6 +7,8 @@ Run :
     Parameters:
        -config-path     path to config, by default "./config/config.yml"
        -debug           set debug mode. It set log level to Debug and log format (plain text instead of json)
+       
+       -config-path=./Adapters/Eth/config/config.yml
 
 Recompile protobuf :
     

@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/models"
 	"github.com/wavesplatform/gowaves/pkg/proto"
@@ -50,3 +49,36 @@ func (cl *nodeClient) GetAllBalances(ctx context.Context, address string) (*mode
 	}
 	return &balance, nil
 }
+// Feature implementation with asset filtering
+//func (cl *nodeClient) GetAllBalances(ctx context.Context, address string, contracts ...string) (*models.AccountBalance, error) {
+//	log := logger.FromContext(ctx)
+//	log.Debugf("Call method 'GetAllBalances' for %s", address)
+//	balances := models.AccountBalance{}
+//	wavesBalance, err := cl.GetBalance(ctx, address)
+//	if err != nil {
+//		return nil, err
+//	}
+//	balances.Amount = wavesBalance
+//	if len(contracts) == 0 {
+//		return &balances, nil
+//	}
+//	a, err := proto.NewAddressFromString(address)
+//	if err != nil {
+//		log.Error("can't get address from string", err)
+//		return nil, err
+//	}
+//	assetBalances, _, err := cl.nodeClient.Assets.BalanceByAddress(ctx, a)
+//	if err != nil {
+//		log.Error("can't get assets balance", err)
+//		return nil, err
+//	}
+//	balances.Assets = make(map[string]uint64)
+//	for _,c := range contracts {
+//		for _,b := range assetBalances.Balances {
+//			if(c == b.AssetId.String()) {
+//				balances.Assets[b.AssetId.String()] = b.Balance
+//			}
+//		}
+//	}
+//	return &balances, nil
+//}

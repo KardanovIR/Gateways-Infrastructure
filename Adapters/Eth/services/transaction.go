@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/ecdsa"
+	"errors"
 	"fmt"
 	"math/big"
 
@@ -16,10 +17,21 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/models"
 )
 
+const FailedTxStatus = 0
+
+var AllowanceAmountIsNotEnoughError = errors.New("allowanceAmountIsNotEnough")
+
 func (cl *nodeClient) CreateRawTransaction(ctx context.Context, addressFrom string, addressTo string,
 	amount *big.Int) ([]byte, error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("call service method 'CreateRawTransaction': send %s from %s to %s", amount, addressFrom, addressTo)
+	ok, _, err := cl.IsAddressValid(ctx, addressTo)
+	if err != nil {
+		return nil, fmt.Errorf("check address %s fails: %s", addressTo, err)
+	}
+	if !ok {
+		return nil, fmt.Errorf("address %s is not valid", addressTo)
+	}
 	gasPrice, err := cl.SuggestGasPrice(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("can't get suggected gas price %s", err)
@@ -50,7 +62,13 @@ func (cl *nodeClient) CreateErc20TokensRawTransaction(ctx context.Context, addre
 	log := logger.FromContext(ctx)
 	log.Debugf("call service method 'CreateErc20TokensRawTransaction': send %s tokens from %s to %s; contract %s",
 		amount, addressFrom, addressTo, contractAddress)
-
+	ok, _, err := cl.IsAddressValid(ctx, addressTo)
+	if err != nil {
+		return nil, fmt.Errorf("check address %s fails: %s", addressTo, err)
+	}
+	if !ok {
+		return nil, fmt.Errorf("address %s is not valid", addressTo)
+	}
 	gasPrice, err := cl.SuggestGasPrice(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("can't get suggected gas price %s", err)
@@ -62,8 +80,14 @@ func (cl *nodeClient) CreateErc20TokensRawTransaction(ctx context.Context, addre
 		return nil, fmt.Errorf("can't get next nonce for address %s: %s", addressFrom, err)
 	}
 	sender := common.HexToAddress(addressFrom)
+	recipient := common.HexToAddress(addressTo)
 	tokenAddress := common.HexToAddress(contractAddress)
-	data := cl.contractProvider.CreateTransferTokenData(ctx, addressTo, amount)
+
+	data, err := ERC20TransferData(recipient, amount)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
 
 	gasLimit, err := cl.ethClient.EstimateGas(context.Background(), ethereum.CallMsg{
 		From: sender,
@@ -84,6 +108,71 @@ func (cl *nodeClient) CreateErc20TokensRawTransaction(ctx context.Context, addre
 	return b, nil
 }
 
+func (cl *nodeClient) CreateErc20TokensTransferToTxSender(ctx context.Context, addressFrom string,
+	contractAddress string, txSender string, amount *big.Int) ([]byte, error) {
+	log := logger.FromContext(ctx)
+	log.Debugf("call service method 'CreateErc20TokensTransferToTxSender': send %s tokens from %s to %s; contract %s",
+		amount, addressFrom, txSender, contractAddress)
+	ok, _, err := cl.IsAddressValid(ctx, txSender)
+	if err != nil {
+		return nil, fmt.Errorf("check address %s fails: %s", txSender, err)
+	}
+	if !ok {
+		return nil, fmt.Errorf("address %s is not valid", txSender)
+	}
+	allowanceAmount, err := cl.GetErc20AllowanceAmount(ctx, addressFrom, contractAddress, txSender)
+	if err != nil {
+		log.Errorf("can't check allowance amount: %s", err)
+		return nil, err
+	}
+	log.Debugf("allowanceAmount %s", allowanceAmount)
+	log.Debugf("amount %s", amount)
+	log.Debugf("Cmp %s", allowanceAmount.Cmp(amount))
+	if allowanceAmount.Cmp(amount) < 0 {
+		log.Errorf("allowance amount is less than transfer's amount")
+		return nil, AllowanceAmountIsNotEnoughError
+	}
+	gasPrice, err := cl.SuggestGasPrice(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("can't get suggected gas price %s", err)
+	}
+	log.Debugf("suggest gas price %s", gasPrice)
+	nonce, err := cl.GetNextNonce(ctx, txSender)
+	log.Debugf("nonce will be %d", nonce)
+	if err != nil {
+		return nil, fmt.Errorf("can't get next nonce for address %s: %s", txSender, err)
+	}
+	owner := common.HexToAddress(addressFrom)
+	sender := common.HexToAddress(txSender)
+	tokenAddress := common.HexToAddress(contractAddress)
+
+	data, err := ERC20TransferFromData(owner, sender, amount)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	gasLimit, err := cl.ethClient.EstimateGas(context.Background(), ethereum.CallMsg{
+		From: sender,
+		To:   &tokenAddress,
+		Data: data,
+	})
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	log.Debugf("estimated gas limit %d", gasLimit)
+	fee := new(big.Int).Mul(big.NewInt(int64(gasLimit)), gasPrice)
+	log.Debugf("fee %s", fee)
+	ethAmountZero := big.NewInt(0)
+	tx := types.NewTransaction(nonce, tokenAddress, ethAmountZero, gasLimit, gasPrice, data)
+	b, err := SerializeTx(tx)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
 func (cl *nodeClient) SignTransaction(ctx context.Context, senderAddr string, rlpTx []byte) ([]byte, error) {
 	log := logger.FromContext(ctx)
 	log.Debug("call service method 'SignTransaction'")
@@ -92,6 +181,54 @@ func (cl *nodeClient) SignTransaction(ctx context.Context, senderAddr string, rl
 		return nil, fmt.Errorf("can't signed transaction for %s: haven't private key", senderAddr)
 	}
 	return cl.signTx(ctx, pk, rlpTx)
+}
+
+func (cl *nodeClient) Erc20TokensRawApproveTransaction(ctx context.Context, ownerAddress string, contractAddress string,
+	amount *big.Int, spenderAddress string) ([]byte, *big.Int, error) {
+	log := logger.FromContext(ctx)
+	log.Debugf("call service method 'Erc20TokensRawApproveTransaction': approve %s tokens in address %s to %s; contract %s",
+		amount, ownerAddress, spenderAddress, contractAddress)
+
+	nonce, err := cl.GetNextNonce(ctx, ownerAddress)
+	log.Debugf("nonce will be %d", nonce)
+	if err != nil {
+		return nil, nil, fmt.Errorf("can't get next nonce for address %s: %s", ownerAddress, err)
+	}
+	owner := common.HexToAddress(ownerAddress)
+	tokenAddress := common.HexToAddress(contractAddress)
+	spender := common.HexToAddress(spenderAddress)
+
+	dataForApprove, err := ERC20ApproveSender(spender, amount)
+	if err != nil {
+		log.Error(err)
+		return nil, nil, err
+	}
+
+	gasLimit, err := cl.ethClient.EstimateGas(context.Background(), ethereum.CallMsg{
+		From: owner,
+		To:   &tokenAddress,
+		Data: dataForApprove,
+	})
+	if err != nil {
+		log.Error(err)
+		return nil, nil, err
+	}
+	log.Debugf("estimated gas limit %d", gasLimit)
+	gasPrice, err := cl.SuggestGasPrice(ctx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("can't get suggected gas price %s", err)
+	}
+	log.Debugf("suggest gas price %s", gasPrice)
+
+	ethAmountZero := big.NewInt(0)
+	fee := new(big.Int).Mul(big.NewInt(int64(gasLimit)), gasPrice)
+	log.Debugf("fee %s", fee)
+	tx := types.NewTransaction(nonce, tokenAddress, ethAmountZero, gasLimit, gasPrice, dataForApprove)
+	b, err := SerializeTx(tx)
+	if err != nil {
+		return nil, nil, err
+	}
+	return b, fee, nil
 }
 
 func (cl *nodeClient) SignTransactionWithPrivateKey(ctx context.Context, privateKey string, rlpTx []byte) ([]byte, error) {
@@ -149,22 +286,52 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 	if status == models.TxStatusUnKnown {
 		return &models.TxInfo{Status: status}, nil
 	}
-	sender, err := types.Sender(types.NewEIP155Signer(big.NewInt(cl.chainID)), tx)
+	// sender
+	signer := types.NewEIP155Signer(big.NewInt(cl.chainID))
+	sender, err := types.Sender(signer, tx)
 	if err != nil {
 		log.Errorf("can't get sender for tx %s: %s", txID, err)
 		return nil, err
 	}
-	// Todo do for erc-20 tokens: another implementation for recipient, amount
-	fee := new(big.Int).Mul(big.NewInt(int64(tx.Gas())), tx.GasPrice())
+	var fee *big.Int
+	// used gas and tx status
+	if status == models.TxStatusPending {
+		fee = new(big.Int).Mul(big.NewInt(int64(tx.Gas())), tx.GasPrice())
+	} else {
+		receipt, err := cl.ethClient.TransactionReceipt(ctx, common.HexToHash(txID))
+		if err != nil {
+			log.Errorf("can't TransactionReceipt for tx %s: %s", txID, err)
+			return nil, err
+		}
+		// contract can be failed and be in blockchain
+		if receipt.Status == FailedTxStatus {
+			status = models.TxStatusFailed
+		}
+		fee = new(big.Int).Mul(big.NewInt(int64(receipt.GasUsed)), tx.GasPrice())
+	}
 	txInfo := models.TxInfo{
-		From:     sender.String(),
-		To:       tx.To().String(),
-		Amount:   tx.Value(),
-		Fee:      fee,
-		Contract: "",
-		TxHash:   tx.Hash().String(),
-		Data:     string(tx.Data()),
-		Status:   status,
+		From:   sender.String(),
+		Amount: tx.Value(),
+		Fee:    fee,
+		TxHash: tx.Hash().String(),
+		Data:   tx.Data(),
+		Status: status,
+	}
+	isERC20Transfers, err := CheckERC20Transfers(tx.Data())
+	if err != nil {
+		return nil, err
+	}
+	if !isERC20Transfers {
+		log.Debugf("there are not erc20 transfers in tx %s: %s", txID, err)
+		txInfo.To = tx.To().Hex()
+	} else {
+		transferParams, err := ParseERC20TransferParams(tx.Data())
+		if err != nil {
+			return nil, err
+		}
+		txInfo.To = transferParams.To.Hex()
+		txInfo.AssetAmount = transferParams.Value
+		txInfo.Contract = tx.To().Hex()
 	}
 	return &txInfo, nil
 }
