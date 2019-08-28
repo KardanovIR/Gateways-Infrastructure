@@ -1,6 +1,6 @@
 package models
 
 type NodeResponse struct {
-	Status  string `json:"status"`
-	Details string `json:"details"`
+	Error   int64  `json:"error"`
+	Message string `json:"message"`
 }
