@@ -109,9 +109,11 @@ func parseBaseTransferEvent(data []byte) (*TransferEvent, error) {
 	transferEvent := &TransferEvent{}
 	err := erc20TokenABI.Unpack(transferEvent, "Transfer", data)
 	if err != nil {
-		return nil, err
+		err = erc20TokenABI.Unpack(transferEvent, "TransferFrom", data)
+		if err != nil {
+			return nil, err
+		}
 	}
-
 	return transferEvent, nil
 }
 
