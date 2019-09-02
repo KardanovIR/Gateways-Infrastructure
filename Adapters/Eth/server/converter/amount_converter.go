@@ -43,3 +43,11 @@ func ToTargetAmount(a *big.Int) *big.Int {
 	}
 	return new(big.Int).Div(a, multiplierToNode)
 }
+
+func ToCommissionStr(a *big.Int) string {
+	if a == nil {
+		return "0"
+	}
+	rounded := new(big.Int).Add(ToTargetAmount(a), big.NewInt(1))
+	return rounded.String()
+}
