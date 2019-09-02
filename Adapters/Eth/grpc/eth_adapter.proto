@@ -18,7 +18,7 @@ service Adapter {
     rpc GetErc20RawTransaction (Erc20RawTransactionRequest) returns (RawTransactionReply) {
     }
     // Get suggested transaction's fee
-    rpc SuggestFee (EmptyRequest) returns (SuggestFeeReply) {
+    rpc Fee (FeeRequest) returns (SuggestFeeReply) {
     }
     // Get account's next nonce
     rpc GetNextNonce (AddressRequest) returns (GetNextNonceReply) {
@@ -56,6 +56,11 @@ service Adapter {
     // Approve amount available for another account to get from owner account
     rpc ApproveAmountForAddressTransaction (ApproveAmountForAddressRequest) returns (ApproveAmountForAddressReply) {
     }
+}
+
+message FeeRequest {
+    string sendersPublicKey = 1;
+    string assetId = 2;
 }
 
 // The request message for getting suggested gas price
