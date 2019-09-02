@@ -92,7 +92,7 @@ func (s *grpcServer) ApproveAmountForAddressTransaction(ctx context.Context, in 
 		log.Errorf("erc-20 tokens approve transaction's creation fails: %s", err)
 		return nil, err
 	}
-	feeStr := converter.ToTargetAmountStr(fee)
+	feeStr := converter.ToCommissionStr(fee)
 	return &pb.ApproveAmountForAddressReply{Tx: tx, Fee: feeStr}, nil
 }
 

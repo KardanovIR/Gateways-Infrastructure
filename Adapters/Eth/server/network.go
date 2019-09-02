@@ -32,5 +32,5 @@ func (s *grpcServer) Fee(ctx context.Context, in *pb.FeeRequest) (*pb.SuggestFee
 		return nil, err
 	}
 
-	return &pb.SuggestFeeReply{Fee: converter.ToTargetAmountStr(fee)}, nil
+	return &pb.SuggestFeeReply{Fee: converter.ToCommissionStr(fee)}, nil
 }
