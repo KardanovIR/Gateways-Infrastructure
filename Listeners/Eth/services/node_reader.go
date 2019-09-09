@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
@@ -22,7 +20,7 @@ type INodeReader interface {
 }
 
 type nodeReader struct {
-	nodeClient *ethclient.Client
+	nodeClient *nodeClient
 	rp         repositories.IRepository
 	conf       *config.Node
 	stopListen chan struct{}
@@ -40,14 +38,11 @@ func New(ctx context.Context, config *config.Node, rp repositories.IRepository) 
 	log := logger.FromContext(ctx)
 	var err error
 	onceNodeClient.Do(func() {
-		rpcc, e := newRPCClient(log, config.Host)
+		nc, e := newNodeClient(ctx, config.Host)
 		if e != nil {
-			log.Errorf("error during initialise rpc client: %s", e)
 			err = e
-			return
 		}
-		ethClient := ethclient.NewClient(rpcc)
-		cl = &nodeReader{nodeClient: ethClient, rp: rp, conf: config, stopListen: make(chan struct{})}
+		cl = &nodeReader{nodeClient: nc, rp: rp, conf: config, stopListen: make(chan struct{})}
 	})
 
 	if err != nil {
@@ -65,17 +60,6 @@ func GetNodeReader() INodeReader {
 		panic("try to get node reader before it's creation!")
 	})
 	return cl
-}
-
-func newRPCClient(log logger.ILogger, host string) (*rpc.Client, error) {
-	log.Infof("try to connect to etherium node", host)
-	c, err := rpc.DialContext(context.Background(), host)
-	if err != nil {
-		log.Errorf("connect to etherium node fails: ", err)
-		return nil, err
-	}
-	log.Info("connected to etherium node successfully")
-	return c, nil
 }
 
 func (nr *nodeReader) Start(ctx context.Context) (err error) {
@@ -134,7 +118,7 @@ func (nr *nodeReader) Start(ctx context.Context) (err error) {
 
 			block, err := client.BlockByHash(ctx, header.Hash())
 			if err != nil {
-				log.Errorf("BlockByNumber(%d) error: %s", startBlock, err)
+				log.Errorf("BlockByHash error: %s", err)
 				time.Sleep(15 * time.Second)
 				continue
 			}
@@ -184,6 +168,12 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err
 
 	for _, tx := range txs {
 		outAddresses := tx.To()
+		txHash := tx.Hash().String()
+		if outAddresses == nil {
+			// contract creation transaction
+			log.Debugf("nil address for tx %s", txHash)
+			continue
+		}
 
 		isERC20Transfers, err := CheckERC20Transfers(tx.Data())
 		if err != nil {
@@ -195,7 +185,7 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err
 				log.Errorf("get transaction receipt failed", err)
 			}
 			if receipt.Status == FailedTxStatus {
-				log.Debugf("failed tx %s. skip it", tx.Hash().String())
+				log.Debugf("failed tx %s. skip it", txHash)
 				continue
 			}
 			transferParams, err := ParseERC20TransferParams(tx.Data())
@@ -204,48 +194,60 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err
 				continue
 			}
 			outAddresses = &transferParams.To
-		}
-
-		if outAddresses == nil {
-			log.Debugf("nil address for tx %s", tx.Hash().String())
-			continue
-		}
-
-		tasks, err := nr.rp.FindByAddressOrTxId(ctx, models.ChainType(nr.conf.ChainType), outAddresses.Hex(), tx.Hash().Hex())
-		if err != nil {
-			log.Errorf("error: %s", err)
-			return err
-		}
-
-		if len(tasks) == 0 {
-			log.Debugf("-> tx %s has no task, will be skipped.", tx.Hash().String())
-			continue
-		}
-
-		log.Debugf("-> tx %s has %d tasks, start processing...", tx.Hash().String(), len(tasks))
-
-		for _, task := range tasks {
-			log.Infof("->   Start processing task id %s for %v ...", task.Id.Hex(), task.ListenTo)
-			err = coreServices.GetCallbackService().SendRequest(ctx, task, tx.Hash().String())
+		} else if len(tx.Data()) > 0 {
+			// if data is not empty -> maybe it is call of the contract -> parse this with trace to find internal tx
+			recipients, err := nr.nodeClient.GetEthRecipientsForTxIncludeInternal(ctx, txHash)
 			if err != nil {
-				log.Errorf("->   Error: send callback %s for task %v for tx %s: %s", task.Callback.Type,
-					task.ListenTo, tx.Hash().String(), err)
-				continue
-			}
-
-			switch task.Type {
-			case models.OneTime:
-				err := nr.rp.RemoveTask(ctx, task.Id.Hex())
-				if err != nil {
-					log.Errorf("->   Error: removing task %s", err)
-					return err
+				log.Errorf("get eth internal transfer recipients fails: %s", err)
+			} else {
+				for _, r := range recipients {
+					if err := nr.findAndExecuteTasks(ctx, r, txHash); err != nil {
+						return err
+					}
 				}
 			}
-
-			log.Debugf("->   Task id %s for %s has been proceed successful!", task.Id.Hex(), nr.conf.ChainType)
 		}
+		if err := nr.findAndExecuteTasks(ctx, outAddresses.Hex(), txHash); err != nil {
+			return err
+		}
+	}
+	return
+}
 
+func (nr *nodeReader) findAndExecuteTasks(ctx context.Context, address string, txHash string) error {
+	log := logger.FromContext(ctx)
+	tasks, err := nr.rp.FindByAddressOrTxId(ctx, models.ChainType(nr.conf.ChainType), address, txHash)
+	if err != nil {
+		log.Errorf("error: %s", err)
+		return err
 	}
 
-	return
+	if len(tasks) == 0 {
+		log.Debugf("tx %s has no task, will be skipped.", txHash)
+		return nil
+	}
+
+	log.Debugf("tx %s has %d tasks, start processing...", txHash, len(tasks))
+
+	for _, task := range tasks {
+		log.Infof("Start processing task id %s for %v ...", task.Id.Hex(), task.ListenTo)
+		err = coreServices.GetCallbackService().SendRequest(ctx, task, txHash)
+		if err != nil {
+			log.Errorf("Error: send callback %s for task %v for tx %s: %s", task.Callback.Type,
+				task.ListenTo, txHash, err)
+			continue
+		}
+
+		switch task.Type {
+		case models.OneTime:
+			err := nr.rp.RemoveTask(ctx, task.Id.Hex())
+			if err != nil {
+				log.Errorf("Error: removing task %s", err)
+				return err
+			}
+		}
+
+		log.Debugf("Task id %s for %s has been proceed successful!", task.Id.Hex(), nr.conf.ChainType)
+	}
+	return nil
 }

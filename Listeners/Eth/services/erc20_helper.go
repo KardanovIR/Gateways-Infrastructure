@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"math/big"
 	"strings"
@@ -22,11 +21,6 @@ func init() {
 	}
 
 	erc20TokenABI = &erc20TokenABIValue
-}
-
-// ERC20TransferData returns data for a "transfer" tx
-func ERC20TransferData(to common.Address, value *big.Int) ([]byte, error) {
-	return erc20TokenABI.Pack("transfer", to, value)
 }
 
 // ERC20TransferParams is a params for token.transfer method
@@ -59,7 +53,7 @@ func CheckERC20Transfers(data []byte) (bool, error) {
 	if err != nil {
 		return false, nil
 	}
-	if method.Name == "transfer" {
+	if method.Name == "transfer" || method.Name == "transferFrom" {
 		return true, nil
 	}
 	return false, nil
@@ -75,31 +69,6 @@ type TransferEvent struct {
 func (e *TransferEvent) String() string {
 	return fmt.Sprintf("from, to, value: %s, %s, %s",
 		e.From.String(), e.To.String(), e.Value.String())
-}
-
-// ParseTransferEvent returns a transferEvent by a log
-func ParseTransferEvent(log types.Log) (*TransferEvent, error) {
-	event, err := parseBaseTransferEvent(log.Data)
-	if err != nil {
-		return nil, err
-	}
-
-	event.From = common.BytesToAddress(log.Topics[1].Bytes())
-	event.To = common.BytesToAddress(log.Topics[2].Bytes())
-
-	return event, nil
-}
-
-func parseBaseTransferEvent(data []byte) (*TransferEvent, error) {
-	transferEvent := &TransferEvent{}
-	err := erc20TokenABI.Unpack(transferEvent, "Transfer", data)
-	if err != nil {
-		err = erc20TokenABI.Unpack(transferEvent, "TransferFrom", data)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return transferEvent, nil
 }
 
 // erc20TokenABIStr is the input ABI used to generate the binding from.

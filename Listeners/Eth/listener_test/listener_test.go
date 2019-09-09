@@ -34,6 +34,7 @@ var (
 	initTestOnce    sync.Once
 )
 
+// need Parity node to rad internal tx
 func TestListenerEth(t *testing.T) {
 	ctx := context.Background()
 	// setup
@@ -50,6 +51,19 @@ func TestListenerEth(t *testing.T) {
 			ListenTo:     &pb.ListenObject{Type: "Address", Value: "0x9515735d60E8fF4036EFAFFAf3370F3097615d19"},
 			CallbackType: string(models.InitOutTx),
 			ProcessId:    "111111111",
+			TaskType:     strconv.Itoa(int(models.OneTime))},
+	)
+	if err != nil {
+		log.Error("adding task fails", err)
+		t.FailNow()
+		return
+	}
+	// internal in block 5202068
+	_, err = grpcClient.AddTask(ctx,
+		&pb.AddTaskRequest{
+			ListenTo:     &pb.ListenObject{Type: "Address", Value: "0x50F554649ED757D40d5Bd32B1154AFfc4278359B"},
+			CallbackType: string(models.InitInTx),
+			ProcessId:    "",
 			TaskType:     strconv.Itoa(int(models.OneTime))},
 	)
 
@@ -71,20 +85,24 @@ func TestListenerEth(t *testing.T) {
 
 	// wait for receiving callback
 	var isTransfer bool
+	var isInternalTransfer bool
 
-	select {
-	case callback := <-callBackChannel:
-		if callback == "InitOutTx" {
-			isTransfer = true
+	for i := 0; i < 2; i++ {
+		select {
+		case callback := <-callBackChannel:
+			if callback == "InitOutTx" {
+				isTransfer = true
+			}
+			if callback == "InitInTx" {
+				isInternalTransfer = true
+			}
+		case <-time.After(30 * time.Second):
+			log.Error("so long waiting...")
+			t.FailNow()
 		}
-	case <-time.After(10 * time.Second):
-		log.Error("so long waiting...")
-		t.FailNow()
 	}
-
-	if !isTransfer {
-		t.Fail()
-	}
+	assert.True(t, isTransfer)
+	assert.True(t, isInternalTransfer)
 
 	mongoDB := mongoConnect(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name)
 	defer func() {
@@ -223,8 +241,15 @@ type coreServerMock struct {
 }
 
 func (c coreServerMock) InitInTx(ctx context.Context, in *corePb.InitInTxRequest) (*corePb.Empty, error) {
-	assert.Equal(c.t, "0x8ec23aCbe3Eed99E92d6D7a85a27A45dA3A04e7d", in.Address)
-	assert.Equal(c.t, "0x9552c6303ae43bd9b4d96bd31eca00faac6abe9c68511b8591ca74c588bb1e52", in.TxHash)
+	if in.Address == "0x8ec23aCbe3Eed99E92d6D7a85a27A45dA3A04e7d" {
+		// erc-20 test
+		assert.Equal(c.t, "0x8ec23aCbe3Eed99E92d6D7a85a27A45dA3A04e7d", in.Address)
+		assert.Equal(c.t, "0x9552c6303ae43bd9b4d96bd31eca00faac6abe9c68511b8591ca74c588bb1e52", in.TxHash)
+	} else {
+		// internal
+		assert.Equal(c.t, "0x50F554649ED757D40d5Bd32B1154AFfc4278359B", in.Address)
+		assert.Equal(c.t, "0xa874bd3d557d5145f71a354c8d4035acc05d7778b2c26c2e73d2621cd8bab143", in.TxHash)
+	}
 	callBackChannel <- "InitInTx"
 	return &corePb.Empty{}, nil
 }
