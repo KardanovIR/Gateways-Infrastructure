@@ -193,17 +193,15 @@ func (cl *nodeClient) SignTransaction(ctx context.Context, senderAddr string, rl
 }
 
 func (cl *nodeClient) Erc20TokensRawApproveTransaction(ctx context.Context, ownerAddress string, contractAddress string,
-	amount *big.Int, spenderAddress string, nonce uint64) ([]byte, *big.Int, error) {
+	amount *big.Int, spenderAddress string) ([]byte, *big.Int, error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("call service method 'Erc20TokensRawApproveTransaction': approve %s tokens in address %s to %s; contract %s",
 		amount, ownerAddress, spenderAddress, contractAddress)
-	var err error
-	if(nonce == 0) {
-		nonce, err = cl.GetNextNonce(ctx, ownerAddress)
 
-		if err != nil {
-			return nil, nil, fmt.Errorf("can't get next nonce for address %s: %s", ownerAddress, err)
-		}
+	nonce, err := cl.GetNextNonce(ctx, ownerAddress)
+
+	if err != nil {
+		return nil, nil, fmt.Errorf("can't get next nonce for address %s: %s", ownerAddress, err)
 	}
 	log.Debugf("nonce will be %d", nonce)
 
@@ -300,12 +298,6 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 		return &models.TxInfo{Status: status}, nil
 	}
 	// sender
-	//signer := types.NewEIP155Signer(big.NewInt(cl.chainID))
-	//sender, err := types.Sender(signer, tx)
-	//if err != nil {
-	//	log.Errorf("can't get sender for tx %s: %s", txID, err)
-	//	return nil, err
-	//}
 	var fee *big.Int
 	// used gas and tx status
 	if status == models.TxStatusPending {

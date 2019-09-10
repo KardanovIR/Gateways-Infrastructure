@@ -202,7 +202,11 @@ message TransactionByHashReply {
     repeated InputOutput inputs = 10;
     repeated InputOutput outputs = 11;
     string assetAmount = 12;
-    uint64 nonce = 13;
+    BCSpecific specificFields = 13;
+}
+
+message BCSpecific {
+    uint64 nonce = 1;
 }
 
 message InputOutput {
@@ -225,7 +229,6 @@ message ApproveAmountForAddressRequest {
     string contract = 2;
     string spenderAddress = 3;
     string amount = 4;
-    uint64 nonce = 5;
 }
 
 message ApproveAmountForAddressReply {

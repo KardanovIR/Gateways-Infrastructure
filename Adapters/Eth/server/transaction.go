@@ -87,7 +87,7 @@ func (s *grpcServer) ApproveAmountForAddressTransaction(ctx context.Context, in 
 		return nil, err
 	}
 	amount = converter.ToNodeAmount(amount)
-	var tx, fee, err = s.nodeClient.Erc20TokensRawApproveTransaction(ctx, in.OwnerAddress, in.Contract, amount, in.SpenderAddress, in.Nonce)
+	var tx, fee, err = s.nodeClient.Erc20TokensRawApproveTransaction(ctx, in.OwnerAddress, in.Contract, amount, in.SpenderAddress)
 	if err != nil {
 		log.Errorf("erc-20 tokens approve transaction's creation fails: %s", err)
 		return nil, err
@@ -166,5 +166,8 @@ func (s *grpcServer) TransactionByHash(ctx context.Context, in *pb.TransactionBy
 		Status:           string(tx.Status),
 		TxHash:           tx.TxHash,
 		Data:             tx.Data,
+		SpecificFields:   &pb.BCSpecific{
+			Nonce: tx.Nonce,
+		},
 	}, nil
 }

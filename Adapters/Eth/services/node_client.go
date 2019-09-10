@@ -31,7 +31,7 @@ type INodeClient interface {
 	CreateErc20TokensRawTransaction(ctx context.Context, addressFrom string, contractAddress string, addressTo string,
 		amount *big.Int, nonce uint64) ([]byte, error)
 	Erc20TokensRawApproveTransaction(ctx context.Context, ownerAddress string, contractAddress string, amount *big.Int,
-		spenderAddress string, nonce uint64) ([]byte, *big.Int, error)
+		spenderAddress string) ([]byte, *big.Int, error)
 	CreateErc20TokensTransferToTxSender(ctx context.Context, addressFrom string, contractAddress string,
 		txSender string, amount *big.Int, nonce uint64) ([]byte, error)
 
