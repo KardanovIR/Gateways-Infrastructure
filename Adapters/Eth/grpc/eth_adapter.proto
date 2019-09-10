@@ -107,6 +107,7 @@ message RawTransactionRequest {
     string addressTo = 3;
     string amount = 4;
     string contract = 5; // empty for eth (need to transfer erc-20 tokens)
+    uint64 nonce = 6;
 }
 
 // The request message for raw transaction creation
@@ -115,6 +116,7 @@ message Erc20RawTransactionRequest {
     string addressTo = 2;
     string amount = 3;
     string contract = 4;
+    uint64 nonce = 6;
 }
 
 // The response message containing the suggested gas price
@@ -200,6 +202,7 @@ message TransactionByHashReply {
     repeated InputOutput inputs = 10;
     repeated InputOutput outputs = 11;
     string assetAmount = 12;
+    uint64 nonce = 13;
 }
 
 message InputOutput {
@@ -222,6 +225,7 @@ message ApproveAmountForAddressRequest {
     string contract = 2;
     string spenderAddress = 3;
     string amount = 4;
+    uint64 nonce = 5;
 }
 
 message ApproveAmountForAddressReply {
