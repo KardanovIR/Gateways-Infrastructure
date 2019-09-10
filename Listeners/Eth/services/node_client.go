@@ -16,19 +16,28 @@ var bigIntZero = big.NewInt(0)
 
 type nodeClient struct {
 	*ethclient.Client
-	rpcNodeClient *rpc.Client
+	rpcParityNodeClient *rpc.Client // can be nil!
 }
 
-func newNodeClient(ctx context.Context, nodeHost string) (*nodeClient, error) {
+func newNodeClient(ctx context.Context, nodeHost string, parityNodeHost string) (*nodeClient, error) {
 	log := logger.FromContext(ctx)
 	rpcc, err := newRPCClient(log, nodeHost)
 	if err != nil {
 		log.Errorf("error during initialise rpc client: %s", err)
-
 		return nil, err
 	}
 	ethClient := ethclient.NewClient(rpcc)
-	return &nodeClient{ethClient, rpcc}, nil
+	var parityConn *rpc.Client
+	if len(parityNodeHost) > 0 {
+		parityConn, err = newRPCClient(log, nodeHost)
+		if err != nil {
+			log.Errorf("error during initialise rpc client for parity: %s", err)
+			return nil, err
+		}
+	} else {
+		log.Warn("parity node is not specified. Read of internal transfers is not available!")
+	}
+	return &nodeClient{ethClient, parityConn}, nil
 }
 
 func newRPCClient(log logger.ILogger, host string) (*rpc.Client, error) {
@@ -68,7 +77,10 @@ type Action struct {
 func (n *nodeClient) getTxTrace(ctx context.Context, txHash string) ([]Trace, error) {
 	log := logger.FromContext(ctx)
 	result := make([]Trace, 0)
-	if err := n.rpcNodeClient.CallContext(ctx, &result, txTraceMethodName, txHash); err != nil {
+	if n.rpcParityNodeClient == nil {
+		return result, nil
+	}
+	if err := n.rpcParityNodeClient.CallContext(ctx, &result, txTraceMethodName, txHash); err != nil {
 		log.Errorf("'trace_transaction' call finished with error: %s", err)
 		return result, err
 	}

@@ -12,7 +12,7 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
 )
 
-// add NODE_HOST parameter to env variable (node should be parity)
+// add NODE_PARITY_HOST parameter to env variable (node should be parity)
 func TestNodeClient_GetEthRecipientsForTxIncludeInternal(t *testing.T) {
 	ctx := context.Background()
 	log := logger.FromContext(ctx)
@@ -20,7 +20,7 @@ func TestNodeClient_GetEthRecipientsForTxIncludeInternal(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	nodeClient, err := newNodeClient(ctx, config.Cfg.Node.Host)
+	nodeClient, err := newNodeClient(ctx, config.Cfg.Node.Host, config.Cfg.Node.ParityHost)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()

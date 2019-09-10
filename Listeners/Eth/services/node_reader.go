@@ -38,7 +38,7 @@ func New(ctx context.Context, config *config.Node, rp repositories.IRepository) 
 	log := logger.FromContext(ctx)
 	var err error
 	onceNodeClient.Do(func() {
-		nc, e := newNodeClient(ctx, config.Host)
+		nc, e := newNodeClient(ctx, config.Host, config.ParityHost)
 		if e != nil {
 			err = e
 		}

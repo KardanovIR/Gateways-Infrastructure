@@ -34,7 +34,7 @@ var (
 	initTestOnce    sync.Once
 )
 
-// need Parity node to read internal tx
+// need Parity node to read internal tx: add NODE_PARITY_HOST parameter to env variable
 func TestListenerEth(t *testing.T) {
 	ctx := context.Background()
 	// setup

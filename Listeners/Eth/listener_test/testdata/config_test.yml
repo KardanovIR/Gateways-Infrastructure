@@ -3,6 +3,7 @@ node:
   startBlock: 5202062
   confirmations: 6
   chain: ETH
+  parity_host:
 
 db:
   name: block_db_test
