@@ -183,6 +183,7 @@ func (nr *nodeReader) processBlock(ctx context.Context, block *types.Block) (err
 			receipt, err := nr.nodeClient.TransactionReceipt(ctx, tx.Hash())
 			if err != nil {
 				log.Errorf("get transaction receipt failed", err)
+				return err
 			}
 			if receipt.Status == FailedTxStatus {
 				log.Debugf("failed tx %s. skip it", txHash)

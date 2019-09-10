@@ -2,12 +2,12 @@ package services
 
 import (
 	"context"
-	"fmt"
+	"math/big"
+	"strings"
+
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
-	"math/big"
-	"strings"
 )
 
 var erc20TokenABI *abi.ABI
@@ -17,7 +17,7 @@ func init() {
 	log := logger.FromContext(ctx)
 	erc20TokenABIValue, err := abi.JSON(strings.NewReader(erc20TokenABIStr))
 	if err != nil {
-		log.Error("cant parse ERC20 abi")
+		log.Error("cant parse ERC20 abi", err)
 	}
 
 	erc20TokenABI = &erc20TokenABIValue
@@ -57,18 +57,6 @@ func CheckERC20Transfers(data []byte) (bool, error) {
 		return true, nil
 	}
 	return false, nil
-}
-
-// TransferEvent is used by abi.unpack
-type TransferEvent struct {
-	From  common.Address
-	To    common.Address
-	Value *big.Int
-}
-
-func (e *TransferEvent) String() string {
-	return fmt.Sprintf("from, to, value: %s, %s, %s",
-		e.From.String(), e.To.String(), e.Value.String())
 }
 
 // erc20TokenABIStr is the input ABI used to generate the binding from.
