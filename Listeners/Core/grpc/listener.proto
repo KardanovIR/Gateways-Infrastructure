@@ -14,6 +14,13 @@ service Listener {
     // Remove task
     rpc RemoveTask (RemoveTaskRequest) returns (Empty) {
     }
+
+    rpc RemoveTaskByTxHash (RemoveTaskByTxHashRequest) returns (Empty) {
+    }
+}
+
+message RemoveTaskByTxHashRequest {
+    string hash = 1;
 }
 
 // The request message containing task
