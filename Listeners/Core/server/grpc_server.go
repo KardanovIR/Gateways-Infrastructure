@@ -82,7 +82,7 @@ func (s *grpcServer) RemoveTaskByTxHash(ctx context.Context, in *pb.RemoveTaskBy
 	}
 
 	for _, task := range tasks {
-		err = s.rp.RemoveTask(ctx, task.Id)
+		err = s.rp.RemoveTask(ctx, task.Id.Hex())
 		if err != nil {
 			log.Errorf("Removing task fails: %s", err)
 			return nil, err
