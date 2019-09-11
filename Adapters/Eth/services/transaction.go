@@ -37,7 +37,7 @@ func (cl *nodeClient) CreateRawTransaction(ctx context.Context, addressFrom stri
 		return nil, fmt.Errorf("can't get suggected gas price %s", err)
 	}
 	log.Debugf("suggest gas price %s", gasPrice)
-	if(nonce == 0) {
+	if nonce == 0 {
 		nonce, err = cl.GetNextNonce(ctx, addressFrom)
 		if err != nil {
 			return nil, fmt.Errorf("can't get next nonce for address %s: %s", addressFrom, err)
@@ -76,7 +76,7 @@ func (cl *nodeClient) CreateErc20TokensRawTransaction(ctx context.Context, addre
 		return nil, fmt.Errorf("can't get suggected gas price %s", err)
 	}
 	log.Debugf("suggest gas price %s", gasPrice)
-	if(nonce == 0) {
+	if nonce == 0 {
 		nonce, err = cl.GetNextNonce(ctx, addressFrom)
 
 		if err != nil {
@@ -142,7 +142,7 @@ func (cl *nodeClient) CreateErc20TokensTransferToTxSender(ctx context.Context, a
 		return nil, fmt.Errorf("can't get suggected gas price %s", err)
 	}
 	log.Debugf("suggest gas price %s", gasPrice)
-	if(nonce ==0){
+	if nonce == 0 {
 		nonce, err = cl.GetNextNonce(ctx, txSender)
 
 		if err != nil {
@@ -298,6 +298,12 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 		return &models.TxInfo{Status: status}, nil
 	}
 	// sender
+	signer := types.NewEIP155Signer(big.NewInt(cl.chainID))
+	sender, err := types.Sender(signer, tx)
+	if err != nil {
+		log.Errorf("can't get sender for tx %s: %s", txID, err)
+		return nil, err
+	}
 	var fee *big.Int
 	// used gas and tx status
 	if status == models.TxStatusPending {
@@ -315,7 +321,7 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 		fee = new(big.Int).Mul(big.NewInt(int64(receipt.GasUsed)), tx.GasPrice())
 	}
 	txInfo := models.TxInfo{
-		//From:   tx.,
+		From:   sender.String(),
 		Amount: tx.Value(),
 		Fee:    fee,
 		TxHash: tx.Hash().String(),
