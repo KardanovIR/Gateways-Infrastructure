@@ -73,16 +73,16 @@ func (s *grpcServer) RemoveTask(ctx context.Context, in *pb.RemoveTaskRequest) (
 
 func (s *grpcServer) RemoveTaskByTxHash(ctx context.Context, in *pb.RemoveTaskByTxHashRequest) (*pb.Empty, error) {
 	log := logger.FromContext(ctx)
-	log.Info("RemoveTask")
+	log.Infof("RemoveTaskByTxHash %s", in.Hash)
 
-	tasks, err := s.rp.FindByAddressOrTxId(ctx, models.ChainType(in.Blockchain), "", in.Hash)
-	if err != nil && len(tasks) > 0 {
+	tasks, err := s.rp.FindByAddressOrTxId(ctx, s.chainType, "", in.Hash)
+	if err != nil {
 		log.Errorf("Removing task fails: %s", err)
 		return nil, err
 	}
 
 	for _, task := range tasks {
-		err = s.rp.RemoveTask(ctx, task.Id)
+		err = s.rp.RemoveTask(ctx, task.Id.Hex())
 		if err != nil {
 			log.Errorf("Removing task fails: %s", err)
 			return nil, err

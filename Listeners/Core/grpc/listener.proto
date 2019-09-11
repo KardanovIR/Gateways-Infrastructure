@@ -21,7 +21,6 @@ service Listener {
 
 message RemoveTaskByTxHashRequest {
     string hash = 1;
-    string blockchain = 2;
 }
 
 // The request message containing task
