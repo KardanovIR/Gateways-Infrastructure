@@ -17,6 +17,7 @@ import (
 type IGrpcServer interface {
 	AddTask(ctx context.Context, in *pb.AddTaskRequest) (*pb.AddTaskResponse, error)
 	RemoveTask(ctx context.Context, in *pb.RemoveTaskRequest) (*pb.Empty, error)
+	RemoveTaskByTxHash(ctx context.Context, in *pb.RemoveTaskByTxHashRequest) (*pb.Empty, error)
 }
 
 type grpcServer struct {
@@ -65,6 +66,27 @@ func (s *grpcServer) RemoveTask(ctx context.Context, in *pb.RemoveTaskRequest) (
 	if err != nil {
 		log.Errorf("Removing task fails: %s", err)
 		return nil, err
+	}
+
+	return &pb.Empty{}, nil
+}
+
+func (s *grpcServer) RemoveTaskByTxHash(ctx context.Context, in *pb.RemoveTaskByTxHashRequest) (*pb.Empty, error) {
+	log := logger.FromContext(ctx)
+	log.Infof("RemoveTaskByTxHash %s", in.Hash)
+
+	tasks, err := s.rp.FindByAddressOrTxId(ctx, s.chainType, "", in.Hash)
+	if err != nil {
+		log.Errorf("Removing task fails: %s", err)
+		return nil, err
+	}
+
+	for _, task := range tasks {
+		err = s.rp.RemoveTask(ctx, task.Id.Hex())
+		if err != nil {
+			log.Errorf("Removing task fails: %s", err)
+			return nil, err
+		}
 	}
 
 	return &pb.Empty{}, nil
