@@ -3,9 +3,10 @@ node:
   startBlock: 5202062
   confirmations: 6
   chain: ETH
+  parity_host:
 
 db:
   name: block_db_test
   host: localhost:27017
-port: 5001
+port: 5111
 callbackUrl: localhost:5020
