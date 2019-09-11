@@ -36,15 +36,15 @@ func (s *grpcServer) GetRawTransaction(ctx context.Context, in *pb.RawTransactio
 			}
 			if senderAddress == in.AddressTo && senderAddress != in.AddressFrom {
 				// sender of tx is not owner of account (but have allowance of owner account)
-				tx, err = s.nodeClient.CreateErc20TokensTransferToTxSender(ctx, in.AddressFrom, in.Contract, senderAddress, amount)
+				tx, err = s.nodeClient.CreateErc20TokensTransferToTxSender(ctx, in.AddressFrom, in.Contract, senderAddress, amount, in.Nonce)
 			} else {
-				tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount)
+				tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount, in.Nonce)
 			}
 		} else {
-			tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount)
+			tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount, in.Nonce)
 		}
 	} else {
-		tx, err = s.nodeClient.CreateRawTransaction(ctx, in.AddressFrom, in.AddressTo, amount)
+		tx, err = s.nodeClient.CreateRawTransaction(ctx, in.AddressFrom, in.AddressTo, amount, in.Nonce)
 	}
 	if err != nil {
 		if err == services.AllowanceAmountIsNotEnoughError {
@@ -68,7 +68,7 @@ func (s *grpcServer) GetErc20RawTransaction(ctx context.Context, in *pb.Erc20Raw
 		return nil, err
 	}
 	amount = converter.ToNodeAmount(amount)
-	var tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount)
+	var tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount, in.Nonce)
 	if err != nil {
 		log.Errorf("transaction's creation fails: %s", err)
 		return nil, err
@@ -166,5 +166,8 @@ func (s *grpcServer) TransactionByHash(ctx context.Context, in *pb.TransactionBy
 		Status:           string(tx.Status),
 		TxHash:           tx.TxHash,
 		Data:             tx.Data,
+		SpecificFields:   &pb.BCSpecific{
+			Nonce: tx.Nonce,
+		},
 	}, nil
 }

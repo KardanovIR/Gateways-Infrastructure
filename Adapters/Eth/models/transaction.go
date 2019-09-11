@@ -21,4 +21,5 @@ type TxInfo struct {
 	Status      TxStatus
 	Contract    string
 	AssetAmount *big.Int
+	Nonce       uint64
 }

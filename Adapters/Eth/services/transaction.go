@@ -22,7 +22,7 @@ const FailedTxStatus = 0
 var AllowanceAmountIsNotEnoughError = errors.New("allowanceAmountIsNotEnough")
 
 func (cl *nodeClient) CreateRawTransaction(ctx context.Context, addressFrom string, addressTo string,
-	amount *big.Int) ([]byte, error) {
+	amount *big.Int, nonce uint64) ([]byte, error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("call service method 'CreateRawTransaction': send %s from %s to %s", amount, addressFrom, addressTo)
 	ok, _, err := cl.IsAddressValid(ctx, addressTo)
@@ -37,9 +37,11 @@ func (cl *nodeClient) CreateRawTransaction(ctx context.Context, addressFrom stri
 		return nil, fmt.Errorf("can't get suggected gas price %s", err)
 	}
 	log.Debugf("suggest gas price %s", gasPrice)
-	nonce, err := cl.GetNextNonce(ctx, addressFrom)
-	if err != nil {
-		return nil, fmt.Errorf("can't get next nonce for address %s: %s", addressFrom, err)
+	if nonce == 0 {
+		nonce, err = cl.GetNextNonce(ctx, addressFrom)
+		if err != nil {
+			return nil, fmt.Errorf("can't get next nonce for address %s: %s", addressFrom, err)
+		}
 	}
 	log.Debugf("nonce will be %d", nonce)
 	tx := types.NewTransaction(
@@ -58,7 +60,7 @@ func (cl *nodeClient) CreateRawTransaction(ctx context.Context, addressFrom stri
 }
 
 func (cl *nodeClient) CreateErc20TokensRawTransaction(ctx context.Context, addressFrom string, contractAddress string,
-	addressTo string, amount *big.Int) ([]byte, error) {
+	addressTo string, amount *big.Int, nonce uint64) ([]byte, error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("call service method 'CreateErc20TokensRawTransaction': send %s tokens from %s to %s; contract %s",
 		amount, addressFrom, addressTo, contractAddress)
@@ -74,11 +76,14 @@ func (cl *nodeClient) CreateErc20TokensRawTransaction(ctx context.Context, addre
 		return nil, fmt.Errorf("can't get suggected gas price %s", err)
 	}
 	log.Debugf("suggest gas price %s", gasPrice)
-	nonce, err := cl.GetNextNonce(ctx, addressFrom)
-	log.Debugf("nonce will be %d", nonce)
-	if err != nil {
-		return nil, fmt.Errorf("can't get next nonce for address %s: %s", addressFrom, err)
+	if nonce == 0 {
+		nonce, err = cl.GetNextNonce(ctx, addressFrom)
+
+		if err != nil {
+			return nil, fmt.Errorf("can't get next nonce for address %s: %s", addressFrom, err)
+		}
 	}
+	log.Debugf("nonce will be %d", nonce)
 	sender := common.HexToAddress(addressFrom)
 	recipient := common.HexToAddress(addressTo)
 	tokenAddress := common.HexToAddress(contractAddress)
@@ -109,7 +114,7 @@ func (cl *nodeClient) CreateErc20TokensRawTransaction(ctx context.Context, addre
 }
 
 func (cl *nodeClient) CreateErc20TokensTransferToTxSender(ctx context.Context, addressFrom string,
-	contractAddress string, txSender string, amount *big.Int) ([]byte, error) {
+	contractAddress string, txSender string, amount *big.Int, nonce uint64) ([]byte, error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("call service method 'CreateErc20TokensTransferToTxSender': send %s tokens from %s to %s; contract %s",
 		amount, addressFrom, txSender, contractAddress)
@@ -137,11 +142,15 @@ func (cl *nodeClient) CreateErc20TokensTransferToTxSender(ctx context.Context, a
 		return nil, fmt.Errorf("can't get suggected gas price %s", err)
 	}
 	log.Debugf("suggest gas price %s", gasPrice)
-	nonce, err := cl.GetNextNonce(ctx, txSender)
-	log.Debugf("nonce will be %d", nonce)
-	if err != nil {
-		return nil, fmt.Errorf("can't get next nonce for address %s: %s", txSender, err)
+	if nonce == 0 {
+		nonce, err = cl.GetNextNonce(ctx, txSender)
+
+		if err != nil {
+			return nil, fmt.Errorf("can't get next nonce for address %s: %s", txSender, err)
+		}
 	}
+	log.Debugf("nonce will be %d", nonce)
+
 	owner := common.HexToAddress(addressFrom)
 	sender := common.HexToAddress(txSender)
 	tokenAddress := common.HexToAddress(contractAddress)
@@ -190,10 +199,12 @@ func (cl *nodeClient) Erc20TokensRawApproveTransaction(ctx context.Context, owne
 		amount, ownerAddress, spenderAddress, contractAddress)
 
 	nonce, err := cl.GetNextNonce(ctx, ownerAddress)
-	log.Debugf("nonce will be %d", nonce)
+
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't get next nonce for address %s: %s", ownerAddress, err)
 	}
+	log.Debugf("nonce will be %d", nonce)
+
 	owner := common.HexToAddress(ownerAddress)
 	tokenAddress := common.HexToAddress(contractAddress)
 	spender := common.HexToAddress(spenderAddress)
@@ -316,6 +327,7 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 		TxHash: tx.Hash().String(),
 		Data:   tx.Data(),
 		Status: status,
+		Nonce:  tx.Nonce(),
 	}
 	isERC20Transfers, err := CheckERC20Transfers(tx.Data())
 	if err != nil {
