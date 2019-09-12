@@ -44,7 +44,7 @@ func TestGrpcClient(t *testing.T) {
 	amount, _ := new(big.Int).SetString("10000", 10)
 
 	// check fee and transfered amount on predefined address
-	feeReply, err := clientgrpc.GetClient().SuggestFee(ctx, &ethAdapter.EmptyRequest{})
+	feeReply, err := clientgrpc.GetClient().Fee(ctx, &ethAdapter.FeeRequest{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -117,7 +117,7 @@ func TestGrpcClient(t *testing.T) {
 	assert.Equal(t, balanceReply.Balance, amount.String())
 
 	// return money back
-	fee2Reply, err := clientgrpc.GetClient().SuggestFee(ctx, &ethAdapter.EmptyRequest{})
+	fee2Reply, err := clientgrpc.GetClient().Fee(ctx, &ethAdapter.FeeRequest{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -155,22 +155,22 @@ func TestGrpcClient(t *testing.T) {
 	assert.Equal(t, amountBack.String(), txInfoReply.Amount)
 	assert.Equal(t, address2, txInfoReply.SenderAddress)
 	assert.Equal(t, address, txInfoReply.RecipientAddress)
-	assert.Equal(t, fee2.String(), txInfoReply.Fee)
+	assert.Equal(t, false, txInfoReply.SpecificFields.IsInternalTx)
 
 	// check balance
 	balance1Reply, err := clientgrpc.GetClient().GetEthBalance(ctx, &ethAdapter.AddressRequest{Address: address})
 	if err != nil {
 		log.Fatal(err)
 	}
-	// final_balance_on_address1 = initial_balance_on_address1 - (fee_of_1_to_2 + fee_of_2_to_1)
-	amountResult := new(big.Int).Sub(sBalance, new(big.Int).Add(fee, fee2))
-	assert.Equal(t, amountResult.String(), balance1Reply.Balance)
+
+	balance1After, _ := new(big.Int).SetString(balance1Reply.Balance, 10)
+	assert.Equal(t, -1, balance1After.Cmp(sBalance))
 
 	nonceReply, err := clientgrpc.GetClient().GetNextNonce(ctx, &ethAdapter.AddressRequest{Address: address2})
 	if err != nil {
 		log.Fatal(err)
 	}
-	assert.Equal(t, int64(1), nonceReply.Nonce)
+	assert.Equal(t, uint64(1), nonceReply.Nonce)
 }
 
 func TestTransactionByHash(t *testing.T) {
@@ -204,6 +204,42 @@ func TestTransactionByHash(t *testing.T) {
 	assert.Equal(t, "FAILED", reply2.Status)
 	assert.Equal(t, "35610", reply2.Fee)
 	assert.Equal(t, "0x722dd3F80BAC40c951b51BdD28Dd19d435762180", reply2.AssetId)
+}
+
+func TestTransactionByHashInternal(t *testing.T) {
+	ctx, log := beforeTests()
+	reply, err := clientgrpc.GetClient().TransactionByHash(ctx, &ethAdapter.TransactionByHashRequest{
+		TxHash: "0xa874bd3d557d5145f71a354c8d4035acc05d7778b2c26c2e73d2621cd8bab143",
+	})
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	assert.Equal(t, "0", reply.Amount)
+	assert.Equal(t, "0", reply.AssetAmount)
+	assert.Equal(t, "0xB78aBDCc9c327F521C9Cdd03DF3c08D39bdDa11d", reply.SenderAddress)
+	assert.Equal(t, "SUCCESS", reply.Status)
+	assert.Equal(t, "75705", reply.Fee)
+	assert.Equal(t, "", reply.AssetId)
+	if len(config.Cfg.Node.ParityHost) == 0 {
+		assert.Equal(t, 0, len(reply.Outputs))
+		assert.Equal(t, "0x6a20bCa56696042944663e3EF04dB5c899074B89", reply.RecipientAddress)
+	} else {
+		assert.Equal(t, 3, len(reply.Outputs))
+		assert.Equal(t, "", reply.RecipientAddress)
+		assert.Equal(t, true, reply.SpecificFields.IsInternalTx)
+		for _, output := range reply.Outputs {
+			to := output.Address
+			if to == "0xDC7B9C49cAb3d3Ea58D8d166f788426965052684" ||
+				to == "0xdb8Db8eE13FB0df9374Dab40405D701cc79c65e9" ||
+				to == "0x50F554649ED757D40d5Bd32B1154AFfc4278359B" {
+				assert.Equal(t, "2534999", output.Amount)
+			} else {
+				log.Error("not expected address %s", to)
+				t.Fail()
+			}
+		}
+	}
 }
 
 func TestTokenBalance(t *testing.T) {
