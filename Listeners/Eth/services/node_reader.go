@@ -241,14 +241,14 @@ func (nr *nodeReader) findAndExecuteTasks(ctx context.Context, address string, t
 
 		switch task.Type {
 		case models.OneTime:
-			err := nr.rp.RemoveTask(ctx, task.Id.Hex())
-			if err != nil {
-				log.Errorf("Error: removing task %s", err)
-				return err
+			removeTaskErr := nr.rp.RemoveTask(ctx, task.Id.Hex())
+			if removeTaskErr != nil {
+				log.Errorf("Error: removing task %s", removeTaskErr)
+				return removeTaskErr
 			}
 		}
 
 		log.Debugf("Task id %s for %s has been proceed successful!", task.Id.Hex(), nr.conf.ChainType)
 	}
-	return nil
+	return err
 }
