@@ -1,0 +1,8 @@
+node:
+  host: "http://127.0.0.1:9052"
+  user: 0x10
+  password:
+  httppostmode: true
+  disabletls: true
+decimals: 8
+port: 5005
