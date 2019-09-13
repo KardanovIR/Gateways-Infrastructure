@@ -1,0 +1,12 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+	precomposeunicode = true
+[remote "origin"]
+	url = https://github.com/reinerRubin/btcd.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "fix-getblock-verbosity"]
+	remote = origin
+	merge = refs/heads/fix-getblock-verbosity
