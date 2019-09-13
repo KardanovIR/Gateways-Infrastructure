@@ -156,6 +156,13 @@ func (s *grpcServer) TransactionByHash(ctx context.Context, in *pb.TransactionBy
 		log.Errorf("get transaction by hash fails: %s", err)
 		return nil, err
 	}
+	outputs := make([]*pb.InputOutput, len(tx.InternalTransfers))
+	for i, transfer := range tx.InternalTransfers {
+		outputs[i] = &pb.InputOutput{
+			Address: transfer.To.String(),
+			Amount:  converter.ToTargetAmountStr(transfer.Value)}
+	}
+
 	return &pb.TransactionByHashReply{
 		SenderAddress:    tx.From,
 		RecipientAddress: tx.To,
@@ -165,9 +172,10 @@ func (s *grpcServer) TransactionByHash(ctx context.Context, in *pb.TransactionBy
 		AssetAmount:      converter.ToTargetAmountStr(tx.AssetAmount),
 		Status:           string(tx.Status),
 		TxHash:           tx.TxHash,
-		Data:             tx.Data,
-		SpecificFields:   &pb.BCSpecific{
-			Nonce: tx.Nonce,
+		SpecificFields: &pb.BCSpecific{
+			Nonce:        tx.Nonce,
+			IsInternalTx: len(outputs) > 0,
 		},
+		Outputs: outputs,
 	}, nil
 }

@@ -19,6 +19,10 @@ import (
 
 const FailedTxStatus = 0
 
+const txTraceMethodName = "trace_transaction"
+
+var bigIntZero = big.NewInt(0)
+
 var AllowanceAmountIsNotEnoughError = errors.New("allowanceAmountIsNotEnough")
 
 func (cl *nodeClient) CreateRawTransaction(ctx context.Context, addressFrom string, addressTo string,
@@ -329,21 +333,48 @@ func (cl *nodeClient) TransactionInfo(ctx context.Context, txID string) (*models
 		Status: status,
 		Nonce:  tx.Nonce(),
 	}
-	isERC20Transfers, err := CheckERC20Transfers(tx.Data())
-	if err != nil {
-		return nil, err
-	}
-	if !isERC20Transfers {
-		log.Debugf("there are not erc20 transfers in tx %s: %s", txID, err)
-		txInfo.To = tx.To().Hex()
-	} else {
+
+	// erc-20 tokens
+	if CheckERC20Transfers(tx.Data()) {
+		log.Debugf("there are erc20 transfers in tx %s: %s", txID, err)
 		transferParams, err := ParseERC20TransferParams(tx.Data())
 		if err != nil {
+			log.Errorf("parse erc-20 params fails: %s", err)
 			return nil, err
 		}
 		txInfo.To = transferParams.To.Hex()
 		txInfo.AssetAmount = transferParams.Value
 		txInfo.Contract = tx.To().Hex()
+	} else {
+		isToContract, err := cl.IsContract(ctx, *tx.To())
+		if err != nil {
+			log.Errorf("method isContract return error: %s", err)
+			return nil, err
+		}
+		// eth transfer to account
+		if !isToContract {
+			log.Debugf("there is usual eth transaction %s", txID)
+			txInfo.To = tx.To().Hex()
+		} else {
+			// contract call -> find internal tx
+			intTransfers, err := cl.GetEthTransfersIncludeInternalForTx(ctx, tx.Hash().String())
+			if err != nil {
+				log.Errorf("get internal transaction fails: %s", err)
+				return nil, err
+			}
+			if len(intTransfers) == 0 {
+				txInfo.To = tx.To().Hex()
+			} else if len(intTransfers) == 1 {
+				log.Debugf("there is internal eth transfer in tx %s", txID)
+				t := intTransfers[0]
+				txInfo.To = t.To.String()
+				txInfo.Amount = t.Value
+				txInfo.InternalTransfers = intTransfers
+			} else {
+				log.Debugf("there are %d internal eth transfer in tx %s", len(intTransfers), txID)
+				txInfo.InternalTransfers = intTransfers
+			}
+		}
 	}
 	return &txInfo, nil
 }
@@ -360,6 +391,81 @@ func (cl *nodeClient) getTxAndStatus(ctx context.Context, txID string) (*types.T
 		return tx, models.TxStatusPending, nil
 	}
 	return tx, models.TxStatusSuccess, nil
+}
+
+// GetEthTransfersIncludeInternalForTx parse eth transfers include internal transactions. Work only with parity node
+// if tx in simple eth transfer (without internal) - it returns it
+// don't return zero-valued transfers
+func (cl *nodeClient) GetEthTransfersIncludeInternalForTx(ctx context.Context, txHash string) ([]models.TransferEvent, error) {
+	log := logger.FromContext(ctx)
+	traceList, err := cl.getTxTraces(ctx, txHash)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	recipients, err := cl.parseTrances(ctx, traceList)
+	if err != nil {
+		return nil, err
+	}
+	return recipients, nil
+}
+
+type Trace struct {
+	Action Action `json:"action"`
+}
+
+type Action struct {
+	CallType string `json:"callType"`
+	From     string `json:"from"`
+	To       string `json:"to"`
+	Value    string `json:"value"`
+}
+
+func (cl *nodeClient) getTxTraces(ctx context.Context, txHash string) ([]Trace, error) {
+	log := logger.FromContext(ctx)
+	result := make([]Trace, 0)
+	if cl.parityClient == nil {
+		return result, nil
+	}
+	if err := cl.parityClient.CallContext(ctx, &result, txTraceMethodName, txHash); err != nil {
+		log.Errorf("'trace_transaction' call finished with error: %s", err)
+		return result, err
+	}
+	log.Debugf("eth transfers count in tx %s is %d", txHash, len(result))
+	return result, nil
+}
+
+func (cl *nodeClient) parseTrances(ctx context.Context, traceList []Trace) ([]models.TransferEvent, error) {
+	log := logger.FromContext(ctx)
+	transfers := make([]models.TransferEvent, 0)
+	for _, trace := range traceList {
+		amount, ok := new(big.Int).SetString(trace.Action.Value, 0)
+		// only for transfers with not zero eth amount
+		if ok && amount.Cmp(bigIntZero) > 0 {
+			// convert address string -> object -> string to get address with right letters case
+			addressTo := common.HexToAddress(trace.Action.To)
+			addressFrom := common.HexToAddress(trace.Action.From)
+			to := addressTo.String()
+			hasTransferWithSameRecipient := false
+			// if have transfer for recipient -> summarize transfer's amounts
+			for _, transfer := range transfers {
+				if transfer.To.String() == to {
+					hasTransferWithSameRecipient = true
+					transfer.Value = transfer.Value.Add(transfer.Value, amount)
+				}
+			}
+			if !hasTransferWithSameRecipient {
+				transfers = append(transfers, models.TransferEvent{To: addressTo, From: addressFrom, Value: amount})
+			}
+		}
+		if !ok {
+			err := fmt.Errorf("can't convert %s to big Int", trace.Action.Value)
+			log.Error(err)
+			return nil, err
+		}
+	}
+	log.Debugf("not zero eth transfers count is %d", len(transfers))
+	return transfers, nil
 }
 
 func DeserializeTx(rlpTx []byte) (*types.Transaction, error) {

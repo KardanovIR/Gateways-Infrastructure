@@ -207,6 +207,7 @@ message TransactionByHashReply {
 
 message BCSpecific {
     uint64 nonce = 1;
+    bool isInternalTx = 2;
 }
 
 message InputOutput {

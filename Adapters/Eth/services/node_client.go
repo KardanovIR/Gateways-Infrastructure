@@ -48,6 +48,7 @@ const gasLimitForMoneyTransfer = 21000
 
 type nodeClient struct {
 	ethClient        *ethclient.Client
+	parityClient     *rpc.Client // can be nil!
 	contractProvider *Erc20ContractProvider
 	chainID          int64
 	// private keys for addresses
@@ -69,10 +70,22 @@ func New(ctx context.Context, config config.Node) error {
 			err = e
 			return
 		}
+		var rcParity *rpc.Client
+		if len(config.ParityHost) > 0 {
+			rcParity, e = newRPCClient(log, config.ParityHost)
+			if e != nil {
+				err = e
+				return
+			}
+		} else {
+			log.Warn("parity node is not specified: read of internal transfers is not available")
+		}
+
 		ethClient := ethclient.NewClient(rc)
 		cp := NewContractProvider(ethClient)
 		cl = &nodeClient{
 			ethClient:        ethClient,
+			parityClient:     rcParity,
 			contractProvider: cp,
 			chainID:          config.ChainId,
 			privateKeys:      make(map[string]*ecdsa.PrivateKey),

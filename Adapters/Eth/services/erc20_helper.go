@@ -2,13 +2,13 @@ package services
 
 import (
 	"context"
-	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 	"math/big"
 	"strings"
+
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/models"
 )
 
 var erc20TokenABI *abi.ABI
@@ -18,7 +18,7 @@ func init() {
 	log := logger.FromContext(ctx)
 	erc20TokenABIValue, err := abi.JSON(strings.NewReader(erc20TokenABIStr))
 	if err != nil {
-		log.Error("cant parse ERC20 abi")
+		log.Error("cant parse ERC20 abi", err)
 	}
 
 	erc20TokenABI = &erc20TokenABIValue
@@ -44,16 +44,9 @@ func ERC20AllowanceForSender(owner common.Address, spender common.Address) ([]by
 	return erc20TokenABI.Pack("allowance", owner, spender)
 }
 
-// ERC20TransferParams is a params for token.transfer method
-type ERC20TransferParams struct {
-	To    common.Address
-	From  common.Address
-	Value *big.Int
-}
-
 // ParseERC20TransferParams returns "transfer" params from a tx data (reverse of ERC20TransferData)
-func ParseERC20TransferParams(data []byte) (*ERC20TransferParams, error) {
-	transferParams := &ERC20TransferParams{}
+func ParseERC20TransferParams(data []byte) (*models.TransferEvent, error) {
+	transferParams := &models.TransferEvent{}
 
 	// ABI pack and unpack methods are not symmetric. The pack of a function call looks like
 	// 4 bytes of "method name" and params; so we get a method name first. And then unpack params
@@ -66,55 +59,15 @@ func ParseERC20TransferParams(data []byte) (*ERC20TransferParams, error) {
 	return transferParams, nil
 }
 
-func CheckERC20Transfers(data []byte) (bool, error) {
+func CheckERC20Transfers(data []byte) bool {
 	if len(data) < 4 {
-		return false, nil
+		return false
 	}
 	method, err := erc20TokenABI.MethodById(data)
 	if err != nil {
-		return false, err
+		return false
 	}
-	if method.Name == "transfer" {
-		return true, nil
-	}
-	return false, nil
-}
-
-// TransferEvent is used by abi.unpack
-type TransferEvent struct {
-	From  common.Address
-	To    common.Address
-	Value *big.Int
-}
-
-func (e *TransferEvent) String() string {
-	return fmt.Sprintf("from, to, value: %s, %s, %s",
-		e.From.String(), e.To.String(), e.Value.String())
-}
-
-// ParseTransferEvent returns a transferEvent by a log
-func ParseTransferEvent(log types.Log) (*TransferEvent, error) {
-	event, err := parseBaseTransferEvent(log.Data)
-	if err != nil {
-		return nil, err
-	}
-
-	event.From = common.BytesToAddress(log.Topics[1].Bytes())
-	event.To = common.BytesToAddress(log.Topics[2].Bytes())
-
-	return event, nil
-}
-
-func parseBaseTransferEvent(data []byte) (*TransferEvent, error) {
-	transferEvent := &TransferEvent{}
-	err := erc20TokenABI.Unpack(transferEvent, "Transfer", data)
-	if err != nil {
-		err = erc20TokenABI.Unpack(transferEvent, "TransferFrom", data)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return transferEvent, nil
+	return method.Name == "transfer" || method.Name == "transferFrom"
 }
 
 // erc20TokenABIStr is the input ABI used to generate the binding from.

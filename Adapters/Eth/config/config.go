@@ -22,8 +22,9 @@ type Config struct {
 }
 
 type Node struct {
-	Host    string `mapstructure:"HOST"`
-	ChainId int64  `mapstructure:"CHAINID"`
+	Host       string `mapstructure:"HOST"`
+	ChainId    int64  `mapstructure:"CHAINID"`
+	ParityHost string `mapstructure:"PARITY_HOST"`
 }
 
 // Load set configuration parameters.
