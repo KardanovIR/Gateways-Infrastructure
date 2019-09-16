@@ -2,14 +2,9 @@ package services
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/btcsuite/btcd/rpcclient"
-	"io"
-	"io/ioutil"
-	"net/http"
 	"sync"
-	"time"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/config"
@@ -111,7 +106,7 @@ func (cl *nodeClient) BlockLast(ctx context.Context) (*BlockShortInfo, error) {
 	log := logger.FromContext(ctx)
 	log.Debug("get current height")
 	//todo
-	return &block, nil
+	return nil, nil
 }
 
 func (cl *nodeClient) BlockAt(ctx context.Context, blockNumber uint64, currentHeight *uint64) (*Block, error) {
@@ -127,12 +122,12 @@ func (cl *nodeClient) BlockAt(ctx context.Context, blockNumber uint64, currentHe
 		currentHeight = &lastBlock.Height
 	}
 	//todo
-	return &block, nil
+	return nil, nil
 }
 
 func (cl *nodeClient) BlockByNumber(ctx context.Context, targetBlockNumber uint64, lastBlockHeight uint64) (*BlockShortInfo, error) {
-	log := logger.FromContext(ctx)
+	//log := logger.FromContext(ctx)
 	// calculate how much blocks will be skipped
 	//todo
-	return nil, fmt.Errorf("haven't block with height %d between blocks %v", targetBlockNumber, heights)
+	return nil, fmt.Errorf("haven't block with height %d between blocks %v", targetBlockNumber, 0)
 }
