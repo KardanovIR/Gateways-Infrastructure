@@ -16,7 +16,11 @@ type Block struct {
 func (cl *nodeClient) getCurrentHeight(ctx context.Context) (uint64, error) {
 	log := logger.FromContext(ctx)
 	log.Info("get current height")
-	//todo сделать метод
+	info, err := cl.nodeClient.GetInfo()
+	if err != nil {
+		return 0, err
+	}
+	height := uint64(info.Blocks)
 
 	log.Infof("current height is %d", height)
 	return height, nil

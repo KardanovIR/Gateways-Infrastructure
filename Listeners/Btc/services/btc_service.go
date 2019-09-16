@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/_vendor-20180717124023/github.com/btcsuite/btcd/rpcclient"
+	"github.com/btcsuite/btcd/rpcclient"
 	"io"
 	"io/ioutil"
 	"net/http"

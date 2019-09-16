@@ -21,9 +21,9 @@ type AddressTransactions struct {
 func (cl *nodeClient) GetAllBalances(ctx context.Context, address string) (*models.AccountBalance, error) {
 	log := logger.FromContext(ctx)
 	log.Infof("call service method 'GetBalanceWithAssets' for address %s", address)
-	balance := models.AccountBalance{}
+
 	//todo сделать метод
 
 
-	return &balance, nil
+	return nil, nil
 }

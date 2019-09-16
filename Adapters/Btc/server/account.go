@@ -18,13 +18,7 @@ func (s *grpcServer) GetAllBalances(ctx context.Context, in *pb.AddressRequest) 
 		return nil, err
 	}
 	wb := strconv.FormatUint(balance.Amount, 10)
-	assetBalances := make([]*pb.GetAllBalanceReply_AssetBalance, 0, len(balance.Assets))
-	for c, amount := range balance.Assets {
-		assetBalances = append(assetBalances,
-			&pb.GetAllBalanceReply_AssetBalance{AssetId: c, Amount: strconv.FormatUint(amount, 10)},
-		)
-	}
-	result := pb.GetAllBalanceReply{Amount: wb, AssetBalances: assetBalances}
+	result := pb.GetAllBalanceReply{Amount: wb, AssetBalances: nil}
 	return &result, nil
 }
 
@@ -37,12 +31,7 @@ func (s *grpcServer) GetAllBalance(ctx context.Context, in *pb.GetAllBalanceRequ
 		return nil, err
 	}
 	wb := strconv.FormatUint(balance.Amount, 10)
-	assetBalances := make([]*pb.GetAllBalanceReply_AssetBalance, 0, len(balance.Assets))
-	for c, amount := range balance.Assets {
-		assetBalances = append(assetBalances,
-			&pb.GetAllBalanceReply_AssetBalance{AssetId: c, Amount: strconv.FormatUint(amount, 10)},
-		)
-	}
-	result := pb.GetAllBalanceReply{Amount: wb, AssetBalances: assetBalances}
+
+	result := pb.GetAllBalanceReply{Amount: wb, AssetBalances: nil}
 	return &result, nil
 }

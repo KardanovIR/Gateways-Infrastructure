@@ -2,18 +2,16 @@ package services
 
 import (
 	"context"
-	"github.com/BANKEX/payment-gateway-btc-adapter/_vendor-20180717124023/github.com/btcsuite/btcd/rpcclient"
+	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Router/logger"
-	"strconv"
 	"sync"
 )
 
 
 type INodeClient interface {
 	ValidateAddress(ctx context.Context, address string) (bool, error)
-	PublicKeyFromAddress(ctx context.Context, address string) []byte
 	GetAllBalances(ctx context.Context, address string) (*models.AccountBalance, error)
 
 	Fee(ctx context.Context, senderPublicKey string) (uint64, error)

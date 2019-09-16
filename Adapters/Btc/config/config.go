@@ -7,7 +7,6 @@ import (
 
 	"github.com/spf13/viper"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/models"
 )
 
 const (
@@ -33,7 +32,7 @@ type Node struct {
 
 func (c *Config) String() string {
 	return fmt.Sprintf("NODE_HOST: %s, EXPLORER_URL: %s, USER: %v, PORT: %s",
-		c.Node.Host, c.Node.ExplorerUrl, c.Node.User, c.Port,
+		c.Node.Host, c.Node.User, c.Node.User, c.Port,
 	)
 }
 
