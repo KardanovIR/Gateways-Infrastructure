@@ -49,13 +49,26 @@ func (cl *nodeClient) IsAddressValid(ctx context.Context, address string) (bool,
 		return false, "", nil
 	}
 	addr := common.HexToAddress(address)
-	code, err := cl.ethClient.CodeAt(ctx, addr, nil)
+	isContract, err := cl.IsContract(ctx, addr)
 	if err != nil {
 		return false, "", err
 	}
 	// is it smart contract
-	if len(code) > 0 {
+	if isContract {
 		return false, "address is smart contract", err
 	}
 	return true, "", nil
+}
+
+// check address
+func (cl *nodeClient) IsContract(ctx context.Context, address common.Address) (bool, error) {
+	code, err := cl.ethClient.CodeAt(ctx, address, nil)
+	if err != nil {
+		return false, err
+	}
+	// is it smart contract
+	if len(code) > 0 {
+		return true, nil
+	}
+	return false, nil
 }

@@ -22,7 +22,7 @@ func (s *grpcServer) GasPrice(ctx context.Context, in *pb.GasPriceRequest) (*pb.
 }
 
 // Get suggested transaction's fee
-func (s *grpcServer) SuggestFee(ctx context.Context, in *pb.EmptyRequest) (*pb.SuggestFeeReply, error) {
+func (s *grpcServer) Fee(ctx context.Context, in *pb.FeeRequest) (*pb.SuggestFeeReply, error) {
 	log := logger.FromContext(ctx)
 	log.Info("SuggestFee")
 
@@ -32,5 +32,5 @@ func (s *grpcServer) SuggestFee(ctx context.Context, in *pb.EmptyRequest) (*pb.S
 		return nil, err
 	}
 
-	return &pb.SuggestFeeReply{Fee: converter.ToTargetAmountStr(fee)}, nil
+	return &pb.SuggestFeeReply{Fee: converter.ToCommissionStr(fee)}, nil
 }

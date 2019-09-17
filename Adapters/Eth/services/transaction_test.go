@@ -67,7 +67,7 @@ func TestNodeClient_Transactions(t *testing.T) {
 		hex.EncodeToString(crypto.FromECDSA(cl.(*nodeClient).privateKeys[address2])), address2)
 
 	// send 0.000001 ETH to receiver
-	tx, err := GetNodeClient().CreateRawTransaction(ctx, address, address2, amount)
+	tx, err := GetNodeClient().CreateRawTransaction(ctx, address, address2, amount, 0)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -104,7 +104,7 @@ func TestNodeClient_Transactions(t *testing.T) {
 		t.FailNow()
 	}
 	amountBack := new(big.Int).Sub(balance, fee2)
-	tx2, err := GetNodeClient().CreateRawTransaction(ctx, address2, address, amountBack)
+	tx2, err := GetNodeClient().CreateRawTransaction(ctx, address2, address, amountBack, 0)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -137,7 +137,7 @@ func TestNodeClient_SendErc20(t *testing.T) {
 	address2 := "0x7D7EB567Df197471A3C43e504844883538356635"
 	//privateKey2 := "f0229190763eb29915c40f1e439f510461ec31d6228eceb434fad13659aef0c1"
 
-	tx, err := GetNodeClient().CreateErc20TokensRawTransaction(ctx, address1, contractAddress, address2, amount)
+	tx, err := GetNodeClient().CreateErc20TokensRawTransaction(ctx, address1, contractAddress, address2, amount, 0)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -169,6 +169,7 @@ func TestNodeClient_SendErc20(t *testing.T) {
 		t.FailNow()
 	}
 }
+
 func TestNodeClient_CheckErc20AllowanceAmount(t *testing.T) {
 	ctx, log := beforeTest()
 	addressWithErc20 := "0x43E735DB4bb21cb253f948e195346f4fB9Bab358"
@@ -183,6 +184,37 @@ func TestNodeClient_CheckErc20AllowanceAmount(t *testing.T) {
 		t.FailNow()
 	}
 	log.Info(amount)
+}
+
+// if NODE_PARITY_HOST env parameter is set - read internal
+func TestNodeClient_TransactionInfoInternalTx(t *testing.T) {
+	ctx, log := beforeTest()
+	txHash := "0xa874bd3d557d5145f71a354c8d4035acc05d7778b2c26c2e73d2621cd8bab143"
+	txInfo, err := GetNodeClient().TransactionInfo(ctx, txHash)
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	assert.Equal(t, models.TxStatusSuccess, txInfo.Status)
+	assert.Equal(t, "0", txInfo.Amount.String())
+	assert.Equal(t, "0xB78aBDCc9c327F521C9Cdd03DF3c08D39bdDa11d", txInfo.From)
+	if len(config.Cfg.Node.ParityHost) == 0 {
+		assert.Equal(t, 0, len(txInfo.InternalTransfers))
+	} else {
+		assert.Equal(t, 3, len(txInfo.InternalTransfers))
+		for _, transfer := range txInfo.InternalTransfers {
+			to := transfer.To.String()
+			if to == "0xDC7B9C49cAb3d3Ea58D8d166f788426965052684" ||
+				to == "0xdb8Db8eE13FB0df9374Dab40405D701cc79c65e9" ||
+				to == "0x50F554649ED757D40d5Bd32B1154AFfc4278359B" {
+				assert.Equal(t, "25349997240000000", transfer.Value.String())
+				assert.Equal(t, "0x36d38d6ec40f5B12a944a6864E24826C42AE6021", transfer.From.String())
+			} else {
+				log.Error("not expected address %s", to)
+				t.Fail()
+			}
+		}
+	}
 }
 
 func TestNodeClient_SendErc20FromAnotherAccount(t *testing.T) {
@@ -224,7 +256,7 @@ func TestNodeClient_SendErc20FromAnotherAccount(t *testing.T) {
 		t.FailNow()
 	}
 
-	tx2, err := GetNodeClient().(*nodeClient).CreateErc20TokensTransferToTxSender(ctx, addressWithErc20, contractBNCAddress, ethAddress, amount)
+	tx2, err := GetNodeClient().(*nodeClient).CreateErc20TokensTransferToTxSender(ctx, addressWithErc20, contractBNCAddress, ethAddress, amount, 0)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()

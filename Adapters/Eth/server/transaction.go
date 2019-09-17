@@ -36,15 +36,15 @@ func (s *grpcServer) GetRawTransaction(ctx context.Context, in *pb.RawTransactio
 			}
 			if senderAddress == in.AddressTo && senderAddress != in.AddressFrom {
 				// sender of tx is not owner of account (but have allowance of owner account)
-				tx, err = s.nodeClient.CreateErc20TokensTransferToTxSender(ctx, in.AddressFrom, in.Contract, senderAddress, amount)
+				tx, err = s.nodeClient.CreateErc20TokensTransferToTxSender(ctx, in.AddressFrom, in.Contract, senderAddress, amount, in.Nonce)
 			} else {
-				tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount)
+				tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount, in.Nonce)
 			}
 		} else {
-			tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount)
+			tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount, in.Nonce)
 		}
 	} else {
-		tx, err = s.nodeClient.CreateRawTransaction(ctx, in.AddressFrom, in.AddressTo, amount)
+		tx, err = s.nodeClient.CreateRawTransaction(ctx, in.AddressFrom, in.AddressTo, amount, in.Nonce)
 	}
 	if err != nil {
 		if err == services.AllowanceAmountIsNotEnoughError {
@@ -68,7 +68,7 @@ func (s *grpcServer) GetErc20RawTransaction(ctx context.Context, in *pb.Erc20Raw
 		return nil, err
 	}
 	amount = converter.ToNodeAmount(amount)
-	var tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount)
+	var tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount, in.Nonce)
 	if err != nil {
 		log.Errorf("transaction's creation fails: %s", err)
 		return nil, err
@@ -92,7 +92,7 @@ func (s *grpcServer) ApproveAmountForAddressTransaction(ctx context.Context, in 
 		log.Errorf("erc-20 tokens approve transaction's creation fails: %s", err)
 		return nil, err
 	}
-	feeStr := converter.ToTargetAmountStr(fee)
+	feeStr := converter.ToCommissionStr(fee)
 	return &pb.ApproveAmountForAddressReply{Tx: tx, Fee: feeStr}, nil
 }
 
@@ -156,6 +156,13 @@ func (s *grpcServer) TransactionByHash(ctx context.Context, in *pb.TransactionBy
 		log.Errorf("get transaction by hash fails: %s", err)
 		return nil, err
 	}
+	outputs := make([]*pb.InputOutput, len(tx.InternalTransfers))
+	for i, transfer := range tx.InternalTransfers {
+		outputs[i] = &pb.InputOutput{
+			Address: transfer.To.String(),
+			Amount:  converter.ToTargetAmountStr(transfer.Value)}
+	}
+
 	return &pb.TransactionByHashReply{
 		SenderAddress:    tx.From,
 		RecipientAddress: tx.To,
@@ -165,6 +172,10 @@ func (s *grpcServer) TransactionByHash(ctx context.Context, in *pb.TransactionBy
 		AssetAmount:      converter.ToTargetAmountStr(tx.AssetAmount),
 		Status:           string(tx.Status),
 		TxHash:           tx.TxHash,
-		Data:             tx.Data,
+		SpecificFields: &pb.BCSpecific{
+			Nonce:        tx.Nonce,
+			IsInternalTx: len(outputs) > 0,
+		},
+		Outputs: outputs,
 	}, nil
 }

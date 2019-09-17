@@ -27,13 +27,13 @@ type INodeClient interface {
 	AddressByPublicKey(ctx context.Context, public string) (string, error)
 
 	// create transaction and return it on RPL encoding
-	CreateRawTransaction(ctx context.Context, addressFrom string, addressTo string, amount *big.Int) ([]byte, error)
+	CreateRawTransaction(ctx context.Context, addressFrom string, addressTo string, amount *big.Int, nonce uint64) ([]byte, error)
 	CreateErc20TokensRawTransaction(ctx context.Context, addressFrom string, contractAddress string, addressTo string,
-		amount *big.Int) ([]byte, error)
+		amount *big.Int, nonce uint64) ([]byte, error)
 	Erc20TokensRawApproveTransaction(ctx context.Context, ownerAddress string, contractAddress string, amount *big.Int,
 		spenderAddress string) ([]byte, *big.Int, error)
 	CreateErc20TokensTransferToTxSender(ctx context.Context, addressFrom string, contractAddress string,
-		txSender string, amount *big.Int) ([]byte, error)
+		txSender string, amount *big.Int, nonce uint64) ([]byte, error)
 
 	// sign transaction if has private key. rlpTx is transaction for signing on RPL encoding (returned by CreateRawTransaction function)
 	SignTransaction(ctx context.Context, senderAddr string, rlpTx []byte) ([]byte, error)
@@ -48,6 +48,7 @@ const gasLimitForMoneyTransfer = 21000
 
 type nodeClient struct {
 	ethClient        *ethclient.Client
+	parityClient     *rpc.Client // can be nil!
 	contractProvider *Erc20ContractProvider
 	chainID          int64
 	// private keys for addresses
@@ -69,10 +70,22 @@ func New(ctx context.Context, config config.Node) error {
 			err = e
 			return
 		}
+		var rcParity *rpc.Client
+		if len(config.ParityHost) > 0 {
+			rcParity, e = newRPCClient(log, config.ParityHost)
+			if e != nil {
+				err = e
+				return
+			}
+		} else {
+			log.Warn("parity node is not specified: read of internal transfers is not available")
+		}
+
 		ethClient := ethclient.NewClient(rc)
 		cp := NewContractProvider(ethClient)
 		cl = &nodeClient{
 			ethClient:        ethClient,
+			parityClient:     rcParity,
 			contractProvider: cp,
 			chainID:          config.ChainId,
 			privateKeys:      make(map[string]*ecdsa.PrivateKey),

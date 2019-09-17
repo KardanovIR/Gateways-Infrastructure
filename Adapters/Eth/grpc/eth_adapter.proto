@@ -18,7 +18,7 @@ service Adapter {
     rpc GetErc20RawTransaction (Erc20RawTransactionRequest) returns (RawTransactionReply) {
     }
     // Get suggested transaction's fee
-    rpc SuggestFee (EmptyRequest) returns (SuggestFeeReply) {
+    rpc Fee (FeeRequest) returns (SuggestFeeReply) {
     }
     // Get account's next nonce
     rpc GetNextNonce (AddressRequest) returns (GetNextNonceReply) {
@@ -56,6 +56,11 @@ service Adapter {
     // Approve amount available for another account to get from owner account
     rpc ApproveAmountForAddressTransaction (ApproveAmountForAddressRequest) returns (ApproveAmountForAddressReply) {
     }
+}
+
+message FeeRequest {
+    string sendersPublicKey = 1;
+    string assetId = 2;
 }
 
 // The request message for getting suggested gas price
@@ -102,6 +107,7 @@ message RawTransactionRequest {
     string addressTo = 3;
     string amount = 4;
     string contract = 5; // empty for eth (need to transfer erc-20 tokens)
+    uint64 nonce = 6;
 }
 
 // The request message for raw transaction creation
@@ -110,6 +116,7 @@ message Erc20RawTransactionRequest {
     string addressTo = 2;
     string amount = 3;
     string contract = 4;
+    uint64 nonce = 6;
 }
 
 // The response message containing the suggested gas price
@@ -195,6 +202,12 @@ message TransactionByHashReply {
     repeated InputOutput inputs = 10;
     repeated InputOutput outputs = 11;
     string assetAmount = 12;
+    BCSpecific specificFields = 13;
+}
+
+message BCSpecific {
+    uint64 nonce = 1;
+    bool isInternalTx = 2;
 }
 
 message InputOutput {

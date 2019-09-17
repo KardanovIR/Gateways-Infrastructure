@@ -1,5 +1,6 @@
 node:
   host: https://ropsten.infura.io/v3/3b59a3e5f8ff42ee8cd1aa1b2fc8b335
   chainId: 3
+  parity_host:
 port: 5033
 decimals: 8

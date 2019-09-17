@@ -49,6 +49,7 @@ func (cl *nodeClient) GetAllBalances(ctx context.Context, address string) (*mode
 	}
 	return &balance, nil
 }
+
 // Feature implementation with asset filtering
 //func (cl *nodeClient) GetAllBalances(ctx context.Context, address string, contracts ...string) (*models.AccountBalance, error) {
 //	log := logger.FromContext(ctx)

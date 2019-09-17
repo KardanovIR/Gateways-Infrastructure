@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	millisecondsInSec   = 1000
-	decimalBase         = 10
-	txIsNotInBlockchain = "Transaction is not in blockchain"
+	millisecondsInSec  = 1000
+	decimalBase        = 10
+	txDoesNotExistCode = 311
 )
 
 // CreateRawTxBySendersAddress creates transaction for senders address if private key keeps in adapter
@@ -262,7 +262,7 @@ func (cl *nodeClient) getTxAndStatus(ctx context.Context, txId string) (proto.Tr
 				if unErr := json.Unmarshal([]byte(e.Body), nr); unErr != nil {
 					return nil, "", err
 				}
-				if nr.Details == txIsNotInBlockchain {
+				if nr.Error == txDoesNotExistCode {
 					return nil, models.TxStatusUnKnown, nil
 				}
 			}
