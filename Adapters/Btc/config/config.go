@@ -23,11 +23,12 @@ type Config struct {
 }
 
 type Node struct {
-	Host        string             `mapstructure:"HOST"`
-	User     	string `mapstructure:"USER"`
-	Password      string             `mapstructure:"PASSWORD"`
-	HTTPPostMode bool `mapstructure:"HTTPPOSTMODE"`
-	DisableTLS bool `mapstructure:"DISABLETLS"`
+	Host         string `mapstructure:"HOST"`
+	User         string `mapstructure:"USER"`
+	Password     string `mapstructure:"PASSWORD"`
+	HTTPPostMode bool   `mapstructure:"HTTPPOSTMODE"`
+	DisableTLS   bool   `mapstructure:"DISABLETLS"`
+	ChainType    string `mapstructure:"CHAINTYPE"`
 }
 
 func (c *Config) String() string {

@@ -28,7 +28,7 @@ func main() {
 	if err := config.Load(configPath); err != nil {
 		log.Fatal("loading of configuration failed with error:", err)
 	}
-	log.Infof("ergo adapter will be started with configuration %s", config.Cfg.String())
+	log.Infof("btc adapter will be started with configuration %s", config.Cfg.String())
 	ctx := context.Background()
 	ctx = logger.ToContext(ctx, log)
 

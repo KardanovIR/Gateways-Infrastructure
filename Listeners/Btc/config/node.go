@@ -9,11 +9,11 @@ type Node struct {
 	Host             string           `mapstructure:"HOST"`
 	StartBlockHeight uint64           `mapstructure:"STARTBLOCK"`
 	Confirmations    uint64           `mapstructure:"CONFIRMATIONS"`
-	User     	string `mapstructure:"USER"`
+	User             string           `mapstructure:"USER"`
 	ChainType        models.ChainType `mapstructure:"CHAIN"`
-	Password      string             `mapstructure:"PASSWORD"`
-	HTTPPostMode bool `mapstructure:"HTTPPOSTMODE"`
-	DisableTLS bool `mapstructure:"DISABLETLS"`
+	Password         string           `mapstructure:"PASSWORD"`
+	HTTPPostMode     bool             `mapstructure:"HTTPPOSTMODE"`
+	DisableTLS       bool             `mapstructure:"DISABLETLS"`
 }
 
 func (n *Node) String() string {
