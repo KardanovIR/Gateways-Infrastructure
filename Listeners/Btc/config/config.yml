@@ -1,5 +1,5 @@
 node:
-  host: "https://api-testnet.ergoplatform.com"
+  host: localhost:18332
   startBlock: 84185
   confirmations: 6
   user: 0x10

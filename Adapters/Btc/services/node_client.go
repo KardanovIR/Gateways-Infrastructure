@@ -31,7 +31,7 @@ var (
 	onceRPCClientInstance sync.Once
 )
 
-// New create node's client with connection to Waves node
+// New create node's client with connection to Btc node
 func New(ctx context.Context, conf config.Node) error {
 	onceRPCClientInstance.Do(func() {
 		log := logger.FromContext(ctx)

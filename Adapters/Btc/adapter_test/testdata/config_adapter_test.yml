@@ -1,7 +1,0 @@
-node:
-  host: "http://127.0.0.1:9052"
-  explorer_url: "https://api-testnet.ergoplatform.com"
-  user: 0x10
-  password:
-decimals: 8
-port: 50025

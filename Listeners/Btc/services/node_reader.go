@@ -72,17 +72,17 @@ func (nr *nodeReader) Start(ctx context.Context) (err error) {
 		log.Errorf("Configuration start block error: start block %d, current block %d.", startBlock, lastBlock.Height)
 		startBlock = lastBlock.Height
 	}
-	log.Infof("Start listening Ergo from %d block.", startBlock)
+	log.Infof("Start listening Btc from %d block.", startBlock)
 	go func() {
 		for {
 			select {
 			case <-nr.stopListen:
-				log.Infof("Stop listening Ergo.")
+				log.Infof("Stop listening Btc.")
 				return
 			default:
 			}
 
-			log.Debugf("Process Ergo block %d", startBlock)
+			log.Debugf("Process Btc block %d", startBlock)
 			lastBlock, err := nr.nodeClient.BlockLast(ctx)
 			if err != nil {
 				log.Errorf("last block error: %s", err)
@@ -133,7 +133,7 @@ func (nr *nodeReader) Start(ctx context.Context) (err error) {
 
 func (nr *nodeReader) Stop(ctx context.Context) {
 	log := logger.FromContext(ctx)
-	log.Info("Stop listening Ergo.")
+	log.Info("Stop listening Btc.")
 	nr.stopListen <- struct{}{}
 	return
 }
