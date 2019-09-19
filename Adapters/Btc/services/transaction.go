@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
@@ -37,42 +38,53 @@ func (cl *nodeClient) SendTransaction(ctx context.Context, txSigned []byte) (txI
 func (cl *nodeClient) TransactionByHash(ctx context.Context, txId string) (*models.TxInfo, error) {
 	log := logger.FromContext(ctx)
 	log.Infof("call service method 'TransactionByHash' for txID %s", txId)
-	var chainHash *chainhash.Hash
-	err := chainhash.Decode(chainHash, txId)
+	txHash,err  := chainhash.NewHashFromStr(txId)
+	log.Infof("new hash %s", txHash)
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
-	_, err = cl.nodeClient.GetTransaction(chainHash)
-	//&models.TxInfo{
-	//	TxHash:  nodeTx.Hex,
-	//	Amount:  nodeTx.Amount,
-	//	Fee: nodeTx.Fee,
-	//
-	//	Inputs:  inputs,
-	//	Outputs: outputs,
-	//}
-	//nodeTx.Details
-
-	return nil, nil
+	log.Infof("call node")
+	nodeTx, err := cl.nodeClient.GetRawTransactionVerbose(txHash)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	log.Infof("node's response %s", nodeTx)
+	return parseTx(nodeTx), nil
 }
 
-func parseTx(tx *btcjson.GetTransactionResult) *models.TxInfo {
-	//todo переделать под btc
-	//inputs := make([]models.InputOutputInfo, 0)
-	//outputs := make([]models.InputOutputInfo, 0)
+func parseTx(tx *btcjson.TxRawResult) *models.TxInfo {
 
+	inputs := make([]models.InputOutputInfo, 0)
+	outputs := make([]models.InputOutputInfo, 0)
 
+	for _, input := range tx.Vin {
+		//todo доделать
+		inputs = append(inputs, models.InputOutputInfo{
+			//Amount: fmt.Sprintf("%f", input),
+			Address: input.Txid,
+		})
+	}
+
+	amount:= 0.0
+	for _, output := range tx.Vout {
+		if len(output.ScriptPubKey.Addresses) == 0 {
+			continue
+		}
+		inputs = append(inputs, models.InputOutputInfo{
+			Amount: fmt.Sprintf("%f", output.Value),
+			Address: output.ScriptPubKey.Addresses[0],
+		})
+		amount += output.Value
+	}
 
 	return &models.TxInfo{
-		//From:    sender,
-		//To:      recipient,
-		//Fee:     converter.ToTargetAmountStr(fee),
-		//Amount:  amount,
-		//TxHash:  tx.Summary.ID,
-		//Status:  models.TxStatusSuccess,
-		//Inputs:  inputs,
-		//Outputs: outputs,
+		Amount:  fmt.Sprintf("%f", amount),
+		TxHash:  tx.Txid,
+		Status:  models.TxStatusSuccess,
+		Inputs:  inputs,
+		Outputs: outputs,
 	}
 }
 

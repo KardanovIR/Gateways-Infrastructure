@@ -10,7 +10,6 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/server"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/services"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/services/converter"
 )
 
 func main() {
@@ -32,12 +31,11 @@ func main() {
 	ctx := context.Background()
 	ctx = logger.ToContext(ctx, log)
 
-	converter.Init(ctx, config.Cfg.Decimals)
-
 	if err := services.New(ctx, config.Cfg.Node); err != nil {
 		log.Fatal("can't create node's client: ", err)
 	}
 
+	log.Info("")
 	if err := server.InitAndStart(ctx, config.Cfg.Port, services.GetNodeClient()); err != nil {
 		log.Fatal("Can't start grpc server", err)
 	}

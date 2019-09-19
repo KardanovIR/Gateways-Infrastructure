@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/models"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/services/converter"
 )
 
 // CreateRawTx creates transaction
@@ -18,9 +17,11 @@ func (cl *nodeClient) CreateRawTx(ctx context.Context, addressFrom string, outs 
 	}
 	amount := uint64(0)
 	for _, r := range outs {
-		r.Amount = converter.ToNodeAmount(r.Amount)
 		amount += r.Amount
 	}
 	//todo сделать метод
+
+
+
 	return nil, nil
 }
