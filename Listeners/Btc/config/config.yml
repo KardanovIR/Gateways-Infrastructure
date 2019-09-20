@@ -1,0 +1,14 @@
+node:
+  host: localhost:18332
+  startBlock: 84185
+  confirmations: 6
+  user: 0x10
+  password:
+  httppostmode: true
+  disabletls: true
+  chain: BTC
+db:
+  name: block_db
+  host: localhost:27017
+port: 5006
+callbackUrl: localhost:5020

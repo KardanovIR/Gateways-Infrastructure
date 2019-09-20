@@ -1,0 +1,132 @@
+syntax = "proto3";
+
+package blockchain;
+
+// The adapter service definition.
+service Adapter {
+    // Validate address
+    rpc ValidateAddress (AddressRequest) returns (ValidateAddressReply) {
+    }
+    // Get transaction's fee
+    rpc Fee (FeeRequest) returns (FeeReply) {
+    }
+    // Get account's balance with assets balances
+    rpc GetAllBalances (AddressRequest) returns (GetAllBalanceReply) {
+    }
+    // request to create raw transaction
+    rpc GetRawTransaction (RawTransactionRequest) returns (RawTransactionReply) {
+    }
+    // request to create raw transaction with many recipients
+    rpc GetRawMassTransaction (RawMassTransactionRequest) returns (RawTransactionReply) {
+    }
+    // Send transaction
+    rpc SendTransaction (SendTransactionRequest) returns (SendTransactionReply) {
+    }
+    // Get transaction
+    rpc TransactionByHash (TransactionByHashRequest) returns (TransactionByHashReply) {
+    }
+
+    rpc GetAllBalance (GetAllBalanceRequest) returns (GetAllBalanceReply) {
+    }
+}
+
+
+// The request message for getting information by account address
+message AddressRequest {
+    string address = 1;
+}
+
+// fee request message
+message FeeRequest {
+    string sendersPublicKey = 1;
+    string assetId = 2;
+}
+
+// The response message containing transaction's fee
+message FeeReply {
+    string fee = 1;
+}
+
+// The response message containing account's balance with assets balances
+message GetAllBalanceReply {
+    message AssetBalance {
+        string assetId = 1;
+        string amount = 2;
+    }
+
+    string amount = 1;
+    repeated AssetBalance assetBalances = 2;
+}
+
+// The response message containing result of address's validation
+message ValidateAddressReply {
+    bool valid = 1;
+}
+
+// The request message for raw transaction creation
+message RawTransactionRequest {
+    string addressFrom = 1;
+    string sendersPublicKey = 2;
+    string addressTo = 3;
+    string amount = 4;
+    string assetId = 5; // empty for WAVES
+}
+
+// The request message for raw transaction with many recipients creation
+message RawMassTransactionRequest {
+    message Out {
+        string addressTo = 1;
+        string amount = 2;
+    }
+    string addressFrom = 1;
+    string sendersPublicKey = 2;
+    string assetId = 5;
+    repeated Out outs = 6;
+}
+
+// The response message containing raw transaction
+message RawTransactionReply {
+    bytes tx = 1;
+}
+
+
+// The request message for singing transaction
+message SendTransactionRequest {
+    bytes tx = 1;
+}
+
+// The response message containing transaction's id
+message SendTransactionReply {
+    string txId = 1;
+}
+
+// The request message for getting transaction by hash
+message TransactionByHashRequest {
+    string txHash = 1;
+}
+
+// The response message for getting transaction by hash
+message TransactionByHashReply {
+    string senderAddress = 1;
+    string sendersPublicKey = 2;
+    string recipientAddress = 3;
+    string amount = 4;
+    string assetId = 5;
+    string txHash = 6;
+    string fee = 7;
+    bytes data = 8;
+    string status = 9;
+    repeated InputOutput inputs = 10;
+    repeated InputOutput outputs = 11;
+    string assetAmount = 12;
+}
+
+message InputOutput {
+    string address = 1;
+    string amount = 2;
+}
+
+message GetAllBalanceRequest {
+    string address = 1;
+    repeated string contracts = 2;
+}

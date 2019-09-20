@@ -39,7 +39,7 @@ on environment variables passed to the container:
 | BTC_RPCCLIENTTIMEOUT | 30 |
 | BTC_DISABLEWALLET | 1 |
 | BTC_TXINDEX | 0 |
-| BTC_TESTNET | 0 |
+| BTC_TESTNET | 0 | 
 | BTC_DBCACHE | 0 |
 | BTC_ZMQPUBHASHTX | tcp://0.0.0.0:28333 |
 | BTC_ZMQPUBHASHBLOCK | tcp://0.0.0.0:28333 |
