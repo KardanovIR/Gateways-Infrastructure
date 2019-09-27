@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (rep *repository) GetLastChainState(ctx context.Context, chainType models.ChainType) (*models.ChainState, error) {
+func (rep *Repository) GetLastChainState(ctx context.Context, chainType models.ChainType) (*models.ChainState, error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("GetLastChainState for %s", chainType)
 	var chainState = new(models.ChainState)
@@ -27,7 +27,7 @@ func (rep *repository) GetLastChainState(ctx context.Context, chainType models.C
 	return chainState, err
 }
 
-func (rep *repository) PutChainState(ctx context.Context, state *models.ChainState) (newState *models.ChainState, err error) {
+func (rep *Repository) PutChainState(ctx context.Context, state *models.ChainState) (newState *models.ChainState, err error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("PutChainState %d", state.LastBlock)
 	state.Timestamp = time.Now()

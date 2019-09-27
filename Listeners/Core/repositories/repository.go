@@ -24,11 +24,11 @@ type IRepository interface {
 	PutChainState(ctx context.Context, state *models.ChainState) (newState *models.ChainState, err error)
 }
 
-type repository struct {
-	client      *mongo.Client
+type Repository struct {
+	Client      *mongo.Client
 	tasksC      *mongo.Collection
 	chainStateC *mongo.Collection
-	dbName      string
+	DbName      string
 }
 
 var (
@@ -38,7 +38,7 @@ var (
 
 func GetRepository() IRepository {
 	onceRepository.Do(func() {
-		panic("try to get repository before it's creation!")
+		panic("try to get Repository before it's creation!")
 	})
 	return rep
 }
@@ -67,11 +67,11 @@ func connect(ctx context.Context, url, dbName string) (IRepository, error) {
 		} else {
 			var db = mongoClient.Database(dbName)
 			log.Infof("Connected successfully to MongoDB at %s", url)
-			rep = &repository{
-				client:      mongoClient,
+			rep = &Repository{
+				Client:      mongoClient,
 				tasksC:      db.Collection(Ctasks),
 				chainStateC: db.Collection(CChainState),
-				dbName:      dbName}
+				DbName:      dbName}
 			return rep, nil
 		}
 	}

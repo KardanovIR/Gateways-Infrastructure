@@ -2,10 +2,14 @@ module github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc
 
 require (
 	github.com/btcsuite/btcd v0.0.0-20190824003749-130ea5bddde3
-	github.com/golang/snappy v0.0.1 // indirect
+	github.com/mongodb/mongo-go-driver v1.1.1
+	github.com/shopspring/decimal v0.0.0-20190905144223-a36b5d85f337
 	github.com/spf13/viper v1.4.0
+	github.com/stretchr/testify v1.2.2
+	github.com/tidwall/pretty v1.0.0 // indirect
 	github.com/wavesplatform/GatewaysInfrastructure v1.2.0
-	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
-	github.com/xdg/stringprep v1.0.0 // indirect
-	go.mongodb.org/mongo-driver v1.1.1 // indirect
+	go.mongodb.org/mongo-driver v1.1.1
+	google.golang.org/grpc v1.23.1
 )
+
+replace github.com/wavesplatform/GatewaysInfrastructure => ../../../GatewaysInfrastructure

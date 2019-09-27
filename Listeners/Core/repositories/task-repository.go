@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (rep *repository) PutTask(ctx context.Context, task *models.Task) (id string, err error) {
+func (rep *Repository) PutTask(ctx context.Context, task *models.Task) (id string, err error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("PutTask %+v", task)
 	if task.Id.IsZero() {
@@ -26,7 +26,7 @@ func (rep *repository) PutTask(ctx context.Context, task *models.Task) (id strin
 	return "", fmt.Errorf("task id is not empty: %s", id)
 }
 
-func (rep *repository) RemoveTask(ctx context.Context, id string) (err error) {
+func (rep *Repository) RemoveTask(ctx context.Context, id string) (err error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("RemoveTask %s", id)
 	if id != "" {
@@ -43,7 +43,7 @@ func (rep *repository) RemoveTask(ctx context.Context, id string) (err error) {
 	return nil
 }
 
-func (rep *repository) FindByAddressOrTxId(ctx context.Context, ticket models.ChainType, address string,
+func (rep *Repository) FindByAddressOrTxId(ctx context.Context, ticket models.ChainType, address string,
 	txID string) ([]*models.Task, error) {
 
 	log := logger.FromContext(ctx)

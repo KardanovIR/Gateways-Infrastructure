@@ -15,7 +15,7 @@ func TestRepository_PutChainState(t *testing.T) {
 	if err != nil {
 		log.Fatal("Can't create db connection: ", err)
 	}
-	r := rep.(*repository)
+	r := rep.(*Repository)
 	defer func() {
 		// drop chain state after test complete successful
 		if _, err := r.chainStateC.DeleteOne(ctx, bson.D{{"chaintype", models.Ethereum}}); err != nil {

@@ -9,6 +9,7 @@ require (
 	github.com/mongodb/mongo-go-driver v1.1.1
 	github.com/mr-tron/base58 v1.1.2 // indirect
 	github.com/spf13/viper v1.4.0
+	github.com/stretchr/testify v1.2.2
 	github.com/wavesplatform/gowaves v0.2.0
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
