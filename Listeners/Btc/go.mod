@@ -12,4 +12,5 @@ require (
 	google.golang.org/grpc v1.23.1
 )
 
-replace github.com/wavesplatform/GatewaysInfrastructure => ../../../GatewaysInfrastructure
+//for local development
+//replace github.com/wavesplatform/GatewaysInfrastructure => ../../../GatewaysInfrastructure
