@@ -8,4 +8,5 @@ const (
 	Ergo     ChainType = "ERGO"
 	Vostok   ChainType = "VOSTOK"
 	Btc      ChainType = "BTC"
+	Ltc      ChainType = "LTC"
 )
