@@ -2,18 +2,25 @@ package services
 
 import (
 	"context"
-	"fmt"
-	"github.com/btcsuite/btcd/rpcclient"
+	"encoding/json"
 	"sync"
 
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
+	"github.com/btcsuite/btcd/btcjson"
+	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/config"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 )
 
 type INodeClient interface {
-	BlockAt(ctx context.Context, blockNumber uint64, currentHeight *uint64) (*Block, error)
-	BlockLast(ctx context.Context) (*BlockShortInfo, error)
+	BlockAt(ctx context.Context, blockNumber uint64) (*GetBlockVerboseResult, error)
+	GetCurrentHeight(ctx context.Context) (uint64, error)
+	GetBlockVerboseTx(ctx context.Context, blockHash string) (*GetBlockVerboseResult, error)
 }
+
+const (
+	getBlockMethod           = "getblock"
+	verbosityBlockWithTxType = 2
+)
 
 type nodeClient struct {
 	conf       config.Node
@@ -30,14 +37,14 @@ func NewNodeClient(ctx context.Context, conf config.Node) INodeClient {
 	onceRPCClientInstance.Do(func() {
 		log := logger.FromContext(ctx)
 		nodeCon := &rpcclient.ConnConfig{
-			Host: conf.Host,
-			User: conf.User,
-			Pass: conf.Password,
+			Host:         conf.Host,
+			User:         conf.User,
+			Pass:         conf.Password,
 			HTTPPostMode: conf.HTTPPostMode,
-			DisableTLS: conf.DisableTLS,
+			DisableTLS:   conf.DisableTLS,
 		}
 
-		client, err  := rpcclient.New(nodeCon, nil)
+		client, err := rpcclient.New(nodeCon, nil)
 		if err != nil {
 			log.Error(err)
 		}
@@ -55,79 +62,71 @@ func GetNodeClient() INodeClient {
 	return cl
 }
 
-const (
-	getCurrentBlockUrl          = "/blocks?limit=1"
-	getBlockByNumberUrlTemplate = "/blocks?limit=2&offset=%d"
-	getBlockByIdUrlTemplate     = "/blocks/%s"
-)
-
-type BlocksResponse struct {
-	Items []BlockShortInfo `json:"items"`
-}
-
-type BlockShortInfo struct {
-	ID                string `json:"id"`
-	Height            uint64 `json:"height"`
-	TransactionsCount uint   `json:"transactionsCount"`
-}
-
-type Block struct {
-	Block BlockEntity `json:"block"`
-}
-
-func (b *Block) Height() uint64 {
-	return b.Block.Header.Height
-}
-
-func (b *Block) Transactions() []Transaction {
-	return b.Block.Transactions
-}
-
-type BlockEntity struct {
-	Header       Header        `json:"header"`
-	Transactions []Transaction `json:"blockTransactions"`
-}
-
-type Header struct {
-	Height uint64 `json:"height"`
-}
-
-type Transaction struct {
-	ID        string      `json:"id"`
-	TxOutputs []*TxOutput `json:"outputs"`
-}
-
-type TxOutput struct {
-	Address string `json:"address"`
-	Value   uint64 `json:"value"`
-}
-
-func (cl *nodeClient) BlockLast(ctx context.Context) (*BlockShortInfo, error) {
+func (cl *nodeClient) GetCurrentHeight(ctx context.Context) (uint64, error) {
 	log := logger.FromContext(ctx)
 	log.Debug("get current height")
-	//todo
-	return nil, nil
+	chainInfo, err := cl.nodeClient.GetBlockChainInfo()
+	if err != nil {
+		log.Errorf("get blockchain info fails: %s", err)
+		return 0, err
+	}
+	return uint64(chainInfo.Blocks), nil
 }
 
-func (cl *nodeClient) BlockAt(ctx context.Context, blockNumber uint64, currentHeight *uint64) (*Block, error) {
+func (cl *nodeClient) BlockAt(ctx context.Context, blockNumber uint64) (*GetBlockVerboseResult, error) {
 	log := logger.FromContext(ctx)
 	log.Debugf("get BlockAt %d", blockNumber)
 	// get current block
-	if currentHeight == nil {
-		lastBlock, err := cl.BlockLast(ctx)
-		if err != nil {
-			log.Errorf("failed to get current block: %s", err)
-			return nil, err
-		}
-		currentHeight = &lastBlock.Height
+	blockHash, err := cl.nodeClient.GetBlockHash(int64(blockNumber))
+	if err != nil {
+		log.Errorf("failed to get block %d hash: %s", blockNumber, err)
+		return nil, err
 	}
-	//todo
-	return nil, nil
+
+	block, err := cl.GetBlockVerboseTx(ctx, blockHash.String())
+	if err != nil {
+		log.Errorf("failed to get block %d: %s", blockNumber, err)
+		return nil, err
+	}
+	return block, nil
 }
 
-func (cl *nodeClient) BlockByNumber(ctx context.Context, targetBlockNumber uint64, lastBlockHeight uint64) (*BlockShortInfo, error) {
-	//log := logger.FromContext(ctx)
-	// calculate how much blocks will be skipped
-	//todo
-	return nil, fmt.Errorf("haven't block with height %d between blocks %v", targetBlockNumber, 0)
+type GetBlockVerboseResult struct {
+	Hash          string                `json:"hash"`
+	Confirmations int64                 `json:"confirmations"`
+	StrippedSize  int32                 `json:"strippedsize"`
+	Size          int32                 `json:"size"`
+	Weight        int32                 `json:"weight"`
+	Height        int64                 `json:"height"`
+	Version       int32                 `json:"version"`
+	VersionHex    string                `json:"versionHex"`
+	MerkleRoot    string                `json:"merkleroot"`
+	Tx            []btcjson.TxRawResult `json:"tx,omitempty"`
+	Time          int64                 `json:"time"`
+	Nonce         uint32                `json:"nonce"`
+	Bits          string                `json:"bits"`
+	Difficulty    float64               `json:"difficulty"`
+	PreviousHash  string                `json:"previousblockhash"`
+	NextHash      string                `json:"nextblockhash,omitempty"`
+}
+
+func (cl *nodeClient) GetBlockVerboseTx(ctx context.Context, blockHash string) (*GetBlockVerboseResult, error) {
+	log := logger.FromContext(ctx)
+	blHash, err := json.Marshal(blockHash)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	verbosity, _ := json.Marshal(verbosityBlockWithTxType)
+	rawResult, err := cl.nodeClient.RawRequest(getBlockMethod, []json.RawMessage{blHash, verbosity})
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	blockVerboseRes := GetBlockVerboseResult{}
+	if err = json.Unmarshal(rawResult, &blockVerboseRes); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	return &blockVerboseRes, err
 }

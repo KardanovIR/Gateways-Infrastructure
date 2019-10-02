@@ -6,18 +6,17 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/config"
+	btcRep "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/repository"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/services"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/server"
 	coreServices "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/config"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/services"
 )
 
 func main() {
 	var configPath string
-
 	flag.StringVar(&configPath, "config-path", "./config/config.yml", "A path to config file")
 	isDebugMode := flag.Bool("debug", false, "debug mode")
 	flag.Parse()
@@ -35,18 +34,15 @@ func main() {
 	ctx := context.Background()
 	ctx = logger.ToContext(ctx, log)
 
-	err = repositories.New(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name)
-	if err != nil {
-		log.Fatal("Can't create db connection: ", err)
-	}
-
 	if err := coreServices.NewCallbackService(ctx, config.Cfg.CallbackUrl, config.Cfg.Node.ChainType); err != nil {
 		log.Fatal("Can't create callback service: ", err)
 	}
-
+	rep, err := btcRep.New(ctx, config.Cfg.Db)
+	if err != nil {
+		log.Fatal("Can't create repository: ", err)
+	}
 	nodeClient := services.NewNodeClient(ctx, config.Cfg.Node)
-	repository := repositories.GetRepository()
-	if err := services.NewReader(ctx, &config.Cfg.Node, repository, nodeClient, coreServices.GetCallbackService()); err != nil {
+	if err := services.NewReader(ctx, &config.Cfg.Node, rep, nodeClient, coreServices.GetCallbackService()); err != nil {
 		log.Fatal("Can't create node's client: ", err)
 	}
 	nodeReader := services.GetNodeReader()
@@ -57,7 +53,7 @@ func main() {
 	}
 	defer nodeReader.Stop(ctx)
 
-	if err := server.InitAndStart(ctx, config.Cfg.Port, repository, models.Btc); err != nil {
+	if err := server.InitAndStart(ctx, config.Cfg.Port, rep, models.Btc); err != nil {
 		log.Fatal("Can't start grpc server", err)
 	}
 }

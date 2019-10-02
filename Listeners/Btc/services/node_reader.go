@@ -2,14 +2,18 @@ package services
 
 import (
 	"context"
+	"github.com/btcsuite/btcd/btcjson"
+	"github.com/shopspring/decimal"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/repository"
+	"strconv"
 	"sync"
 	"time"
 
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
 	coreServices "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/config"
 )
 
 const (
@@ -23,11 +27,12 @@ type INodeReader interface {
 }
 
 type nodeReader struct {
-	nodeClient      INodeClient
-	rp              repositories.IRepository
-	callbackService coreServices.ICallbackService
-	conf            *config.Node
-	stopListen      chan struct{}
+	nodeClient       INodeClient
+	unspentTxService *unspentTxService
+	rp               repositories.IRepository
+	callbackService  coreServices.ICallbackService
+	conf             *config.Node
+	stopListen       chan struct{}
 }
 
 var (
@@ -35,10 +40,17 @@ var (
 	onceNodeClient sync.Once
 )
 
-func NewReader(ctx context.Context, config *config.Node, rp repositories.IRepository, nodeClient INodeClient,
+func NewReader(ctx context.Context, config *config.Node, rp repository.IUTXORepository, nodeClient INodeClient,
 	cs coreServices.ICallbackService) error {
 	onceNodeClient.Do(func() {
-		reader = &nodeReader{nodeClient: nodeClient, rp: rp, conf: config, callbackService: cs, stopListen: make(chan struct{})}
+
+		reader = &nodeReader{nodeClient: nodeClient,
+			unspentTxService: NewUnspentTxService(ctx, rp),
+			rp:               rp,
+			conf:             config,
+			callbackService:  cs,
+			stopListen:       make(chan struct{}),
+		}
 	})
 	return nil
 }
@@ -62,17 +74,17 @@ func (nr *nodeReader) Start(ctx context.Context) (err error) {
 		}
 	}
 
-	startBlock := nr.conf.StartBlockHeight
-	lastBlock, err := nr.nodeClient.BlockLast(ctx)
+	startBlockHeight := nr.conf.StartBlockHeight
+	currentHeight, err := nr.nodeClient.GetCurrentHeight(ctx)
 	if err != nil {
-		log.Errorf("Last block error: %s", err)
+		log.Errorf("Current height error: %s", err)
 		return err
 	}
-	if uint64(startBlock) > lastBlock.Height {
-		log.Errorf("Configuration start block error: start block %d, current block %d.", startBlock, lastBlock.Height)
-		startBlock = lastBlock.Height
+	if uint64(startBlockHeight) > currentHeight {
+		log.Errorf("Configuration start block error: start block %d, current block %d.", startBlockHeight, currentHeight)
+		startBlockHeight = currentHeight
 	}
-	log.Infof("Start listening Btc from %d block.", startBlock)
+	log.Infof("Start listening Btc from %d block.", startBlockHeight)
 	go func() {
 		for {
 			select {
@@ -82,31 +94,31 @@ func (nr *nodeReader) Start(ctx context.Context) (err error) {
 			default:
 			}
 
-			log.Debugf("Process Btc block %d", startBlock)
-			lastBlock, err := nr.nodeClient.BlockLast(ctx)
-			if err != nil {
-				log.Errorf("last block error: %s", err)
-				time.Sleep(delayAfterError)
-				continue
-			}
-
-			log.Infof("Current block (%d), start block %d", lastBlock.Height, startBlock)
-			if startBlock > (lastBlock.Height - nr.conf.Confirmations) {
-				log.Debugf("confirmations of %d < %d. Waiting a %d minutes...", startBlock, nr.conf.Confirmations, delayForWaitingNewBlock/time.Minute)
+			log.Debugf("Process Btc block %d", startBlockHeight)
+			log.Infof("Current block (%d), start block %d", currentHeight, startBlockHeight)
+			if startBlockHeight > (currentHeight - nr.conf.Confirmations) {
+				log.Debugf("confirmations of %d < %d. Waiting a %d minutes...", startBlockHeight, nr.conf.Confirmations, delayForWaitingNewBlock/time.Minute)
 				time.Sleep(delayForWaitingNewBlock)
+				nodeHeight, err := nr.nodeClient.GetCurrentHeight(ctx)
+				if err != nil {
+					log.Errorf("height error: %s", err)
+					time.Sleep(delayAfterError)
+				} else {
+					currentHeight = nodeHeight
+				}
 				continue
 			}
 
-			block, err := nr.nodeClient.BlockAt(ctx, startBlock, &lastBlock.Height)
+			block, err := nr.nodeClient.BlockAt(ctx, startBlockHeight)
 			if err != nil {
-				log.Errorf("BlockByNumber(%d) error: %s", startBlock, err)
+				log.Errorf("BlockByNumber(%d) error: %s", startBlockHeight, err)
 				time.Sleep(delayAfterError)
 				continue
 			}
 
 			err = nr.processBlock(ctx, block)
 			if err != nil {
-				log.Errorf("processBlock(%d) error: %s. Waiting %d second", startBlock, err, delayAfterError/time.Second)
+				log.Errorf("processBlock(%d) error: %s. Waiting %d second", startBlockHeight, err, delayAfterError/time.Second)
 				time.Sleep(delayAfterError)
 				continue
 			}
@@ -116,7 +128,7 @@ func (nr *nodeReader) Start(ctx context.Context) (err error) {
 				chainState.ChainType = models.ChainType(nr.conf.ChainType)
 			}
 
-			chainState.LastBlock = int64(block.Height() + 1)
+			chainState.LastBlock = int64(startBlockHeight + 1)
 			chainState.Timestamp = time.Now()
 
 			chainState, err = nr.rp.PutChainState(ctx, chainState)
@@ -124,7 +136,7 @@ func (nr *nodeReader) Start(ctx context.Context) (err error) {
 				log.Errorf("Updating chainState for %s error: %s", nr.conf.ChainType, err)
 			}
 
-			startBlock = uint64(chainState.LastBlock)
+			startBlockHeight = uint64(chainState.LastBlock)
 		}
 	}()
 
@@ -138,35 +150,107 @@ func (nr *nodeReader) Stop(ctx context.Context) {
 	return
 }
 
-func (nr *nodeReader) processBlock(ctx context.Context, block *Block) (err error) {
+func (nr *nodeReader) processBlock(ctx context.Context, block *GetBlockVerboseResult) (err error) {
 	log := logger.FromContext(ctx)
-	log.Debugf("start process block %d", block.Height())
-	for _, tx := range block.Transactions() {
-		for _, output := range tx.TxOutputs {
-			if err := nr.findAndExecuteTasks(ctx, output.Address, tx.ID); err != nil {
-				return err
-			}
+	log.Debugf("start process block %d", block.Height)
+	for _, tx := range block.Tx {
+		if err := nr.processTx(ctx, tx); err != nil {
+			return err
 		}
 	}
 	return
 }
 
-func (nr *nodeReader) findAndExecuteTasks(ctx context.Context, address string, txId string) error {
+func (nr *nodeReader) processTx(ctx context.Context, tx btcjson.TxRawResult) error {
 	log := logger.FromContext(ctx)
-	tasks, err := nr.rp.FindByAddressOrTxId(ctx, models.ChainType(nr.conf.ChainType), address, txId)
+	// find tasks for txId
+	tasksForTxId, err := nr.rp.FindByAddressOrTxId(ctx, models.ChainType(nr.conf.ChainType), "", tx.Txid)
 	if err != nil {
 		log.Errorf("error: %s", err)
 		return err
 	}
-	if len(tasks) == 0 {
-		return nil
+	// if tasks for txId were found - it's our transaction for sending bitcoins - tx inputs were used - delete used inputs
+	if len(tasksForTxId) > 0 {
+		// get inputs for tx -> get inputTxId
+		// delete inputs
+		if err := nr.deleteTxInputs(ctx, tx.Vin); err != nil {
+			return err
+		}
 	}
+
+	tasks := make([]*models.Task, 0)
+	for _, output := range tx.Vout {
+		if len(output.ScriptPubKey.Addresses) != 1 {
+			// many addresses can be for multisig account
+			continue
+		}
+		address := output.ScriptPubKey.Addresses[0]
+		tasksForAddress, err := nr.rp.FindByAddressOrTxId(ctx, models.ChainType(nr.conf.ChainType), address, "")
+		if err != nil {
+			log.Errorf("error: %s", err)
+			return err
+		}
+		// if tasks for address were found - we interested in counting inputs for this address
+		if len(tasksForAddress) > 0 {
+			amount, err := GetIntFromFloat(ctx, output.Value)
+			if err != nil {
+				log.Errorf("get amount fails: %s", err)
+				return err
+			}
+			// add output to unspent inputs for address
+			if err := nr.unspentTxService.addTxInputs(ctx, tx.Txid, amount, address, output.N); err != nil {
+				return err
+			}
+			tasks = append(tasks, tasksForAddress...)
+		}
+	}
+	tasks = append(tasks, tasksForTxId...)
+	if len(tasks) > 0 {
+		// execute tasks which have callbackUrl
+		if err := nr.executeTasks(ctx, tasks, tx.Txid); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (nr *nodeReader) deleteTxInputs(ctx context.Context, vIn []btcjson.Vin) error {
+	// delete input
+	// find UnspentTx by txId (of input) -> delete txId, update UnspentTx
+	for _, in := range vIn {
+		if err := nr.unspentTxService.deleteTxInputs(ctx, in.Txid, in.Vout); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func GetIntFromFloat(ctx context.Context, value float64) (uint64, error) {
+	amount := decimal.NewFromFloat(value).Shift(8)
+	amount.Truncate(0)
+	strInt := amount.String()
+	result, err := strconv.ParseUint(strInt, 10, 64)
+	if err != nil {
+		logger.FromContext(ctx).Errorf("convert amount from float64 %f to uint64 fails %s", value, err)
+		return 0, err
+	}
+	return result, nil
+}
+
+func (nr *nodeReader) executeTasks(ctx context.Context, tasks []*models.Task, txId string) error {
+	log := logger.FromContext(ctx)
 	log.Infof("tx ID %s has %d tasks, start processing...", txId, len(tasks))
+	var err error
 	for _, task := range tasks {
-		log.Debugf("Start processing task id %s for %v ...", task.Id.Hex(), task.ListenTo)
+		log.Infof("Start processing task id %s for %v ...", task.Id.Hex(), task.ListenTo)
+		// skip tasks which was added only for calculation inputs for address and is not need callback call
+		if len(task.Callback.Type) == 0 {
+			log.Debugf("callback is empty for task %+v", task.ListenTo)
+			continue
+		}
 		err = nr.callbackService.SendRequest(ctx, task, txId)
 		if err != nil {
-			log.Errorf("Error while processing tx %s for address %s: %s", txId, address, err)
+			log.Errorf("Error while processing task for %s %s: %s", task.ListenTo.Type, task.ListenTo.Value, err)
 			continue
 		}
 		switch task.Type {
