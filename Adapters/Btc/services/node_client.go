@@ -9,16 +9,13 @@ import (
 	"sync"
 )
 
-
 type INodeClient interface {
 	ValidateAddress(ctx context.Context, address string) (bool, error)
-	GetAllBalances(ctx context.Context, address string) (*models.AccountBalance, error)
 
 	Fee(ctx context.Context, senderPublicKey string) (uint64, error)
 
 	CreateRawTx(ctx context.Context, addressFrom string, outs []*models.Output) ([]byte, error)
 	SendTransaction(ctx context.Context, txSigned []byte) (txId string, err error)
-	TransactionByHash(ctx context.Context, txId string) (*models.TxInfo, error)
 }
 
 type nodeClient struct {
@@ -36,14 +33,14 @@ func New(ctx context.Context, conf config.Node) error {
 	onceRPCClientInstance.Do(func() {
 		log := logger.FromContext(ctx)
 		nodeCon := &rpcclient.ConnConfig{
-			Host: conf.Host,
-			User: conf.User,
-			Pass: conf.Password,
+			Host:         conf.Host,
+			User:         conf.User,
+			Pass:         conf.Password,
 			HTTPPostMode: conf.HTTPPostMode,
-			DisableTLS: conf.DisableTLS,
+			DisableTLS:   conf.DisableTLS,
 		}
 
-		client, err  := rpcclient.New(nodeCon, nil)
+		client, err := rpcclient.New(nodeCon, nil)
 		if err != nil {
 			log.Error(err)
 		}

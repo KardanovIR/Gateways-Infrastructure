@@ -14,6 +14,7 @@ import (
 type grpcServer struct {
 	port       string
 	nodeClient services.INodeClient
+	dataClient services.IDataClient
 }
 
 var (
@@ -21,11 +22,11 @@ var (
 	onceGrpcServertInstance sync.Once
 )
 
-func InitAndStart(ctx context.Context, port string, client services.INodeClient) error {
+func InitAndStart(ctx context.Context, port string, client services.INodeClient, dataClient services.IDataClient) error {
 	log := logger.FromContext(ctx)
 	var initErr error
 	onceGrpcServertInstance.Do(func() {
-		server = &grpcServer{nodeClient: client, port: ":" + port}
+		server = &grpcServer{nodeClient: client, port: ":" + port, dataClient: dataClient}
 
 		lis, err := net.Listen("tcp", ":"+port)
 		if err != nil {

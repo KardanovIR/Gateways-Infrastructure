@@ -2,11 +2,12 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"github.com/btcsuite/btcd/btcjson"
-	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/services/converter"
+	"net/http"
 )
 
 const (
@@ -14,6 +15,7 @@ const (
 	sendTxUrl           = "/transactions"
 	unconfirmedTxUrl    = "/transactions/unconfirmed"
 	TxByIdUrlTemplate   = "/transactions/%s"
+	getTxByHashUrl      = "/tx/%s"
 )
 
 type SendTxResponse struct {
@@ -35,56 +37,49 @@ func (cl *nodeClient) SendTransaction(ctx context.Context, txSigned []byte) (txI
 	return "", nil
 }
 
-func (cl *nodeClient) TransactionByHash(ctx context.Context, txId string) (*models.TxInfo, error) {
+func (cl *dataClient) TransactionByHash(ctx context.Context, txId string) (*models.TxInfo, error) {
 	log := logger.FromContext(ctx)
 	log.Infof("call service method 'TransactionByHash' for txID %s", txId)
-	txHash,err  := chainhash.NewHashFromStr(txId)
-	log.Infof("new hash %s", txHash)
+
+	txResp, err := cl.Request(ctx, http.MethodGet, cl.conf.Url+fmt.Sprintf(getTxByHashUrl, txId), nil)
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
-	log.Infof("call node")
-	nodeTx, err := cl.nodeClient.GetRawTransactionVerbose(txHash)
-	if err != nil {
-		log.Error(err)
+	tx := &models.RawTx{}
+	if err := json.Unmarshal(txResp, tx); err != nil {
+		log.Errorf("failed to unmarshal raw tx: %s", err)
 		return nil, err
 	}
-	log.Infof("node's response %s", nodeTx)
-	return parseTx(nodeTx), nil
+
+	return parseTx(tx), nil
 }
 
-func parseTx(tx *btcjson.TxRawResult) *models.TxInfo {
-
+func parseTx(tx *models.RawTx) *models.TxInfo {
 	inputs := make([]models.InputOutputInfo, 0)
 	outputs := make([]models.InputOutputInfo, 0)
 
-	for _, input := range tx.Vin {
-		//todo доделать
+	for _, input := range tx.Inputs {
 		inputs = append(inputs, models.InputOutputInfo{
-			//Amount: fmt.Sprintf("%f", input),
-			Address: input.Txid,
+			Amount:  converter.ToTargetAmountStr(input.Value),
+			Address: input.Address,
 		})
 	}
 
-	amount:= 0.0
-	for _, output := range tx.Vout {
-		if len(output.ScriptPubKey.Addresses) == 0 {
-			continue
-		}
-		inputs = append(inputs, models.InputOutputInfo{
-			Amount: fmt.Sprintf("%f", output.Value),
-			Address: output.ScriptPubKey.Addresses[0],
+	amount := tx.ValueIn - tx.ValueOut
+	for _, output := range tx.Outputs {
+		outputs = append(outputs, models.InputOutputInfo{
+			Amount: output.Value,
 		})
-		amount += output.Value
 	}
 
 	return &models.TxInfo{
-		Amount:  fmt.Sprintf("%f", amount),
-		TxHash:  tx.Txid,
+		Amount:  converter.ToTargetAmountStr(amount),
+		TxHash:  tx.Id,
 		Status:  models.TxStatusSuccess,
 		Inputs:  inputs,
 		Outputs: outputs,
+		Fee:     converter.ToTargetAmountStr(tx.Fees),
 	}
 }
 

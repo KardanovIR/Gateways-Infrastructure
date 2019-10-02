@@ -20,6 +20,11 @@ type Config struct {
 	Node     Node   `mapstructure:"NODE"`
 	Port     string `mapstructure:"PORT"`
 	Decimals int    `mapstructure:"DECIMALS"`
+	DataService HttpService `mapstructure:"DATASERVICE"`
+}
+
+type HttpService struct {
+	Url string `mapstructure:"URL"`
 }
 
 type Node struct {
@@ -32,8 +37,8 @@ type Node struct {
 }
 
 func (c *Config) String() string {
-	return fmt.Sprintf("NODE_HOST: %s, EXPLORER_URL: %s, USER: %v, PORT: %s",
-		c.Node.Host, c.Node.User, c.Node.User, c.Port,
+	return fmt.Sprintf("NODE_HOST: %s, DATA_URL: %s, USER: %v, PORT: %s",
+		c.Node.Host, c.DataService.Url, c.Node.User, c.Port,
 	)
 }
 
