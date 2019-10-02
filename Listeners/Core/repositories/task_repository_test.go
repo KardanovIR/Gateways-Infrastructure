@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"go.mongodb.org/mongo-driver/bson"
 	"testing"
 	"time"
 
@@ -18,7 +19,7 @@ func TestTaskRepository(t *testing.T) {
 	if err != nil {
 		log.Fatal("Can't create db connection: ", err)
 	}
-	r := rep.(*repository)
+	r := rep.(*Repository)
 	defer func() {
 		// for test debug
 		// drop collection after test complete successful
@@ -34,7 +35,7 @@ func TestTaskRepository(t *testing.T) {
 		Type:           models.OneTime,
 		BlockchainType: models.Ethereum,
 		ListenTo:       models.ListenObject{Type: models.ListenTypeAddress, Value: address},
-		Callback:       models.Callback{Url: "who_waits/address", Type: models.Get},
+		Callback:       models.Callback{Type: models.InitInTx, ProcessId: "123456"},
 	}
 	taskAddressId, err := rep.PutTask(ctx, &taskAddress)
 	if err != nil {
@@ -48,7 +49,7 @@ func TestTaskRepository(t *testing.T) {
 		Type:           models.OneTime,
 		BlockchainType: models.Ethereum,
 		ListenTo:       models.ListenObject{Type: models.ListenTypeTxID, Value: txId},
-		Callback:       models.Callback{Url: "who_waits/txId", Type: models.Get},
+		Callback:       models.Callback{Type: models.InitOutTx, ProcessId: "87654321"},
 	}
 	taskTxId, err := rep.PutTask(ctx, &taskTxHash)
 	if err != nil {
@@ -56,7 +57,7 @@ func TestTaskRepository(t *testing.T) {
 		t.FailNow()
 	}
 	// check tasks count in db
-	count, err := r.tasksC.Count(ctx, nil)
+	count, err := r.tasksC.CountDocuments(ctx, bson.D{{}})
 	assert.Nil(t, err)
 	assert.Equal(t, int64(2), count)
 	// only address suitable
@@ -70,7 +71,7 @@ func TestTaskRepository(t *testing.T) {
 		t.FailNow()
 	}
 	assert.Equal(t, taskAddressId, tasks[0].Id.Hex(), "test 'get task by address' fail")
-	assert.Equal(t, "who_waits/address", tasks[0].Callback.Url, "test 'get task by address' fail")
+	assert.Equal(t, models.InitInTx, tasks[0].Callback.Type, "test 'get task by address' fail")
 
 	// only txID suitable
 	tasks2, err := rep.FindByAddressOrTxId(ctx, models.Ethereum, "0xf4bac4964dafa8d02ce1ace0b75b753b1dde2ac5", txId)
@@ -83,7 +84,7 @@ func TestTaskRepository(t *testing.T) {
 		t.FailNow()
 	}
 	assert.Equal(t, taskTxId, tasks2[0].Id.Hex(), "test 'get task by txID' fail")
-	assert.Equal(t, "who_waits/txId", tasks2[0].Callback.Url, "test 'get task by txID' fail")
+	assert.Equal(t, models.InitOutTx, tasks2[0].Callback.Type, "test 'get task by txID' fail")
 
 	// address and txID suitable
 	tasks3, err := rep.FindByAddressOrTxId(ctx, models.Ethereum, address, txId)
