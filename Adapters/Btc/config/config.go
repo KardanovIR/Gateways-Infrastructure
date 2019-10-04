@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/spf13/viper"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
 )
@@ -12,6 +13,13 @@ import (
 const (
 	LogLevelEnvKey  = "LOG_LEVEL"
 	LogLevelDefault = logger.INFO
+	testnetNetwork  = "testnet"
+	mainnetNetwork  = "mainnet"
+)
+
+var (
+	btcMainnetChainParams = chaincfg.MainNetParams
+	btcTestnetChainParams = chaincfg.TestNet3Params
 )
 
 var Cfg *Config
@@ -20,6 +28,7 @@ type Config struct {
 	Node     Node   `mapstructure:"NODE"`
 	Port     string `mapstructure:"PORT"`
 	Decimals int    `mapstructure:"DECIMALS"`
+	Db       DB     `mapstructure:"DB"`
 }
 
 type Node struct {
@@ -29,6 +38,23 @@ type Node struct {
 	HTTPPostMode bool   `mapstructure:"HTTPPOSTMODE"`
 	DisableTLS   bool   `mapstructure:"DISABLETLS"`
 	ChainType    string `mapstructure:"CHAINTYPE"`
+	ChainParams  *chaincfg.Params
+}
+
+type DB struct {
+	Name string `mapstructure:"NAME"`
+	Host string `mapstructure:"HOST"`
+}
+
+func btcParamsByChainType(chainType string) *chaincfg.Params {
+	switch chainType {
+	case mainnetNetwork:
+		return &btcMainnetChainParams
+	case testnetNetwork:
+		return &btcTestnetChainParams
+	default:
+		return nil
+	}
 }
 
 func (c *Config) String() string {
@@ -59,7 +85,11 @@ func Load(defaultConfigPath string) error {
 		return err
 	}
 	Cfg = cfg
-	return validateConfig()
+	if err := validateConfig(); err != nil {
+		return err
+	}
+	cfg.Node.ChainParams = btcParamsByChainType(cfg.Node.ChainType)
+	return nil
 }
 
 func validateConfig() error {
@@ -68,6 +98,9 @@ func validateConfig() error {
 	}
 	if len(Cfg.Port) == 0 {
 		return errors.New("PORT parameter is empty")
+	}
+	if len(Cfg.Node.ChainType) == 0 {
+		return errors.New("CHAINTYPE parameter is empty")
 	}
 	return nil
 }

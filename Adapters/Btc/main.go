@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/repositories"
 	"os"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/config"
@@ -31,7 +32,10 @@ func main() {
 	ctx := context.Background()
 	ctx = logger.ToContext(ctx, log)
 
-	if err := services.New(ctx, config.Cfg.Node); err != nil {
+	if err := repositories.New(ctx, config.Cfg.Db); err != nil {
+		log.Fatal("can't create repository: ", err)
+	}
+	if err := services.New(ctx, config.Cfg.Node, repositories.GetRepository()); err != nil {
 		log.Fatal("can't create node's client: ", err)
 	}
 
