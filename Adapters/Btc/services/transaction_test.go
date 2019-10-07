@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"github.com/stretchr/testify/assert"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/models"
@@ -43,6 +44,7 @@ func TestNodeClient_SendTx(t *testing.T) {
 		t.FailNow()
 	}
 	log.Info("txId = ", txId)
+	assert.True(t, len(txId) > 0)
 }
 
 func beforeTest() (context.Context, logger.ILogger) {

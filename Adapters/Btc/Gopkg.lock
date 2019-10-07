@@ -3,7 +3,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c867c7eeaaadc39507e461c92815f04653d02cda8fb6879a8ab50115b31e6329"
+  digest = "1:10304a453d8795c5c45683c83d60ec83b35b0ae9d9e6ba76728070331c5b2ee8"
   name = "github.com/btcsuite/btcd"
   packages = [
     "btcec",
@@ -11,6 +11,7 @@
     "chaincfg",
     "chaincfg/chainhash",
     "rpcclient",
+    "txscript",
     "wire",
   ]
   pruneopts = "UT"
@@ -53,12 +54,28 @@
   revision = "31079b6807923eb23992c421b114992b95131b55"
 
 [[projects]]
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = "UT"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
   digest = "1:abeb38ade3f32a92943e5be54f55ed6d6e3b6602761d74b4aab4c9dd45c18abd"
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
   pruneopts = "UT"
   revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
   version = "v1.4.7"
+
+[[projects]]
+  digest = "1:586ea76dbd0374d6fb649a91d70d652b7fe0ccffb8910a77468e7702e7901f3d"
+  name = "github.com/go-stack/stack"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "2fee6af1a9795aafbe0253a0cfbdf668e1fb8a9a"
+  version = "v1.8.0"
 
 [[projects]]
   digest = "1:f5ce1529abc1204444ec73779f44f94e2fa8fcdb7aca3c355b0c95947e4005c6"
@@ -73,6 +90,14 @@
   pruneopts = "UT"
   revision = "6c65a5562fc06764971b7c5d05c76c75e84bdbf7"
   version = "v1.3.2"
+
+[[projects]]
+  branch = "master"
+  digest = "1:700b1e527116332847452edf9febc0c252c026785a8c3cfa3f68a8eeffb09ee8"
+  name = "github.com/golang/snappy"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ff6b7dc882cf4cfba7ee0b9f7dcc1ac096c554aa"
 
 [[projects]]
   digest = "1:c0d19ab64b32ce9fe5cf4ddceba78d5bc9807f0016db6b1183599da3dcc24d10"
@@ -118,6 +143,14 @@
   version = "v1.4.0"
 
 [[projects]]
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = "UT"
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:bb495ec276ab82d3dd08504bbc0594a65de8c3b22c6f2aaa92d05b73fbf3a82e"
   name = "github.com/spf13/afero"
   packages = [
@@ -161,12 +194,65 @@
   version = "v1.4.0"
 
 [[projects]]
-  digest = "1:52a562a65ca0997f3bd7dc7e499caac599c82b1107ef36836d2ec17f21ac9f47"
-  name = "github.com/wavesplatform/GatewaysInfrastructure"
-  packages = ["Router/logger"]
+  digest = "1:8548c309c65a85933a625be5e7d52b6ac927ca30c56869fae58123b8a77a75e1"
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
   pruneopts = "UT"
-  revision = "f06bba63e1831db69f3efe772442c9fdf24a8890"
-  version = "v1.2.1"
+  revision = "221dbe5ed46703ee255b1da0dec05086f5035f62"
+  version = "v1.4.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:40fdfd6ab85ca32b6935853bbba35935dcb1d796c8135efd85947566c76e662e"
+  name = "github.com/xdg/scram"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7eeb5667e42c09cb51bf7b7c28aea8c56767da90"
+
+[[projects]]
+  branch = "master"
+  digest = "1:f5c1d04bc09c644c592b45b9f0bad4030521b1a7d11c7dadbb272d9439fa6e8e"
+  name = "github.com/xdg/stringprep"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "73f8eece6fdcd902c185bf651de50f3828bed5ed"
+
+[[projects]]
+  digest = "1:480e1343dcb5630d200dd23a08d3d81f76c7f938780cb616113c96d90aa37c9b"
+  name = "go.mongodb.org/mongo-driver"
+  packages = [
+    "bson",
+    "bson/bsoncodec",
+    "bson/bsonrw",
+    "bson/bsontype",
+    "bson/primitive",
+    "event",
+    "internal",
+    "mongo",
+    "mongo/options",
+    "mongo/readconcern",
+    "mongo/readpref",
+    "mongo/writeconcern",
+    "tag",
+    "version",
+    "x/bsonx",
+    "x/bsonx/bsoncore",
+    "x/mongo/driver",
+    "x/mongo/driver/address",
+    "x/mongo/driver/auth",
+    "x/mongo/driver/auth/internal/gssapi",
+    "x/mongo/driver/connstring",
+    "x/mongo/driver/description",
+    "x/mongo/driver/dns",
+    "x/mongo/driver/operation",
+    "x/mongo/driver/session",
+    "x/mongo/driver/topology",
+    "x/mongo/driver/uuid",
+    "x/mongo/driver/wiremessage",
+  ]
+  pruneopts = "UT"
+  revision = "c520d023af0a89aec8b7f97717b52da270df2c38"
+  version = "v1.1.1"
 
 [[projects]]
   digest = "1:777e729b475d3895c7229552aa10076f0d177daf37c0a72258006d046d329960"
@@ -201,9 +287,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1fa95129371749532e2ac8b93a0016c549ebe77f25c6fad296b6ee271fae2fd6"
+  digest = "1:1cdae1db2401d9ea3c98e44c301b94d3a3021228d141a9a8af601b025ff31a4d"
   name = "golang.org/x/crypto"
-  packages = ["ripemd160"]
+  packages = [
+    "pbkdf2",
+    "ripemd160",
+  ]
   pruneopts = "UT"
   revision = "227b76d455e791cb042b03e633e2f7fbcfdf74a5"
 
@@ -221,6 +310,14 @@
   ]
   pruneopts = "UT"
   revision = "a8b05e9114ab0cb08faec337c959aed24b68bf50"
+
+[[projects]]
+  branch = "master"
+  digest = "1:382bb5a7fb4034db3b6a2d19e5a4a6bcf52f4750530603c01ca18a172fa3089b"
+  name = "golang.org/x/sync"
+  packages = ["semaphore"]
+  pruneopts = "UT"
+  revision = "cd5d95a43a6e21273425c7ae415d3df9ea832eeb"
 
 [[projects]]
   branch = "master"
@@ -317,14 +414,21 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/btcsuite/btcd/btcec",
     "github.com/btcsuite/btcd/btcjson",
     "github.com/btcsuite/btcd/chaincfg",
     "github.com/btcsuite/btcd/chaincfg/chainhash",
     "github.com/btcsuite/btcd/rpcclient",
+    "github.com/btcsuite/btcd/txscript",
+    "github.com/btcsuite/btcd/wire",
     "github.com/btcsuite/btcutil",
     "github.com/golang/protobuf/proto",
     "github.com/spf13/viper",
-    "github.com/wavesplatform/GatewaysInfrastructure/Router/logger",
+    "github.com/stretchr/testify/assert",
+    "go.mongodb.org/mongo-driver/bson",
+    "go.mongodb.org/mongo-driver/bson/primitive",
+    "go.mongodb.org/mongo-driver/mongo",
+    "go.mongodb.org/mongo-driver/mongo/options",
     "go.uber.org/zap",
     "go.uber.org/zap/zapcore",
     "google.golang.org/grpc",

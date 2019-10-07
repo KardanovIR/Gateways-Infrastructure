@@ -11,7 +11,21 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/models"
 )
 
-const MinOutputValue = uint64(1000)
+const (
+	MinOutputValue = uint64(1000)
+	// if locktime is 0 -> tx will be immediately processing (if locktime > 0 -> node waits for block or time before takes it)
+	WithoutLockTime = int64(0)
+)
+
+type TxRawInfo struct {
+	InputsInfo []TxInputInfo `json:"inputsInfo"`
+	RawTx      []byte        `json:"rawTx"`
+}
+
+type TxInputInfo struct {
+	Address string `json:"address"`
+	Input   btcjson.TransactionInput
+}
 
 // CreateRawTx creates transaction
 func (cl *nodeClient) CreateRawTx(ctx context.Context, addressesFrom []string, changeAddress string,
@@ -61,9 +75,7 @@ func (cl *nodeClient) CreateRawTx(ctx context.Context, addressesFrom []string, c
 		}
 		destinations[outAddress] = btcutil.Amount(out.Amount)
 	}
-	log.Debugf("inputs %+v", inputsForTx)
-	log.Debugf("out %+v", destinations)
-	lockTime := int64(0) // todo what is lock time for?!
+	lockTime := WithoutLockTime
 	rawTx, err := cl.nodeClient.CreateRawTransaction(inputsForTx, destinations, &lockTime)
 
 	if err != nil {
@@ -103,14 +115,4 @@ func (cl *nodeClient) getUnspentInputs(ctx context.Context, addressesFrom []stri
 		return nil, 0, fmt.Errorf("insufficient funds: need %d, has %d", summaryAmount, summaryInputsAmount)
 	}
 	return inputInfos, summaryInputsAmount, nil
-}
-
-type TxRawInfo struct {
-	InputsInfo []TxInputInfo `json:"inputsInfo"`
-	RawTx      []byte        `json:"rawTx"`
-}
-
-type TxInputInfo struct {
-	Address string `json:"address"`
-	Input   btcjson.TransactionInput
 }

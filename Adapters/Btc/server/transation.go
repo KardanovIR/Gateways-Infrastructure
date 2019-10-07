@@ -14,7 +14,7 @@ import (
 func (s *grpcServer) GetRawTransaction(ctx context.Context, in *pb.RawTransactionRequest) (
 	*pb.RawTransactionReply, error) {
 	log := logger.FromContext(ctx)
-	log.Infof("GetRawTransaction: address %s to %s send %s ergo", in.AddressFrom, in.AddressTo, in.Amount)
+	log.Infof("GetRawTransaction: address from %s to %s send %s BTC", in.AddressFrom, in.AddressTo, in.Amount)
 	outputs := make([]*models.Output, 1)
 	amount, err := strconv.ParseUint(in.Amount, 10, 64)
 	if err != nil {
@@ -22,7 +22,7 @@ func (s *grpcServer) GetRawTransaction(ctx context.Context, in *pb.RawTransactio
 		return nil, err
 	}
 	outputs[0] = &models.Output{Address: in.AddressTo, Amount: amount}
-	tx, err := s.nodeClient.CreateRawTx(ctx, in.AddressFrom, outputs)
+	tx, err := s.nodeClient.CreateRawTx(ctx, []string{in.AddressFrom}, in.AddressFrom, outputs)
 	if err != nil {
 		log.Errorf("get raw transaction fails: %s", err)
 		return nil, err
@@ -33,7 +33,7 @@ func (s *grpcServer) GetRawTransaction(ctx context.Context, in *pb.RawTransactio
 // create raw transaction with many recipients
 func (s *grpcServer) GetRawMassTransaction(ctx context.Context, in *pb.RawMassTransactionRequest) (*pb.RawTransactionReply, error) {
 	log := logger.FromContext(ctx)
-	log.Infof("GetRawMassTransaction: address %s to %v ergo", in.AddressFrom, in.Outs)
+	log.Infof("GetRawMassTransaction: address from %s to %v BTC", in.AddressFrom, in.Outs)
 	if len(in.AddressFrom) == 0 || len(in.Outs) == 0 {
 		return nil, fmt.Errorf("wrong parameters %s, %+v", in.AddressFrom, in.Outs)
 	}
@@ -46,7 +46,7 @@ func (s *grpcServer) GetRawMassTransaction(ctx context.Context, in *pb.RawMassTr
 		}
 		outputs[i] = &models.Output{Address: o.AddressTo, Amount: amount}
 	}
-	tx, err := s.nodeClient.CreateRawTx(ctx, in.AddressFrom, outputs)
+	tx, err := s.nodeClient.CreateRawTx(ctx, []string{in.AddressFrom}, in.AddressFrom, outputs)
 	if err != nil {
 		log.Errorf("GetRawMassTransaction fails: %s", err)
 		return nil, err

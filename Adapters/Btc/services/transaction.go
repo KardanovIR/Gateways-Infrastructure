@@ -150,7 +150,7 @@ func (cl *nodeClient) Fee(ctx context.Context) (uint64, error) {
 	log := logger.FromContext(ctx)
 	log.Info("call service method 'Fee'")
 	// todo real fee calc or use parameter
-	fee := MinOutputValue * 4
+	fee := MinOutputValue * 2
 	return fee, nil
 }
 
