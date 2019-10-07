@@ -10,7 +10,7 @@ import (
 func (s *grpcServer) Fee(ctx context.Context, in *pb.FeeRequest) (*pb.FeeReply, error) {
 	log := logger.FromContext(ctx)
 	log.Infof("Fee request for sender %s, assetId %s", in.SendersPublicKey, in.AssetId)
-	var fee, err = s.nodeClient.Fee(ctx, in.SendersPublicKey)
+	var fee, err = s.nodeClient.Fee(ctx)
 	if err != nil {
 		log.Errorf("get fee fails: %s", err)
 		return nil, err
