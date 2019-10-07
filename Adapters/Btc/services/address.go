@@ -13,7 +13,7 @@ import (
 
 const (
 	getBalanceUrlTemplate = "/addr/%s/balance"
-	getUnspentInputsUrlTemplate = "addr/%s/utxo"
+	getUnspentInputsUrlTemplate = "/addr/%s/utxo"
 )
 
 func (dcl *dataClient) GetAllBalances(ctx context.Context, address string) (*models.AccountBalance, error) {
