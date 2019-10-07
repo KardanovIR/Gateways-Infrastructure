@@ -28,23 +28,23 @@ type InputOutputInfo struct {
 }
 
 type RawTx struct {
-	Id            string       `json:"txid,omitempty"`
-	Inputs        []UtxoInput  `json:"vin"`
-	Outputs       []UtxoOutput `json:"vout"`
-	Version       uint         `json:"version"`
-	BlockHash     string       `json:"blockhash"`
-	BlockHeight   uint         `json:"blockheight"`
-	Confirmations uint         `json:"confirmations"`
-	Time          uint         `json:"time"`
-	BlockTime     uint         `json:"blocktime"`
-	ValueOut      float64      `json:"valueOut"`
-	ValueIn       float64      `json:"valueIn"`
-	Fees          float64      `json:"fees"`
-	Size          uint         `json:"size"`
-	LockTime      uint         `json:"locktime"`
+	Id            string      `json:"txid,omitempty"`
+	Inputs        []RawInput  `json:"vin"`
+	Outputs       []RawOutput `json:"vout"`
+	Version       uint        `json:"version"`
+	BlockHash     string      `json:"blockhash"`
+	BlockHeight   uint        `json:"blockheight"`
+	Confirmations uint        `json:"confirmations"`
+	Time          uint        `json:"time"`
+	BlockTime     uint        `json:"blocktime"`
+	ValueOut      float64     `json:"valueOut"`
+	ValueIn       float64     `json:"valueIn"`
+	Fees          float64     `json:"fees"`
+	Size          uint        `json:"size"`
+	LockTime      uint        `json:"locktime"`
 }
 
-type UtxoInput struct {
+type RawInput struct {
 	Id              string  `json:"txid,omitempty"`
 	Vout            uint    `json:"vout"`
 	Sequence        uint    `json:"sequence"`
@@ -56,13 +56,13 @@ type UtxoInput struct {
 	DoubleSpentTxID string  `json:"doubleSpentTxID"`
 }
 
-type UtxoOutput struct {
-	Value       string  `json:"value"`
-	N           uint    `json:"n"`
-	Script      Script  `json:"scriptPubKey"`
-	SpentTxId   string  `json:"spentTxId"`
-	SpentIndex  string  `json:"spentIndex"`
-	SpentHeight uint    `json:"spentHeight"`
+type RawOutput struct {
+	Value       string `json:"value"`
+	N           uint   `json:"n"`
+	Script      Script `json:"scriptPubKey"`
+	SpentTxId   string `json:"spentTxId"`
+	SpentIndex  string `json:"spentIndex"`
+	SpentHeight uint   `json:"spentHeight"`
 }
 
 type Script struct {
@@ -71,3 +71,4 @@ type Script struct {
 	ScriptType string   `json:"type"`
 	Addresses  []string `json:"addresses"`
 }
+

@@ -14,6 +14,7 @@ const httpRequestTimeoutMs = 2000
 type IDataClient interface {
 	GetAllBalances(ctx context.Context, address string) (*models.AccountBalance, error)
 	TransactionByHash(ctx context.Context, txId string) (*models.TxInfo, error)
+	GetUnspentInputs(ctx context.Context, address string) ([]*models.RawUtxo, error)
 }
 
 type dataClient struct {
