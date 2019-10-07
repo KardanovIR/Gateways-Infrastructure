@@ -35,8 +35,12 @@ func main() {
 		log.Fatal("can't create node's client: ", err)
 	}
 
+	if err := services.NewDataClient(ctx, config.Cfg.DataService); err != nil {
+		log.Fatal("can't create data's client: ", err)
+	}
+
 	log.Info("")
-	if err := server.InitAndStart(ctx, config.Cfg.Port, services.GetNodeClient()); err != nil {
+	if err := server.InitAndStart(ctx, config.Cfg.Port, services.GetNodeClient(), services.GetDataClient()); err != nil {
 		log.Fatal("Can't start grpc server", err)
 	}
 }

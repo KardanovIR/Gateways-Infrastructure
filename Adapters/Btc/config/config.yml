@@ -1,9 +1,11 @@
 node:
   host: localhost:18332
-  user:
-  password:
+  user: user
+  password: pass
   httppostmode: true
   disabletls: true
   chaintype: mainnet
+dataservice:
+  url: https://insight.bitpay.com/api
 decimals: 8
 port: 5005
