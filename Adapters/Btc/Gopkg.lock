@@ -151,6 +151,14 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:81e02c4edb639c80559c0650f9401d3e2dcc3256d1fa215382bb7c83c1db9126"
+  name = "github.com/shopspring/decimal"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "cd690d0c9e2447b1ef2a129a6b7b49077da89b8e"
+  version = "1.1.0"
+
+[[projects]]
   digest = "1:bb495ec276ab82d3dd08504bbc0594a65de8c3b22c6f2aaa92d05b73fbf3a82e"
   name = "github.com/spf13/afero"
   packages = [
@@ -423,6 +431,7 @@
     "github.com/btcsuite/btcd/wire",
     "github.com/btcsuite/btcutil",
     "github.com/golang/protobuf/proto",
+    "github.com/shopspring/decimal",
     "github.com/spf13/viper",
     "github.com/stretchr/testify/assert",
     "go.mongodb.org/mongo-driver/bson",

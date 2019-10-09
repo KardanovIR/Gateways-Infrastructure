@@ -73,30 +73,30 @@ func (s *grpcServer) SendTransaction(ctx context.Context, in *pb.SendTransaction
 func (s *grpcServer) TransactionByHash(ctx context.Context, in *pb.TransactionByHashRequest) (*pb.TransactionByHashReply, error) {
 	log := logger.FromContext(ctx)
 	log.Infof("TransactionByHash for %s", in.TxHash)
-	_, err := s.nodeClient.TransactionByHash(ctx, in.TxHash)
+	tx, err := s.nodeClient.TransactionByHash(ctx, in.TxHash)
 	if err != nil {
 		log.Errorf("getting transaction by hash fails: %s", err)
 		return nil, err
 	}
-	//inputs := make([]*pb.InputOutput, 0)
-	//for _, in := range tx.Inputs {
-	//	inputs = append(inputs, &pb.InputOutput{Amount: in.Amount, Address: in.Address})
-	//}
-	//outputs := make([]*pb.InputOutput, 0)
-	//for _, out := range tx.Outputs {
-	//	outputs = append(outputs, &pb.InputOutput{Amount: out.Amount, Address: out.Address})
-	//}
+	inputs := make([]*pb.InputOutput, 0)
+	for _, in := range tx.Inputs {
+		inputs = append(inputs, &pb.InputOutput{Amount: in.Amount, Address: in.Address})
+	}
+	outputs := make([]*pb.InputOutput, 0)
+	for _, out := range tx.Outputs {
+		outputs = append(outputs, &pb.InputOutput{Amount: out.Amount, Address: out.Address})
+	}
 	return &pb.TransactionByHashReply{
-		//SenderAddress:    tx.From,
-		//SendersPublicKey: tx.SenderPublicKey,
-		//RecipientAddress: tx.To,
-		//Amount:           tx.Amount,
-		//Fee:              tx.Fee,
-		//AssetId:          tx.AssetId,
-		//Status:           string(tx.Status),
-		//TxHash:           tx.TxHash,
-		//Data:             tx.Data,
-		//Inputs:           inputs,
-		//Outputs:          outputs,
+		SenderAddress:    tx.From,
+		SendersPublicKey: tx.SenderPublicKey,
+		RecipientAddress: tx.To,
+		Amount:           tx.Amount,
+		Fee:              tx.Fee,
+		AssetId:          tx.AssetId,
+		Status:           string(tx.Status),
+		TxHash:           tx.TxHash,
+		Data:             tx.Data,
+		Inputs:           inputs,
+		Outputs:          outputs,
 	}, nil
 }
