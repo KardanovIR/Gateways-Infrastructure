@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/models"
 )
@@ -24,6 +25,5 @@ func (cl *nodeClient) GetAllBalances(ctx context.Context, address string) (*mode
 
 	//todo сделать метод
 
-
-	return nil, nil
+	return nil, fmt.Errorf("not inplemented")
 }
