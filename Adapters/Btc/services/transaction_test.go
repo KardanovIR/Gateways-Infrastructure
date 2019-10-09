@@ -47,6 +47,34 @@ func TestNodeClient_SendTx(t *testing.T) {
 	assert.True(t, len(txId) > 0)
 }
 
+func TestNodeClient_TransactionByHash(t *testing.T) {
+	ctx, log := beforeTest()
+	tx, err := GetNodeClient().TransactionByHash(ctx, "4d996fd7524c46a3afe959d0823ab15f30312bbf02e86a815749bca163b2664c")
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	assert.Equal(t, "2Mxd3wMiJEhHqcMPX8BrFwHxXSSsDvrrpJN", tx.From)
+	assert.Equal(t, "61100", tx.Fee)
+	assert.Equal(t, models.TxStatusSuccess, tx.Status)
+	assert.Equal(t, "4d996fd7524c46a3afe959d0823ab15f30312bbf02e86a815749bca163b2664c", tx.TxHash)
+	assert.Equal(t, "2071140", tx.Amount)
+	assert.Equal(t, 2, len(tx.Outputs))
+	assert.Equal(t, 1, len(tx.Inputs))
+	assert.Equal(t, "2132240", tx.Inputs[0].Amount)
+	assert.Equal(t, "2Mxd3wMiJEhHqcMPX8BrFwHxXSSsDvrrpJN", tx.Inputs[0].Address)
+	assert.Equal(t, "1000000", tx.Outputs[0].Amount)
+	assert.Equal(t, "mwjKGKKxTaNNwnCAhGLvPXTR8Mn6P21aP1", tx.Outputs[0].Address)
+	assert.Equal(t, "1071140", tx.Outputs[1].Amount)
+	assert.Equal(t, "2Mxd3wMiJEhHqcMPX8BrFwHxXSSsDvrrpJN", tx.Outputs[1].Address)
+	txUnknown, err := GetNodeClient().TransactionByHash(ctx, "4d996fd7524c46a3afe959d0823ab15f30312bbf02e86a815749bca163b26641")
+	if err != nil {
+		log.Error(err)
+		t.FailNow()
+	}
+	assert.Equal(t, models.TxStatusUnKnown, txUnknown.Status)
+}
+
 func beforeTest() (context.Context, logger.ILogger) {
 	ctx := context.Background()
 	log, _ := logger.Init(false, logger.DEBUG)

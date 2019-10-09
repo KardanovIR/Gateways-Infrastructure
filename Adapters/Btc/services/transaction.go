@@ -6,16 +6,20 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
+	"github.com/shopspring/decimal"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/models"
+	"strconv"
+	"strings"
 )
+
+const RPC_INVALID_ADDRESS_OR_KEY = "-5"
 
 type SendTxResponse struct {
 	ID string `json:"id"`
@@ -97,53 +101,154 @@ func (cl *nodeClient) TransactionByHash(ctx context.Context, txId string) (*mode
 	log := logger.FromContext(ctx)
 	log.Infof("call service method 'TransactionByHash' for txID %s", txId)
 	txHash, err := chainhash.NewHashFromStr(txId)
-	log.Infof("new hash %s", txHash)
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
-	log.Infof("call node")
 	nodeTx, err := cl.nodeClient.GetRawTransactionVerbose(txHash)
 	if err != nil {
+		if strings.Contains(err.Error(), RPC_INVALID_ADDRESS_OR_KEY) {
+			return &models.TxInfo{Status: models.TxStatusUnKnown}, nil
+		}
 		log.Error(err)
 		return nil, err
 	}
-	log.Infof("node's response %s", nodeTx)
-	return parseTx(nodeTx), nil
+	return cl.parseTx(ctx, nodeTx)
 }
 
-func parseTx(tx *btcjson.TxRawResult) *models.TxInfo {
-
-	inputs := make([]models.InputOutputInfo, 0)
-	outputs := make([]models.InputOutputInfo, 0)
-
+func (cl *nodeClient) parseTx(ctx context.Context, tx *btcjson.TxRawResult) (*models.TxInfo, error) {
+	log := logger.FromContext(ctx)
+	inputs := make([]models.InputOutput, 0)
+	outputs := make([]models.InputOutput, 0)
+	inputAmountSum := uint64(0)
+	inputsTxMap := make(map[string]*btcjson.TxRawResult) // keep tx which get from node to avoid double requests for one tx
 	for _, input := range tx.Vin {
-		//todo доделать
-		inputs = append(inputs, models.InputOutputInfo{
-			//Amount: fmt.Sprintf("%f", input),
-			Address: input.Txid,
+		// get tx which was used for input
+		var inputTx *btcjson.TxRawResult
+		if tx, ok := inputsTxMap[input.Txid]; ok {
+			inputTx = tx
+		} else {
+			inputHash, err := chainhash.NewHashFromStr(input.Txid)
+			if err != nil {
+				log.Error(err)
+				return nil, err
+			}
+			tx, err := cl.nodeClient.GetRawTransactionVerbose(inputHash)
+			if err != nil {
+				log.Error(err)
+				return nil, err
+			}
+			inputTx = tx
+			inputsTxMap[input.Txid] = tx
+		}
+		// find output which was used for input of current tx
+		var vOut btcjson.Vout
+		for _, previousOut := range inputTx.Vout {
+			if previousOut.N == input.Vout {
+				vOut = previousOut
+				break
+			}
+		}
+		if len(vOut.ScriptPubKey.Hex) == 0 {
+			// not found output for input
+			return nil, fmt.Errorf("not found output for input %s N = %d", input.Txid, input.Vout)
+		}
+		amount, err := GetIntFromFloat(vOut.Value)
+		if err != nil {
+			return nil, err
+		}
+		inputAmountSum += amount
+		address := ""
+		if len(vOut.ScriptPubKey.Addresses) > 0 {
+			address = vOut.ScriptPubKey.Addresses[0]
+		}
+		inputs = append(inputs, models.InputOutput{
+			Value:   amount,
+			Address: address,
 		})
 	}
 
-	amount := 0.0
+	outputAmountSum := uint64(0)
 	for _, output := range tx.Vout {
-		if len(output.ScriptPubKey.Addresses) == 0 {
+		if len(output.ScriptPubKey.Addresses) != 1 {
+			// addresses count > 1 can be for multisign account (we haven't them)
 			continue
 		}
-		inputs = append(inputs, models.InputOutputInfo{
-			Amount:  fmt.Sprintf("%f", output.Value),
+		amount, err := GetIntFromFloat(output.Value)
+		if err != nil {
+			return nil, err
+		}
+		outputs = append(outputs, models.InputOutput{
+			Value:   amount,
 			Address: output.ScriptPubKey.Addresses[0],
 		})
-		amount += output.Value
+		outputAmountSum += amount
 	}
-
+	// sum different inputs(outputs) with the same address
+	inputs = summarizeAmountByAddress(inputs)
+	outputs = summarizeAmountByAddress(outputs)
+	fee := inputAmountSum - outputAmountSum
+	txInputs := make([]models.InputOutputInfo, len(inputs))
+	txOutputs := make([]models.InputOutputInfo, len(outputs))
+	for i, in := range inputs {
+		txInputs[i] = models.InputOutputInfo{
+			Amount:  strconv.FormatUint(in.Value, 10),
+			Address: in.Address,
+		}
+	}
+	for i, out := range outputs {
+		txOutputs[i] = models.InputOutputInfo{
+			Amount:  strconv.FormatUint(out.Value, 10),
+			Address: out.Address,
+		}
+	}
+	sender := ""
+	if len(txInputs) == 1 {
+		sender = txInputs[0].Address
+	}
+	var status models.TxStatus
+	if tx.Confirmations == 0 {
+		status = models.TxStatusPending
+	} else {
+		status = models.TxStatusSuccess
+	}
 	return &models.TxInfo{
-		Amount:  fmt.Sprintf("%f", amount),
+		From:    sender,
+		Amount:  strconv.FormatUint(outputAmountSum, 10),
 		TxHash:  tx.Txid,
-		Status:  models.TxStatusSuccess,
-		Inputs:  inputs,
-		Outputs: outputs,
+		Fee:     strconv.FormatUint(fee, 10),
+		Status:  status,
+		Inputs:  txInputs,
+		Outputs: txOutputs,
+	}, nil
+}
+
+func summarizeAmountByAddress(list []models.InputOutput) []models.InputOutput {
+	result := make([]models.InputOutput, 0)
+	for i := 0; i < len(list); i++ {
+		a := list[i]
+		if hasAddress(a.Address, result) {
+			continue
+		}
+		amount := a.Value
+		for j := i + 1; j < len(list); j++ {
+			next := list[j]
+			if next.Address == a.Address {
+				amount += next.Value
+			}
+		}
+		result = append(result, models.InputOutput{Address: a.Address, Value: amount})
 	}
+	return result
+}
+
+func hasAddress(address string, list []models.InputOutput) bool {
+	for _, t := range list {
+		if address == t.Address {
+			return true
+		}
+	}
+	return false
 }
 
 func (cl *nodeClient) Fee(ctx context.Context) (uint64, error) {
@@ -169,4 +274,15 @@ func Deserialize(rawTx []byte) (*wire.MsgTx, error) {
 		return nil, err
 	}
 	return msgTx, nil
+}
+
+func GetIntFromFloat(value float64) (uint64, error) {
+	amount := decimal.NewFromFloat(value).Shift(8)
+	amount.Truncate(0)
+	strInt := amount.String()
+	result, err := strconv.ParseUint(strInt, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return result, nil
 }
