@@ -16,6 +16,7 @@ import (
 type IRepository interface {
 	GetUnspentTxListForAddress(ctx context.Context, addresses []string) ([]models.UnspentTx, error)
 	GetUnspentTxByTxHashAndOutputNumber(ctx context.Context, txHash string, outputN uint32) (*models.UnspentTx, error)
+	GetBalanceForAddresses(ctx context.Context, addresses []string) ([]models.Balance, error)
 }
 
 const UnspentTxCollection = "unspentTx"
@@ -52,6 +53,42 @@ func (r *repository) GetUnspentTxListForAddress(ctx context.Context, addresses [
 		return unspentTxList, err
 	}
 	return unspentTxList, nil
+}
+
+func (r *repository) GetBalanceForAddresses(ctx context.Context, addresses []string) ([]models.Balance, error) {
+	log := logger.FromContext(ctx)
+	log.Debugf("GetBalanceForAddresses %s", addresses)
+	stageMatch := bson.D{{
+		"$match", bson.D{{
+			"address", bson.D{{"$in", addresses}},
+		}},
+	}}
+	stageSumByAddress := bson.D{{"$group", bson.D{{"_id", "$address"}, {"amount", bson.D{{"$sum", "$amount"}}}}}}
+	stageRenameFields := bson.D{{"$project", bson.M{"address": "$_id", "amount": 1}}}
+	cur, err := r.unspentTxC.Aggregate(ctx, bson.A{stageMatch, stageSumByAddress, stageRenameFields})
+
+	if err != nil {
+		log.Errorf("Finding unspent tx for %s in DB fails: %s", addresses, err)
+		return nil, err
+	}
+	defer func() {
+		if err := cur.Close(ctx); err != nil {
+			log.Error("close cursor error: ", err)
+		}
+	}()
+	balances := make([]models.Balance, 0)
+
+	for cur.Next(ctx) {
+		var balance models.Balance
+		if err := cur.Decode(&balance); err != nil {
+			return balances, err
+		}
+		balances = append(balances, balance)
+	}
+	if err := cur.Err(); err != nil {
+		return balances, err
+	}
+	return balances, nil
 }
 
 func (r *repository) GetUnspentTxByTxHashAndOutputNumber(ctx context.Context, txHash string, outputN uint32) (*models.UnspentTx, error) {

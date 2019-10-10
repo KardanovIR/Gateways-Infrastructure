@@ -1,5 +1,6 @@
 package models
 
-type AccountBalance struct {
-	Amount uint64
+type Balance struct {
+	Address string `bson:"address"`
+	Amount  uint64 `bson:"amount"`
 }

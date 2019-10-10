@@ -6,17 +6,18 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
-	"github.com/shopspring/decimal"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/converter"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/models"
-	"strconv"
-	"strings"
 )
 
 const RPC_INVALID_ADDRESS_OR_KEY = "-5"
@@ -153,7 +154,7 @@ func (cl *nodeClient) parseTx(ctx context.Context, tx *btcjson.TxRawResult) (*mo
 			// not found output for input
 			return nil, fmt.Errorf("not found output for input %s N = %d", input.Txid, input.Vout)
 		}
-		amount, err := GetIntFromFloat(vOut.Value)
+		amount, err := converter.GetIntFromFloat(vOut.Value)
 		if err != nil {
 			return nil, err
 		}
@@ -174,7 +175,7 @@ func (cl *nodeClient) parseTx(ctx context.Context, tx *btcjson.TxRawResult) (*mo
 			// addresses count > 1 can be for multisign account (we haven't them)
 			continue
 		}
-		amount, err := GetIntFromFloat(output.Value)
+		amount, err := converter.GetIntFromFloat(output.Value)
 		if err != nil {
 			return nil, err
 		}
@@ -255,7 +256,7 @@ func (cl *nodeClient) Fee(ctx context.Context) (uint64, error) {
 	log := logger.FromContext(ctx)
 	log.Info("call service method 'Fee'")
 	// todo real fee calc or use parameter
-	fee := MinOutputValue * 2
+	fee := MinBtcOutputValueConst * 2
 	return fee, nil
 }
 
@@ -274,15 +275,4 @@ func Deserialize(rawTx []byte) (*wire.MsgTx, error) {
 		return nil, err
 	}
 	return msgTx, nil
-}
-
-func GetIntFromFloat(value float64) (uint64, error) {
-	amount := decimal.NewFromFloat(value).Shift(8)
-	amount.Truncate(0)
-	strInt := amount.String()
-	result, err := strconv.ParseUint(strInt, 10, 64)
-	if err != nil {
-		return 0, err
-	}
-	return result, nil
 }
