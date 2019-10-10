@@ -2,28 +2,23 @@ package services
 
 import (
 	"context"
-	"fmt"
+
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/models"
 )
 
-const (
-	getBalanceUrlTemplate = "/addresses/%s"
-)
-
-type BalanceResponse struct {
-	Transactions AddressTransactions `json:"transactions"`
-}
-
-type AddressTransactions struct {
-	ConfirmedBalance uint64 `json:"confirmedBalance"`
-}
-
-func (cl *nodeClient) GetAllBalances(ctx context.Context, address string) (*models.AccountBalance, error) {
+func (cl *nodeClient) GetAllBalances(ctx context.Context, address string) (*models.Balance, error) {
 	log := logger.FromContext(ctx)
-	log.Infof("call service method 'GetBalanceWithAssets' for address %s", address)
-
-	//todo сделать метод
-
-	return nil, fmt.Errorf("not inplemented")
+	log.Infof("call service method 'GetAllBalances' for address %s", address)
+	balances, err := cl.rep.GetBalanceForAddresses(ctx, []string{address})
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	for _, b := range balances {
+		if b.Address == address {
+			return &b, nil
+		}
+	}
+	return &models.Balance{}, nil
 }

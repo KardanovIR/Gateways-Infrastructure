@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	MinOutputValue = uint64(1000)
+	MinBtcOutputValueConst = uint64(1000)
 	// if locktime is 0 -> tx will be immediately processing (if locktime > 0 -> node waits for block or time before takes it)
 	WithoutLockTime = int64(0)
 )
@@ -38,7 +38,7 @@ func (cl *nodeClient) CreateRawTx(ctx context.Context, addressesFrom []string, c
 	}
 	amount := uint64(0)
 	for _, o := range outs {
-		if o.Amount < MinOutputValue {
+		if o.Amount < MinBtcOutputValueConst {
 			return nil, fmt.Errorf("amount %d to sent to %s is less than min amount of fee", o.Amount, o.Address)
 		}
 		amount += o.Amount
@@ -59,7 +59,7 @@ func (cl *nodeClient) CreateRawTx(ctx context.Context, addressesFrom []string, c
 	}
 	destinations := make(map[btcutil.Address]btcutil.Amount)
 	change := summaryInputsAmount - (amount + fee)
-	if change > MinOutputValue {
+	if change > MinBtcOutputValueConst {
 		sendersAddress, err := btcutil.DecodeAddress(changeAddress, cl.conf.ChainParams)
 		if err != nil {
 			log.Error(err)

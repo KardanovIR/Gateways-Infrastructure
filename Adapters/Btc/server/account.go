@@ -24,10 +24,10 @@ func (s *grpcServer) GetAllBalances(ctx context.Context, in *pb.AddressRequest) 
 
 func (s *grpcServer) GetAllBalance(ctx context.Context, in *pb.GetAllBalanceRequest) (*pb.GetAllBalanceReply, error) {
 	log := logger.FromContext(ctx)
-	log.Infof("GetAllBalances for address %s", in.Address)
+	log.Infof("GetAllBalance for address %s", in.Address)
 	var balance, err = s.nodeClient.GetAllBalances(ctx, in.Address)
 	if err != nil {
-		log.Errorf("getting all balances fails: %s", err)
+		log.Errorf("getting all balance fails: %s", err)
 		return nil, err
 	}
 	wb := strconv.FormatUint(balance.Amount, 10)
