@@ -14,6 +14,7 @@ import (
 type INodeClient interface {
 	ValidateAddress(ctx context.Context, address string) (bool, error)
 	GetAllBalances(ctx context.Context, address string) (*models.Balance, error)
+	GetBalanceForAllAddresses(ctx context.Context) (uint64, error)
 
 	Fee(ctx context.Context) (uint64, error)
 

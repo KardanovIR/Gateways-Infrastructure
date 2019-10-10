@@ -47,11 +47,20 @@ func TestTaskRepository(t *testing.T) {
 	balances, err := GetRepository().GetBalanceForAddresses(ctx, []string{"2NB7EbQxbut764gJebZoJeAi8grzVrEVfPa",
 		"mxRx7FfxFs1xpihZqQNzVE2c9yoAM1Wd7X", "mfduw3E2qtTHNyRfkCKH9v9YMdiiAPCwZr"})
 	assert.Nil(t, err)
+	checkResult(t, balances)
+
+	balances2, err := GetRepository().GetBalanceForAddresses(ctx, []string{})
+	assert.Nil(t, err)
+	checkResult(t, balances2)
+}
+
+func checkResult(t *testing.T, balances []models.Balance) {
 	assert.Equal(t, 2, len(balances))
 	assert.Equal(t, "mxRx7FfxFs1xpihZqQNzVE2c9yoAM1Wd7X", balances[0].Address)
 	assert.Equal(t, uint64(3), balances[0].Amount)
 	assert.Equal(t, "2NB7EbQxbut764gJebZoJeAi8grzVrEVfPa", balances[1].Address)
 	assert.Equal(t, uint64(302), balances[1].Amount)
+
 }
 
 func beforeTest() (ctx context.Context, log logger.ILogger) {
