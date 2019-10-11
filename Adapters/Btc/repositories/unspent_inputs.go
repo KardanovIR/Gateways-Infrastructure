@@ -14,7 +14,7 @@ import (
 )
 
 type IRepository interface {
-	GetUnspentTxListForAddress(ctx context.Context, addresses []string) ([]models.UnspentTx, error)
+	GetUnspentTxListForAddresses(ctx context.Context, addresses []string) ([]models.UnspentTx, error)
 	GetUnspentTxByTxHashAndOutputNumber(ctx context.Context, txHash string, outputN uint32) (*models.UnspentTx, error)
 	GetBalanceForAddresses(ctx context.Context, addresses []string) ([]models.Balance, error)
 }
@@ -27,10 +27,15 @@ type repository struct {
 	DbName     string
 }
 
-func (r *repository) GetUnspentTxListForAddress(ctx context.Context, addresses []string) ([]models.UnspentTx, error) {
+// if addresses is empty return all inputs
+func (r *repository) GetUnspentTxListForAddresses(ctx context.Context, addresses []string) ([]models.UnspentTx, error) {
 	log := logger.FromContext(ctx)
-	log.Debugf("GetUnspentTxListForAddress %s", addresses)
-	cur, err := r.unspentTxC.Find(ctx, bson.D{{"address", bson.D{{"$in", addresses}}}})
+	log.Debugf("GetUnspentTxListForAddresses %s", addresses)
+	filter := bson.D{{}}
+	if len(addresses) > 0 {
+		filter = bson.D{{"address", bson.D{{"$in", addresses}}}}
+	}
+	cur, err := r.unspentTxC.Find(ctx, filter)
 	if err != nil {
 		log.Errorf("Finding unspent tx for %s in DB fails: %s", addresses, err)
 		return nil, err
@@ -65,7 +70,14 @@ func (r *repository) GetBalanceForAddresses(ctx context.Context, addresses []str
 	}}
 	stageSumByAddress := bson.D{{"$group", bson.D{{"_id", "$address"}, {"amount", bson.D{{"$sum", "$amount"}}}}}}
 	stageRenameFields := bson.D{{"$project", bson.M{"address": "$_id", "amount": 1}}}
-	cur, err := r.unspentTxC.Aggregate(ctx, bson.A{stageMatch, stageSumByAddress, stageRenameFields})
+	var pipeline bson.A
+	if len(addresses) == 0 {
+		// collect by all addresses
+		pipeline = bson.A{stageSumByAddress, stageRenameFields}
+	} else {
+		pipeline = bson.A{stageMatch, stageSumByAddress, stageRenameFields}
+	}
+	cur, err := r.unspentTxC.Aggregate(ctx, pipeline)
 
 	if err != nil {
 		log.Errorf("Finding unspent tx for %s in DB fails: %s", addresses, err)
