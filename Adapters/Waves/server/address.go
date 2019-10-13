@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Waves/logger"
@@ -39,4 +40,11 @@ func (s *grpcServer) CheckAddress(ctx context.Context, in *pb.CheckAddressReques
 		return nil, err
 	}
 	return &pb.ValidateAddressReply{Valid: ok}, nil
+}
+
+func (s *grpcServer) GetUnspentInputs(ctx context.Context, in *pb.AddressRequest) (*pb.GetUnspentInputsReply, error) {
+	log := logger.FromContext(ctx)
+	log.Infof("ValidateAddress %s", in.Address)
+
+	return nil, errors.New("not supported for this blockchain")
 }
