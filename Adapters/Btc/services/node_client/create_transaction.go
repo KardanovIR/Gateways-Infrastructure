@@ -1,10 +1,9 @@
-package services
+package node_client
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"

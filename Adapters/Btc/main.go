@@ -5,12 +5,13 @@ import (
 	"flag"
 	"fmt"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/repositories"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/services/data_client"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/services/node_client"
 	"os"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/server"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/services"
 )
 
 func main() {
@@ -35,16 +36,16 @@ func main() {
 	if err := repositories.New(ctx, config.Cfg.Db); err != nil {
 		log.Fatal("can't create repository: ", err)
 	}
-	if err := services.New(ctx, config.Cfg.Node, repositories.GetRepository()); err != nil {
+	if err := node_client.New(ctx, config.Cfg.Node, repositories.GetRepository()); err != nil {
 		log.Fatal("can't create node's client: ", err)
 	}
 
-	if err := services.NewDataClient(ctx, config.Cfg.DataService); err != nil {
+	if err := data_client.NewDataClient(ctx, config.Cfg.DataService); err != nil {
 		log.Fatal("can't create data's client: ", err)
 	}
 
 	log.Info("")
-	if err := server.InitAndStart(ctx, config.Cfg.Port, services.GetNodeClient(), services.GetDataClient()); err != nil {
+	if err := server.InitAndStart(ctx, config.Cfg.Port, node_client.GetNodeClient(), data_client.GetDataClient()); err != nil {
 		log.Fatal("Can't start grpc server", err)
 	}
 }

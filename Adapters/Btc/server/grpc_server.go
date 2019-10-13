@@ -2,19 +2,20 @@ package server
 
 import (
 	"context"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/services/data_client"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/services/node_client"
 	"google.golang.org/grpc"
 	"net"
 	"sync"
 
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/services"
 )
 
 type grpcServer struct {
 	port       string
-	nodeClient services.INodeClient
-	dataClient services.IDataClient
+	nodeClient node_client.INodeClient
+	dataClient data_client.IDataClient
 }
 
 var (
@@ -22,7 +23,7 @@ var (
 	onceGrpcServertInstance sync.Once
 )
 
-func InitAndStart(ctx context.Context, port string, client services.INodeClient, dataClient services.IDataClient) error {
+func InitAndStart(ctx context.Context, port string, client node_client.INodeClient, dataClient data_client.IDataClient) error {
 	log := logger.FromContext(ctx)
 	var initErr error
 	onceGrpcServertInstance.Do(func() {

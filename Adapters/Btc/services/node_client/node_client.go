@@ -1,4 +1,4 @@
-package services
+package node_client
 
 import (
 	"context"

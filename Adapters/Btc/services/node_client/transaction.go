@@ -1,4 +1,4 @@
-package services
+package node_client
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/services/data_client"
 	"strconv"
 	"strings"
 
@@ -23,12 +24,6 @@ import (
 )
 
 const (
-	txIsNotInBlockchain = "Cannot find transaction with id"
-	sendTxUrl           = "/transactions"
-	unconfirmedTxUrl    = "/transactions/unconfirmed"
-	TxByIdUrlTemplate   = "/transactions/%s"
-	getTxByHashUrl      = "/tx/%s"
-
 	RPC_INVALID_ADDRESS_OR_KEY = "-5"
 )
 
@@ -124,25 +119,6 @@ func (cl *nodeClient) TransactionByHash(ctx context.Context, txId string) (*mode
 		return nil, err
 	}
 	return cl.parseTx(ctx, nodeTx)
-}
-
-func (cl *dataClient) TransactionByHash(ctx context.Context, txId string) (*models.TxInfo, error) {
-	log := logger.FromContext(ctx)
-	log.Infof("call service method 'TransactionByHash' of dataClient for txID %s", txId)
-
-	txResp, err := cl.Request(ctx, http.MethodGet, cl.conf.Url+fmt.Sprintf(getTxByHashUrl, txId), nil)
-	if err != nil {
-		log.Error(err)
-		return nil, err
-	}
-	
-	tx := &models.RawTx{}
-	if err := json.Unmarshal(txResp, tx); err != nil {
-		log.Errorf("failed to unmarshal raw tx: %s", err)
-		return nil, err
-	}
-
-	return cl.parseTx(tx), nil
 }
 
 func (cl *nodeClient) parseTx(ctx context.Context, tx *btcjson.TxRawResult) (*models.TxInfo, error) {
@@ -252,33 +228,6 @@ func (cl *nodeClient) parseTx(ctx context.Context, tx *btcjson.TxRawResult) (*mo
 	}, nil
 }
 
-func (cl *dataClient) parseTx(tx *models.RawTx) *models.TxInfo {
-	inputs := make([]models.InputOutputInfo, 0)
-	outputs := make([]models.InputOutputInfo, 0)
-
-	for _, input := range tx.Inputs {
-		inputs = append(inputs, models.InputOutputInfo{
-			Amount:  converter.ToTargetAmountStr(input.Value),
-			Address: input.Address,
-		})
-	}
-
-	amount := tx.ValueIn - tx.ValueOut
-	for _, output := range tx.Outputs {
-		outputs = append(outputs, models.InputOutputInfo{
-			Amount: output.Value,
-		})
-	}
-	return &models.TxInfo{
-		Amount:  converter.ToTargetAmountStr(amount),
-		TxHash:  tx.Id,
-		Status:  models.TxStatusSuccess,
-		Inputs:  inputs,
-		Outputs: outputs,
-		Fee:     converter.ToTargetAmountStr(tx.Fees),
-	}
-}
-
 func summarizeAmountByAddress(list []models.InputOutput) []models.InputOutput {
 	result := make([]models.InputOutput, 0)
 	for i := 0; i < len(list); i++ {
@@ -307,7 +256,7 @@ func hasAddress(address string, list []models.InputOutput) bool {
 	return false
 }
 
-func (cl *nodeClient) Fee(ctx context.Context) (uint64, error) {
+func (cl *node_client.nodeClient) Fee(ctx context.Context) (uint64, error) {
 	log := logger.FromContext(ctx)
 	log.Info("call service method 'Fee'")
 	// todo real fee calc or use parameter
