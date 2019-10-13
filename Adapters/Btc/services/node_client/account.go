@@ -21,3 +21,18 @@ func (cl *nodeClient) GetAllBalances(ctx context.Context, address string) (*mode
 	}
 	return &models.Balance{}, nil
 }
+
+func (cl *nodeClient) GetBalanceForAllAddresses(ctx context.Context) (uint64, error) {
+	log := logger.FromContext(ctx)
+	log.Info("call service method 'GetBalanceForAllAddresses'")
+	balances, err := cl.rep.GetBalanceForAddresses(ctx, []string{})
+	if err != nil {
+		log.Error(err)
+		return 0, err
+	}
+	amount := uint64(0)
+	for _, b := range balances {
+		amount += b.Amount
+	}
+	return amount, nil
+}

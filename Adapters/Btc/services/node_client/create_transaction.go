@@ -32,8 +32,8 @@ func (cl *nodeClient) CreateRawTx(ctx context.Context, addressesFrom []string, c
 	log := logger.FromContext(ctx)
 	log.Infof("call service method 'CreateRawTx' from %s to %v",
 		addressesFrom, outs)
-	if len(addressesFrom) == 0 || len(outs) == 0 {
-		return nil, fmt.Errorf("wrong parameters addressesFrom %s or outs", addressesFrom)
+	if len(changeAddress) == 0 || len(outs) == 0 {
+		return nil, fmt.Errorf("wrong parameters changeAddress %s or outs", changeAddress)
 	}
 	amount := uint64(0)
 	for _, o := range outs {
@@ -47,7 +47,7 @@ func (cl *nodeClient) CreateRawTx(ctx context.Context, addressesFrom []string, c
 		log.Errorf("get fee fails %s", err)
 		return nil, err
 	}
-	inputInfos, summaryInputsAmount, err := cl.getUnspentInputs(ctx, addressesFrom, amount+fee)
+	inputInfos, summaryInputsAmount, err := cl.getUnspentInputs(ctx, changeAddress, amount+fee)
 	if err != nil {
 		log.Errorf("get UnspentInputs fails %s", err)
 		return nil, err
@@ -92,23 +92,42 @@ func (cl *nodeClient) CreateRawTx(ctx context.Context, addressesFrom []string, c
 	return txBytesResp, err
 }
 
-func (cl *nodeClient) getUnspentInputs(ctx context.Context, addressesFrom []string, summaryAmount uint64) ([]TxInputInfo, uint64, error) {
+func (cl *nodeClient) getUnspentInputs(ctx context.Context, changeAddress string, summaryAmount uint64) ([]TxInputInfo, uint64, error) {
 	log := logger.FromContext(ctx)
-	unspentInputs, err := cl.rep.GetUnspentTxListForAddress(ctx, addressesFrom)
+	// set empty addresses list ot get all inputs
+	unspentInputs, err := cl.rep.GetUnspentTxListForAddresses(ctx, []string{})
 	if err != nil {
 		log.Errorf("get unspent inputs fails %s", err)
 		return nil, 0, err
 	}
 	summaryInputsAmount := uint64(0)
 	inputInfos := make([]TxInputInfo, 0)
-	// todo more efficient algorithm of choosing inputs
 	for _, input := range unspentInputs {
 		if summaryInputsAmount >= summaryAmount {
 			break
 		}
+		if input.Address == changeAddress {
+			// first try to collect money from another addresses than changeAddress
+			continue
+		}
 		txInput := btcjson.TransactionInput{Txid: input.TxHash, Vout: input.OutputN}
 		inputInfos = append(inputInfos, TxInputInfo{Address: input.Address, Input: txInput})
 		summaryInputsAmount += input.Amount
+	}
+	// if money is enough - return
+	if summaryInputsAmount >= summaryAmount {
+		return inputInfos, summaryInputsAmount, nil
+	}
+	// try to collect inputs from change address
+	for _, input := range unspentInputs {
+		if input.Address == changeAddress {
+			txInput := btcjson.TransactionInput{Txid: input.TxHash, Vout: input.OutputN}
+			inputInfos = append(inputInfos, TxInputInfo{Address: input.Address, Input: txInput})
+			summaryInputsAmount += input.Amount
+			if summaryInputsAmount >= summaryAmount {
+				break
+			}
+		}
 	}
 	if summaryInputsAmount < summaryAmount {
 		return nil, 0, fmt.Errorf("insufficient funds: need %d, has %d", summaryAmount, summaryInputsAmount)
