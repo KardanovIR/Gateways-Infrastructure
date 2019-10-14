@@ -19,27 +19,27 @@ const (
 )
 
 
-func (cl *dataClient) TransactionByHash(ctx context.Context, txId string) (*models.TxInfo, error) {
+func (dcl *dataClient) TransactionByHash(ctx context.Context, txId string) (*models.TxInfo, error) {
 	log := logger.FromContext(ctx)
 	log.Infof("call service method 'TransactionByHash' of dataClient for txID %s", txId)
 
-	txResp, err := cl.Request(ctx, http.MethodGet, cl.conf.Url+fmt.Sprintf(getTxByHashUrl, txId), nil)
+	txResp, err := dcl.Request(ctx, http.MethodGet, dcl.conf.Url+fmt.Sprintf(getTxByHashUrl, txId), nil)
 	if err != nil {
-	log.Error(err)
-	return nil, err
+		log.Error(err)
+		return nil, err
 	}
 
 	tx := &models.RawTx{}
 	if err := json.Unmarshal(txResp, tx); err != nil {
-	log.Errorf("failed to unmarshal raw tx: %s", err)
-	return nil, err
+		log.Errorf("failed to unmarshal raw tx: %s", err)
+		return nil, err
 	}
 
-	return cl.parseTx(tx), nil
+	return dcl.parseTx(tx), nil
 }
 
 
-func (cl *dataClient) parseTx(tx *models.RawTx) *models.TxInfo {
+func (dcl *dataClient) parseTx(tx *models.RawTx) *models.TxInfo {
 	inputs := make([]models.InputOutputInfo, 0)
 	outputs := make([]models.InputOutputInfo, 0)
 

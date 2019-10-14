@@ -14,10 +14,10 @@ const (
 	getUnspentInputsUrlTemplate = "/addr/%s/utxo"
 )
 
-func (dcl *dataClient) GetAllBalances(ctx context.Context, address string) (*models.AccountBalance, error) {
+func (dcl *dataClient) GetAllBalances(ctx context.Context, address string) (*models.Balance, error) {
 	log := logger.FromContext(ctx)
 	log.Infof("call service method 'GetBalanceWithAssets' for address %s", address)
-	balance := models.AccountBalance{}
+	balance := models.Balance{}
 
 	r, err := dcl.Request(ctx, http.MethodGet, dcl.conf.Url+fmt.Sprintf(getBalanceUrlTemplate, address), nil)
 	if err != nil {

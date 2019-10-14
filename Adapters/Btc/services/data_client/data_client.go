@@ -12,7 +12,7 @@ import (
 const httpRequestTimeoutMs = 2000
 
 type IDataClient interface {
-	GetAllBalances(ctx context.Context, address string) (*models.AccountBalance, error)
+	GetAllBalances(ctx context.Context, address string) (*models.Balance, error)
 	TransactionByHash(ctx context.Context, txId string) (*models.TxInfo, error)
 	GetUnspentInputs(ctx context.Context, address string) ([]*models.RawUtxo, error)
 }

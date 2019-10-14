@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/services/data_client"
 	"strconv"
 	"strings"
 
@@ -16,11 +15,9 @@ import (
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/converter"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/models"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/services/converter"
-	"net/http"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/converter"
 )
 
 const (
@@ -256,7 +253,7 @@ func hasAddress(address string, list []models.InputOutput) bool {
 	return false
 }
 
-func (cl *node_client.nodeClient) Fee(ctx context.Context) (uint64, error) {
+func (cl *nodeClient) Fee(ctx context.Context) (uint64, error) {
 	log := logger.FromContext(ctx)
 	log.Info("call service method 'Fee'")
 	// todo real fee calc or use parameter
