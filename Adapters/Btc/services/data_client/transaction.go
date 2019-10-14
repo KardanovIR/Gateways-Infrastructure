@@ -14,7 +14,8 @@ const (
 	txIsNotInBlockchain = "Cannot find transaction with id"
 	sendTxUrl           = "/transactions"
 	unconfirmedTxUrl    = "/transactions/unconfirmed"
-	TxByIdUrlTemplate   = "/transactions/%s"
+	txByIdUrlTemplate   = "/transactions/%s"
+	feeUrlTemplate      = "/utils/estimatefee"
 	getTxByHashUrl      = "/tx/%s"
 )
 
@@ -64,4 +65,23 @@ func (dcl *dataClient) parseTx(tx *models.RawTx) *models.TxInfo {
 		Outputs: outputs,
 		Fee:     converter.ToTargetAmountStr(tx.Fees),
 	}
+}
+
+func (dcl *dataClient) Fee(ctx context.Context) (uint64, error) {
+	log := logger.FromContext(ctx)
+	log.Info("call service method 'Fee'")
+
+	feeResp, err := dcl.Request(ctx, http.MethodGet, dcl.conf.Url+feeUrlTemplate, nil)
+	if err != nil {
+		log.Error(err)
+		return 0, err
+	}
+
+	fee := make(map[int]float64)
+	if err := json.Unmarshal(feeResp, &fee); err != nil {
+		log.Errorf("failed to unmarshal raw tx: %s", err)
+		return 0, err
+	}
+
+	return  converter.ToTargetAmount(fee[2]), nil
 }

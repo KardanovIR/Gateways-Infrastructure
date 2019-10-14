@@ -15,6 +15,7 @@ type IDataClient interface {
 	GetAllBalances(ctx context.Context, address string) (*models.Balance, error)
 	TransactionByHash(ctx context.Context, txId string) (*models.TxInfo, error)
 	GetUnspentInputs(ctx context.Context, address string) ([]*models.RawUtxo, error)
+	Fee(ctx context.Context) (uint64, error)
 }
 
 type dataClient struct {

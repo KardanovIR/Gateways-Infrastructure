@@ -2,9 +2,9 @@ package converter
 
 import (
 	"context"
-	"strconv"
-
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
+	"math"
+	"strconv"
 )
 
 const (
@@ -31,7 +31,7 @@ func ToNodeAmount(a uint64) uint64 {
 }
 
 func ToTargetAmount(a float64) uint64 {
-	return uint64(a *btcDecimals)
+	return uint64(a * math.Pow10(btcDecimals))
 }
 
 func ToTargetAmountStr(a float64) string {
