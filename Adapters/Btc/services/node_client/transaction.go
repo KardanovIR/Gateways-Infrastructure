@@ -1,4 +1,4 @@
-package services
+package node
 
 import (
 	"bytes"
@@ -15,12 +15,14 @@ import (
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/converter"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/converter"
 )
 
-const RPC_INVALID_ADDRESS_OR_KEY = "-5"
+const (
+	RPC_INVALID_ADDRESS_OR_KEY = "-5"
+)
 
 type SendTxResponse struct {
 	ID string `json:"id"`
@@ -97,10 +99,9 @@ func (cl *nodeClient) SendTransaction(ctx context.Context, txSigned []byte) (txI
 	}
 	return hash.String(), nil
 }
-
 func (cl *nodeClient) TransactionByHash(ctx context.Context, txId string) (*models.TxInfo, error) {
 	log := logger.FromContext(ctx)
-	log.Infof("call service method 'TransactionByHash' for txID %s", txId)
+	log.Infof("call service method 'TransactionByHash' of nodeClient for txID %s", txId)
 	txHash, err := chainhash.NewHashFromStr(txId)
 	if err != nil {
 		log.Error(err)

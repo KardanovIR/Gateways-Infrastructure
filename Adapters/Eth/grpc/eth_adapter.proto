@@ -56,6 +56,9 @@ service Adapter {
     // Approve amount available for another account to get from owner account
     rpc ApproveAmountForAddressTransaction (ApproveAmountForAddressRequest) returns (ApproveAmountForAddressReply) {
     }
+
+    rpc GetUnspentInputs (AddressRequest) returns (GetUnspentInputsReply) {
+    }
 }
 
 message FeeRequest {
@@ -235,4 +238,19 @@ message ApproveAmountForAddressRequest {
 message ApproveAmountForAddressReply {
     bytes tx = 1;
     string fee = 2;
+}
+
+message GetUnspentInputsReply {
+    repeated UnspentInput utxo = 1;
+}
+
+message UnspentInput {
+    string TxId = 1;
+    string Address = 2;
+    uint32 Vout = 3;
+    string ScriptPubKey = 4;
+    float Amount = 5;
+    uint32 Satoshis = 6;
+    uint32 Height = 7;
+    uint32 Confirmations = 8;
 }

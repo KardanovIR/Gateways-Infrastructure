@@ -1,4 +1,4 @@
-package services
+package node
 
 import (
 	"context"
@@ -23,3 +23,4 @@ func (cl *nodeClient) ValidateAddress(ctx context.Context, address string) (bool
 
 	return result.IsValid, nil
 }
+

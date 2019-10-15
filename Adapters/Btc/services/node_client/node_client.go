@@ -1,4 +1,4 @@
-package services
+package node
 
 import (
 	"context"
@@ -46,6 +46,7 @@ func New(ctx context.Context, conf config.Node, rep repositories.IRepository) er
 			HTTPPostMode: conf.HTTPPostMode,
 			DisableTLS:   conf.DisableTLS,
 		}
+		
 		client, err := rpcclient.New(nodeCon, nil)
 		if err != nil {
 			log.Error(err)

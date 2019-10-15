@@ -29,6 +29,11 @@ type Config struct {
 	Port     string `mapstructure:"PORT"`
 	Decimals int    `mapstructure:"DECIMALS"`
 	Db       DB     `mapstructure:"DB"`
+	DataService HttpService `mapstructure:"DATASERVICE"`
+}
+
+type HttpService struct {
+  Url string `mapstructure:"URL"`
 }
 
 type Node struct {
@@ -58,8 +63,8 @@ func btcParamsByChainType(chainType string) *chaincfg.Params {
 }
 
 func (c *Config) String() string {
-	return fmt.Sprintf("NODE_HOST: %s, EXPLORER_URL: %s, USER: %v, PORT: %s",
-		c.Node.Host, c.Node.User, c.Node.User, c.Port,
+	return fmt.Sprintf("NODE_HOST: %s, DATA_URL: %s, USER: %v, PORT: %s",
+		c.Node.Host, c.DataService.Url, c.Node.User, c.Port,
 	)
 }
 

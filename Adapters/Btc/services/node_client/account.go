@@ -1,8 +1,7 @@
-package services
+package node
 
 import (
 	"context"
-
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/models"
 )

@@ -7,6 +7,7 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/repositories"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/services/node_client"
 
 	"testing"
 )
@@ -24,7 +25,7 @@ func TestNodeClient_SendTx(t *testing.T) {
 	outs := make([]*models.Output, 2)
 	outs[0] = &models.Output{Address: recipientAddress, Amount: 80000}
 	outs[1] = &models.Output{Address: "2MwWZAgprCccvQ7LmN4YUPPDd6Jn4FgKSe8", Amount: 210000}
-	raw, err := GetNodeClient().CreateRawTx(ctx, []string{address1, address2}, address1, outs)
+	raw, err := node_client.GetNodeClient().CreateRawTx(ctx, []string{address1, address2}, address1, outs)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -32,13 +33,13 @@ func TestNodeClient_SendTx(t *testing.T) {
 	privates := make(map[string]string)
 	privates[address1] = privateKey1
 	privates[address2] = privateKey2
-	signedTx, err := GetNodeClient().SignTransaction(ctx, raw, privates)
+	signedTx, err := node_client.GetNodeClient().SignTransaction(ctx, raw, privates)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
 	}
 
-	txId, err := GetNodeClient().SendTransaction(ctx, signedTx)
+	txId, err := node_client.GetNodeClient().SendTransaction(ctx, signedTx)
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -49,7 +50,7 @@ func TestNodeClient_SendTx(t *testing.T) {
 
 func TestNodeClient_TransactionByHash(t *testing.T) {
 	ctx, log := beforeTest()
-	tx, err := GetNodeClient().TransactionByHash(ctx, "4d996fd7524c46a3afe959d0823ab15f30312bbf02e86a815749bca163b2664c")
+	tx, err := node_client.GetNodeClient().TransactionByHash(ctx, "4d996fd7524c46a3afe959d0823ab15f30312bbf02e86a815749bca163b2664c")
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -67,7 +68,7 @@ func TestNodeClient_TransactionByHash(t *testing.T) {
 	assert.Equal(t, "mwjKGKKxTaNNwnCAhGLvPXTR8Mn6P21aP1", tx.Outputs[0].Address)
 	assert.Equal(t, "1071140", tx.Outputs[1].Amount)
 	assert.Equal(t, "2Mxd3wMiJEhHqcMPX8BrFwHxXSSsDvrrpJN", tx.Outputs[1].Address)
-	txUnknown, err := GetNodeClient().TransactionByHash(ctx, "4d996fd7524c46a3afe959d0823ab15f30312bbf02e86a815749bca163b26641")
+	txUnknown, err := node_client.GetNodeClient().TransactionByHash(ctx, "4d996fd7524c46a3afe959d0823ab15f30312bbf02e86a815749bca163b26641")
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
@@ -85,7 +86,7 @@ func beforeTest() (context.Context, logger.ILogger) {
 	if err := repositories.New(ctx, config.Cfg.Db); err != nil {
 		log.Fatal("can't create repository: ", err)
 	}
-	if err := New(ctx, config.Cfg.Node, repositories.GetRepository()); err != nil {
+	if err := node_client.New(ctx, config.Cfg.Node, repositories.GetRepository()); err != nil {
 		log.Fatal("can't create node's client: ", err)
 	}
 	return ctx, log

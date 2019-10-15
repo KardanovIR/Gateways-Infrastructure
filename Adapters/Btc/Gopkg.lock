@@ -3,7 +3,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:10304a453d8795c5c45683c83d60ec83b35b0ae9d9e6ba76728070331c5b2ee8"
+  digest = "1:0a62f97889e959fdf37178a4a011ef7ec5feef8da15654b59c4fb23bf1183928"
   name = "github.com/btcsuite/btcd"
   packages = [
     "btcec",
@@ -15,7 +15,7 @@
     "wire",
   ]
   pruneopts = "UT"
-  revision = "130ea5bddde33df32b06a1cdb42a6316eb73cff5"
+  revision = "07282a6656b84356614b0aa4daa63059442775d4"
 
 [[projects]]
   branch = "master"
@@ -135,12 +135,12 @@
   version = "v1.1.2"
 
 [[projects]]
-  digest = "1:93131d8002d7025da13582877c32d1fc302486775a1b06f62241741006428c5e"
+  digest = "1:bbd3997f0121200f72b64d7a3826eb8a0b910d6a4c19894c9fe2852b9e5eaf3b"
   name = "github.com/pelletier/go-toml"
   packages = ["."]
   pruneopts = "UT"
-  revision = "728039f679cbcd4f6a54e080d2219a4c4928c546"
-  version = "v1.4.0"
+  revision = "8fe62057ea2d46ce44254c98e84e810044dbe197"
+  version = "v1.5.0"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -186,12 +186,12 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:cc33ef8c2b75f80e588a96f9a70324c0487a02323bd5b2c5d639dda973edc844"
+  digest = "1:524b71991fc7d9246cc7dc2d9e0886ccb97648091c63e30eef619e6862c955dd"
   name = "github.com/spf13/pflag"
   packages = ["."]
   pruneopts = "UT"
-  revision = "e8f29969b682c41a730f8f08b76033b120498464"
-  version = "v1.0.4"
+  revision = "2e9d26c8c37aae03e3f9d4e90b7116f5accb7cab"
+  version = "v1.0.5"
 
 [[projects]]
   digest = "1:11118bd196646c6515fea3d6c43f66162833c6ae4939bfb229b9956d91c6cf17"
@@ -226,7 +226,7 @@
   revision = "73f8eece6fdcd902c185bf651de50f3828bed5ed"
 
 [[projects]]
-  digest = "1:480e1343dcb5630d200dd23a08d3d81f76c7f938780cb616113c96d90aa37c9b"
+  digest = "1:27e22fe552475e0b843c0bffe24e6bc5c55cb4c5d68d119b8c79af08b1903bb4"
   name = "go.mongodb.org/mongo-driver"
   packages = [
     "bson",
@@ -259,8 +259,8 @@
     "x/mongo/driver/wiremessage",
   ]
   pruneopts = "UT"
-  revision = "c520d023af0a89aec8b7f97717b52da270df2c38"
-  version = "v1.1.1"
+  revision = "1261197350f3ad46a907489aee7ecc49b39efb82"
+  version = "v1.1.2"
 
 [[projects]]
   digest = "1:777e729b475d3895c7229552aa10076f0d177daf37c0a72258006d046d329960"
@@ -302,11 +302,11 @@
     "ripemd160",
   ]
   pruneopts = "UT"
-  revision = "227b76d455e791cb042b03e633e2f7fbcfdf74a5"
+  revision = "87dc89f01550277dc22b74ffcf4cd89fa2f40f4c"
 
 [[projects]]
   branch = "master"
-  digest = "1:ec0b21c65dd414b1306ee9b9f6f2e7d631029dd4c4b274a7d37f332c5fbabe28"
+  digest = "1:0f7e2b539dc3bb2272b2ea9a53254e8021d2b97b1fdc247b20e9ffcb48974abb"
   name = "golang.org/x/net"
   packages = [
     "http/httpguts",
@@ -317,7 +317,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "a8b05e9114ab0cb08faec337c959aed24b68bf50"
+  revision = "491137f692577e390404f177a0515c9f86f79754"
 
 [[projects]]
   branch = "master"
@@ -329,11 +329,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ec9d9815894f067c7878330735b9e4dfa6dc61234d2ba136b60a1436d6b5ea94"
+  digest = "1:7c927f17d868be652a4cfe7de23e4292dea5b14d974a1d536e3b7cb7e79fd695"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "b4ddaad3f8a36719f2b8bc6486c14cc468ca2bb5"
+  revision = "b09406accb4736d857a32bf9444cd7edae2ffa79"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -366,10 +366,10 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "f660b865573183437d2d868f703fe88bb8af0b55"
+  revision = "548a555dbc03994223efbaba0090152849259498"
 
 [[projects]]
-  digest = "1:2e18183989c76d073e9088f1a56f8b1c46ca920b74b529a50c2d7e5877ff18ac"
+  digest = "1:6cd77d0b616d2dcebd363dfecba593f27b0151fc82cdb5fbfb96c5a7cfbc95b5"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -407,16 +407,16 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "39e8a7b072a67ca2a75f57fa2e0d50995f5b22f6"
-  version = "v1.23.1"
+  revision = "f6d0f9ee430895e87ef1ceb5ac8f39725bafceef"
+  version = "v1.24.0"
 
 [[projects]]
-  digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
+  digest = "1:59f10c1537d2199d9115d946927fe31165959a95190849c82ff11e05803528b0"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "UT"
-  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
-  version = "v2.2.2"
+  revision = "f221b8435cfb71e54062f6c6e99e9ade30b124d5"
+  version = "v2.2.4"
 
 [solve-meta]
   analyzer-name = "dep"
