@@ -1,4 +1,4 @@
-package data_client
+package data
 
 import (
 	"context"

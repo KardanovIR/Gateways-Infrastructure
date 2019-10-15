@@ -1,4 +1,4 @@
-package node_client
+package node
 
 import (
 	"context"
