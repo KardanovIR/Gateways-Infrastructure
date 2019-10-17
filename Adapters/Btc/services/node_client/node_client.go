@@ -16,7 +16,8 @@ type INodeClient interface {
 	GetAllBalances(ctx context.Context, address string) (*models.Balance, error)
 	GetBalanceForAllAddresses(ctx context.Context) (uint64, error)
 
-	Fee(ctx context.Context) (uint64, error)
+	FeeRateForKByte(ctx context.Context) (uint64, error)
+	Fee(ctx context.Context, feeRate uint64, txSize int) uint64
 
 	CreateRawTx(ctx context.Context, addressesFrom []string, changeAddress string, outs []*models.Output) ([]byte, error)
 	SendTransaction(ctx context.Context, txSigned []byte) (txId string, err error)
@@ -46,7 +47,7 @@ func New(ctx context.Context, conf config.Node, rep repositories.IRepository) er
 			HTTPPostMode: conf.HTTPPostMode,
 			DisableTLS:   conf.DisableTLS,
 		}
-		
+
 		client, err := rpcclient.New(nodeCon, nil)
 		if err != nil {
 			log.Error(err)
