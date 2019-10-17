@@ -3,19 +3,21 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0a62f97889e959fdf37178a4a011ef7ec5feef8da15654b59c4fb23bf1183928"
+  digest = "1:2c1a8cdf8d20acdeaea1907aa9dc5f4e83450d218d94f49eba28d33e2889f51f"
   name = "github.com/btcsuite/btcd"
   packages = [
+    "blockchain",
     "btcec",
     "btcjson",
     "chaincfg",
     "chaincfg/chainhash",
+    "database",
     "rpcclient",
     "txscript",
     "wire",
   ]
   pruneopts = "UT"
-  revision = "07282a6656b84356614b0aa4daa63059442775d4"
+  revision = "a41498d578a99c1619037746abd916176ea61052"
 
 [[projects]]
   branch = "master"
@@ -36,6 +38,14 @@
   ]
   pruneopts = "UT"
   revision = "9e5f4b9a998d263e3ce9c56664a7816001ac8000"
+
+[[projects]]
+  digest = "1:3ea692d335a564559d952d02c970d8503f610a1ec22a22b48cb88b6364864718"
+  name = "github.com/btcsuite/btcwallet"
+  packages = ["wallet/txsizes"]
+  pruneopts = "UT"
+  revision = "7abdd4f8ad7dcf22c5dd90d123b0c137f93d3879"
+  version = "v0.10.0"
 
 [[projects]]
   branch = "master"
@@ -263,20 +273,20 @@
   version = "v1.1.2"
 
 [[projects]]
-  digest = "1:777e729b475d3895c7229552aa10076f0d177daf37c0a72258006d046d329960"
+  digest = "1:a5158647b553c61877aa9ae74f4015000294e47981e6b8b07525edcbb0747c81"
   name = "go.uber.org/atomic"
   packages = ["."]
   pruneopts = "UT"
-  revision = "4e336646b2ef9fc6e47be8e21594178f98e5ebcf"
-  version = "v1.2.0"
+  revision = "df976f2515e274675050de7b3f42545de80594fd"
+  version = "v1.4.0"
 
 [[projects]]
-  digest = "1:60bf2a5e347af463c42ed31a493d817f8a72f102543060ed992754e689805d1a"
+  digest = "1:ed14edb4b5ec8eff801b1e8217ffaf021729c5a1dee9d940af5bb3302ab7297d"
   name = "go.uber.org/multierr"
   packages = ["."]
   pruneopts = "UT"
-  revision = "3c4937480c32f4c13a875a1829af76c98ca3d40a"
-  version = "v1.1.0"
+  revision = "71e610a0e48dbda460d9c18adca8b5f2de04a7c1"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:676160e6a4722b08e0e26b11521d575c2cb2b6f0c679e1ee6178c5d8dee51e5e"
@@ -306,7 +316,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0f7e2b539dc3bb2272b2ea9a53254e8021d2b97b1fdc247b20e9ffcb48974abb"
+  digest = "1:c21f1f304711b9da16a0aabaa6a2dd697576e9ef5ac0bbd806fed6998cb6c6d6"
   name = "golang.org/x/net"
   packages = [
     "http/httpguts",
@@ -317,7 +327,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "491137f692577e390404f177a0515c9f86f79754"
+  revision = "da9a3fd4c5820e74b24a6cb7fb438dc9b0dd377c"
 
 [[projects]]
   branch = "master"
@@ -430,6 +440,7 @@
     "github.com/btcsuite/btcd/txscript",
     "github.com/btcsuite/btcd/wire",
     "github.com/btcsuite/btcutil",
+    "github.com/btcsuite/btcwallet/wallet/txsizes",
     "github.com/golang/protobuf/proto",
     "github.com/shopspring/decimal",
     "github.com/spf13/viper",

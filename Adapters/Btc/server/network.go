@@ -11,7 +11,8 @@ import (
 func (s *grpcServer) Fee(ctx context.Context, in *pb.FeeRequest) (*pb.FeeReply, error) {
 	log := logger.FromContext(ctx)
 	log.Infof("Fee request for sender %s, assetId %s", in.SendersPublicKey, in.AssetId)
-	var fee, err = s.nodeClient.Fee(ctx)
+	// todo fee rate is for kByte, usual tx size is less
+	var fee, err = s.nodeClient.FeeRateForKByte(ctx)
 	if err != nil {
 		log.Errorf("get fee fails: %s", err)
 		return nil, err
