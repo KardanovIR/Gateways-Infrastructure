@@ -25,15 +25,15 @@ var (
 var Cfg *Config
 
 type Config struct {
-	Node     Node   `mapstructure:"NODE"`
-	Port     string `mapstructure:"PORT"`
-	Decimals int    `mapstructure:"DECIMALS"`
-	Db       DB     `mapstructure:"DB"`
+	Node        Node        `mapstructure:"NODE"`
+	Port        string      `mapstructure:"PORT"`
+	Decimals    int         `mapstructure:"DECIMALS"`
+	Db          DB          `mapstructure:"DB"`
 	DataService HttpService `mapstructure:"DATASERVICE"`
 }
 
 type HttpService struct {
-  Url string `mapstructure:"URL"`
+	Url string `mapstructure:"URL"`
 }
 
 type Node struct {
@@ -43,6 +43,7 @@ type Node struct {
 	HTTPPostMode bool   `mapstructure:"HTTPPOSTMODE"`
 	DisableTLS   bool   `mapstructure:"DISABLETLS"`
 	ChainType    string `mapstructure:"CHAINTYPE"`
+	FeeRateMax   uint64 `mapstructure:"FEE_RATE_MAX"`
 	ChainParams  *chaincfg.Params
 }
 

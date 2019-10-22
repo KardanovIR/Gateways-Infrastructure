@@ -44,7 +44,12 @@ func (cl *nodeClient) FeeRateForKByte(ctx context.Context) (uint64, error) {
 		return 0, fmt.Errorf("%+v", feeResponse.Errors)
 	}
 	fee, err := converter.GetIntFromFloat(feeResponse.FeeRate)
-	log.Infof("current fee rate %d", fee)
+	log.Infof("current fee rate from node %d", fee)
+	if fee > cl.conf.FeeRateMax {
+		log.Infof("fee rate from node %d more than max allowed fee rate %d. Use fee rate %d",
+			fee, cl.conf.FeeRateMax, cl.conf.FeeRateMax)
+		return cl.conf.FeeRateMax, nil
+	}
 	return fee, nil
 }
 
