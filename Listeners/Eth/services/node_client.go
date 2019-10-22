@@ -29,7 +29,7 @@ func newNodeClient(ctx context.Context, nodeHost string, parityNodeHost string) 
 	ethClient := ethclient.NewClient(rpcc)
 	var parityConn *rpc.Client
 	if len(parityNodeHost) > 0 {
-		parityConn, err = newRPCClient(log, nodeHost)
+		parityConn, err = newRPCClient(log, parityNodeHost)
 		if err != nil {
 			log.Errorf("error during initialise rpc client for parity: %s", err)
 			return nil, err
