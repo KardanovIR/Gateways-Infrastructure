@@ -125,7 +125,7 @@ func (nr *nodeReader) Start(ctx context.Context) (err error) {
 
 			err = nr.processBlock(ctx, block)
 			if err != nil {
-				log.Errorf("processBTCBlock(%s) error: %s", startBlock, err)
+				log.Errorf("processBlock(%s) error: %s", startBlock, err)
 				log.Debugf("Waiting a half minute.")
 				time.Sleep(30 * time.Second)
 				continue
