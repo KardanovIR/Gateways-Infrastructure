@@ -34,6 +34,7 @@ func newNodeClient(ctx context.Context, nodeHost string, parityNodeHost string) 
 			log.Errorf("error during initialise rpc client for parity: %s", err)
 			return nil, err
 		}
+		log.Infof("successfully connected to parity node %s", parityNodeHost)
 	} else {
 		log.Warn("parity node is not specified. Read of internal transfers is not available!")
 	}
