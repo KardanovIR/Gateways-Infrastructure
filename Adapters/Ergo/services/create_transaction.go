@@ -19,6 +19,9 @@ const (
 
 	minerErgoTree = "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304"
 	txFee         = uint64(1000000)
+	// min value of output = <minValuePerByte * outputSize> ~ 30000
+	MinErgoOutputValueConst = uint64(30000)
+	MaxInputsCount          = 30
 )
 
 var (
@@ -89,10 +92,7 @@ func createTxInputs(ctx context.Context, unspentTxList []models.UnSpentTx, neede
 
 	log := logger.FromContext(ctx)
 	log.Debugf("create inputs for amount %d", neededAmount)
-	// sort by amount (begins from the least)
-	sort.Slice(unspentTxList, func(i, j int) bool {
-		return unspentTxList[i].Value < unspentTxList[j].Value
-	})
+	unspentInputsForTx := addSmallInputsToTx(findInputs(unspentTxList, neededAmount))
 	type boxInput struct {
 		id     string
 		amount uint64
@@ -100,12 +100,11 @@ func createTxInputs(ctx context.Context, unspentTxList []models.UnSpentTx, neede
 	amountsSum := uint64(0)
 	boxForInputs := make([]*boxInput, 0)
 	hasFunds := false
-	for _, box := range unspentTxList {
+	for _, box := range unspentInputsForTx {
 		amountsSum += box.Value
 		boxForInputs = append(boxForInputs, &boxInput{id: box.ID, amount: box.Value})
 		if amountsSum >= neededAmount {
 			hasFunds = true
-			break
 		}
 	}
 	if !hasFunds {
@@ -121,6 +120,60 @@ func createTxInputs(ctx context.Context, unspentTxList []models.UnSpentTx, neede
 		inputsAmount += b.amount
 	}
 	return txInputsList, inputsAmount, nil
+}
+
+// ergo allows not more than 30 inputs in tx. Add inputs with small amount to tx to collect them to one output
+// forTxInputs - inputs which is enough for transfer amount to recipients
+// restInputs - inputs which is free to add them to tx
+func addSmallInputsToTx(forTxInputs []models.UnSpentTx, restInputs []models.UnSpentTx) []models.UnSpentTx {
+	for _, input := range restInputs {
+		if len(forTxInputs) >= MaxInputsCount {
+			return forTxInputs
+		}
+		forTxInputs = append(forTxInputs, input)
+	}
+	return forTxInputs
+}
+
+// find necessary inputs for tx:
+// at first search for input with amount more or equal target
+// if not found - get input with max amount and find suitable for rest amount
+func findInputs(unspentInputs []models.UnSpentTx, targetAmount uint64) (forTx []models.UnSpentTx, rest []models.UnSpentTx) {
+	resultInputs := make([]models.UnSpentTx, 0)
+	// sort by amount (begins from the least)
+	sort.Slice(unspentInputs, func(i, j int) bool {
+		return unspentInputs[i].Value < unspentInputs[j].Value
+	})
+	for len(unspentInputs) > 0 && len(resultInputs) < MaxInputsCount {
+		if targetAmount < MinErgoOutputValueConst {
+			// rest of money - add one input (with the smallest amount, it amount can't be less than 1000)
+			resultInputs = append(resultInputs, unspentInputs[0])
+			return resultInputs, unspentInputs
+		}
+		for _, input := range unspentInputs {
+			if input.Value >= targetAmount {
+				// check difference between amounts (it will be change)
+				// change (as every output) can't be less than minAllowed - to avoid extra fee -> take next element with large amount
+				if input.Value == targetAmount || input.Value-targetAmount > MinErgoOutputValueConst {
+					// found suitable input
+					resultInputs = append(resultInputs, input)
+					return resultInputs, unspentInputs
+				}
+			}
+		}
+		// didn't find suitable  - take last input with the largest amount
+		lastIndex := len(unspentInputs) - 1
+		input := unspentInputs[lastIndex]
+		resultInputs = append(resultInputs, input)
+		if input.Value < targetAmount {
+			targetAmount = targetAmount - input.Value
+		} else {
+			targetAmount = input.Value - targetAmount
+		}
+		// array without last element
+		unspentInputs = unspentInputs[:lastIndex]
+	}
+	return resultInputs, unspentInputs
 }
 
 func (cl *nodeClient) createTxOutputs(ctx context.Context, outputs []*models.Output, fee, height uint64) []models.TxOutput {
