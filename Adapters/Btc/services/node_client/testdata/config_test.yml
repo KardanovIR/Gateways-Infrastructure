@@ -5,6 +5,7 @@ node:
   httppostmode: true
   disabletls: true
   chaintype: testnet
+  fee_rate_max: 500
 db:
   name: block_db
   host: localhost:27017

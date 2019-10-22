@@ -5,6 +5,7 @@ node:
   httppostmode: true
   disabletls: true
   chaintype: mainnet
+  fee_rate_max: 4000
 db:
   name: block_db
   host: localhost:27017

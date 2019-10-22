@@ -10,7 +10,7 @@ func TestNodeClient_FeeRate(t *testing.T) {
 	ctx, _ := beforeTest()
 	fee, err := GetNodeClient().FeeRateForKByte(ctx)
 	assert.Nil(t, err)
-	assert.True(t, fee > 0)
+	assert.True(t, fee == 500)
 }
 
 func TestNodeClient_Fee(t *testing.T) {
