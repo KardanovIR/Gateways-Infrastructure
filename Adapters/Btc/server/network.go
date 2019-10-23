@@ -4,16 +4,18 @@ import (
 	"context"
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
+	"strconv"
 )
 
 // Get transaction's fee
 func (s *grpcServer) Fee(ctx context.Context, in *pb.FeeRequest) (*pb.FeeReply, error) {
 	log := logger.FromContext(ctx)
 	log.Infof("Fee request for sender %s, assetId %s", in.SendersPublicKey, in.AssetId)
-	var fee, err = s.nodeClient.Fee(ctx, in.SendersPublicKey)
+	// todo fee rate is for kByte, usual tx size is less
+	var fee, err = s.nodeClient.FeeRateForKByte(ctx)
 	if err != nil {
 		log.Errorf("get fee fails: %s", err)
 		return nil, err
 	}
-	return &pb.FeeReply{Fee: string(fee)}, nil
+	return &pb.FeeReply{Fee: strconv.FormatUint(fee, 10)}, nil
 }

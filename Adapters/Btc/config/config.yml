@@ -1,9 +1,15 @@
 node:
   host: localhost:18332
-  user:
-  password:
+  user: user
+  password: pass
   httppostmode: true
   disabletls: true
   chaintype: mainnet
+  fee_rate_max: 4000
+db:
+  name: block_db
+  host: localhost:27017
+dataservice:
+  url: https://insight.bitpay.com/api
 decimals: 8
-port: 5005
+port: 5007

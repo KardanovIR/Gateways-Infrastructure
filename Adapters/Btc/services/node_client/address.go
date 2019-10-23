@@ -1,8 +1,7 @@
-package services
+package node
 
 import (
 	"context"
-	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcutil"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Btc/logger"
 )
@@ -10,8 +9,7 @@ import (
 func (cl *nodeClient) ValidateAddress(ctx context.Context, address string) (bool, error) {
 	log := logger.FromContext(ctx)
 	log.Infof("call service method 'ValidateAddress' for %s", address)
-	defaultNet := &chaincfg.MainNetParams
-	btcAddress, err := btcutil.DecodeAddress(address,defaultNet)
+	btcAddress, err := btcutil.DecodeAddress(address, cl.conf.ChainParams)
 	if err != nil {
 		log.Error(err)
 		return false, err
@@ -25,3 +23,4 @@ func (cl *nodeClient) ValidateAddress(ctx context.Context, address string) (bool
 
 	return result.IsValid, nil
 }
+

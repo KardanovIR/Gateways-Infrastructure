@@ -1,14 +1,13 @@
 node:
   host: localhost:18332
-  startBlock: 84185
-  confirmations: 6
-  user: 0x10
+  user:
   password:
   httppostmode: true
   disabletls: true
-  chain: BTC
+  chaintype: testnet
+  fee_rate_max: 500
 db:
   name: block_db
   host: localhost:27017
-port: 5008
-callbackUrl: localhost:5020
+decimals: 8
+port: 5005

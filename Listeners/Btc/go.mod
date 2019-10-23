@@ -7,10 +7,7 @@ require (
 	github.com/spf13/viper v1.4.0
 	github.com/stretchr/testify v1.2.2
 	github.com/tidwall/pretty v1.0.0 // indirect
-	github.com/wavesplatform/GatewaysInfrastructure v1.2.0
+	github.com/wavesplatform/GatewaysInfrastructure v0.0.0-20191002093934-a3fa77cf44b7
 	go.mongodb.org/mongo-driver v1.1.1
 	google.golang.org/grpc v1.23.1
 )
-
-//for local development
-//replace github.com/wavesplatform/GatewaysInfrastructure => ../../../GatewaysInfrastructure
