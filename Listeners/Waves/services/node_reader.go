@@ -3,16 +3,18 @@ package services
 import (
 	"context"
 	"errors"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/models"
 	"math/big"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
 
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
+	coreModels "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
+	coreServices "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/config"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/models"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/repositories"
 	"github.com/wavesplatform/gowaves/pkg/client"
 	"github.com/wavesplatform/gowaves/pkg/crypto"
 	"github.com/wavesplatform/gowaves/pkg/proto"
@@ -82,7 +84,7 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 
 	//to do add saving chainState
 	//example below
-	chainState, errorChainState := service.rp.GetLastChainState(ctx, models.ChainType(service.conf.ChainType))
+	chainState, errorChainState := service.rp.GetLastChainState(ctx, coreModels.ChainType(service.conf.ChainType))
 	if errorChainState == nil && chainState != nil {
 		if (*chainState).LastBlock > service.conf.StartBlockHeight {
 			service.conf.StartBlockHeight = chainState.LastBlock
@@ -132,8 +134,8 @@ func (service *nodeReader) Start(ctx context.Context) (err error) {
 			}
 
 			if chainState == nil {
-				chainState = new(models.ChainState)
-				chainState.ChainType = models.ChainType(service.conf.ChainType)
+				chainState = new(coreModels.ChainState)
+				chainState.ChainType = coreModels.ChainType(service.conf.ChainType)
 			}
 
 			chainState.LastBlock = int64(block.Height + 1)
@@ -230,7 +232,7 @@ func (service *nodeReader) executeTasksForRecipientOrTxId(ctx context.Context, a
 	assetId crypto.Digest, txId string) (err error) {
 
 	log := logger.FromContext(ctx)
-	tasks, err := service.rp.FindByAddressOrTxId(ctx, models.ChainType(service.conf.ChainType), recipient, txId)
+	tasks, err := service.rp.FindByAddressOrTxId(ctx, coreModels.ChainType(service.conf.ChainType), recipient, txId)
 	if err != nil {
 		log.Errorf("error: %s", err)
 		return err
@@ -241,13 +243,13 @@ func (service *nodeReader) executeTasksForRecipientOrTxId(ctx context.Context, a
 	log.Infof("address %s has %d tasks, start processing...", recipient, len(tasks))
 	for _, task := range tasks {
 		log.Debugf("Start processing task id %s for %v ...", task.Id.Hex(), task.ListenTo)
-		err = GetCallbackService().SendRequest(ctx, task, txId)
+		err = coreServices.GetCallbackService().SendRequest(ctx, task, txId)
 		if err != nil {
 			log.Errorf("Error while processing incoming transfer for address %s. %s", recipient, err)
 			continue
 		}
 		switch task.Type {
-		case models.OneTime:
+		case coreModels.OneTime:
 			err := service.rp.RemoveTask(ctx, task.Id.Hex())
 			if err != nil {
 				log.Errorf("Error: removing task %s", err)
