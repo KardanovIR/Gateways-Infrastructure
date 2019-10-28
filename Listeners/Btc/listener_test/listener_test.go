@@ -3,6 +3,7 @@ package listener_test
 import (
 	"context"
 	"fmt"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/converter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"net"
@@ -171,7 +172,7 @@ func TestNodeClient_GetBlockVerboseTx(t *testing.T) {
 	assert.Equal(t, 2, len(b.Tx[1].Vout))
 	assert.Equal(t, uint32(1), b.Tx[1].Vout[1].N)
 	assert.Equal(t, float64(0.76816512), b.Tx[1].Vout[1].Value)
-	amount, err := services.GetIntFromFloat(ctx, b.Tx[1].Vout[1].Value)
+	amount, err := converter.GetIntFromFloat(ctx, b.Tx[1].Vout[1].Value)
 	if err != nil {
 		t.FailNow()
 	}

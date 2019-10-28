@@ -6,7 +6,7 @@ Development :
 
     for local development with modules just add
     
-    replace github.com/wavesplatform/GatewaysInfrastructure => ../../../GatewaysInfrastructure
+    replace github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core => ../../../GatewaysInfrastructure/Listeners/Core
     
     to go.mod file
 
