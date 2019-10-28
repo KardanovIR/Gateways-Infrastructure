@@ -111,15 +111,13 @@ func createTxInputs(ctx context.Context, unspentTxList []models.UnSpentTx, neede
 		return nil, 0, fmt.Errorf("insufficient funds: need %d, has %d", neededAmount, amountsSum)
 	}
 	txInputsList := make([]models.TxInput, 0)
-	inputsAmount := uint64(0)
 	for _, b := range boxForInputs {
 		txInputsList = append(txInputsList, models.TxInput{
 			BoxId:         b.id,
 			SpendingProof: models.SpendingProof{Extension: emptyObject{}},
 		})
-		inputsAmount += b.amount
 	}
-	return txInputsList, inputsAmount, nil
+	return txInputsList, amountsSum, nil
 }
 
 // ergo allows not more than 30 inputs in tx. Add inputs with small amount to tx to collect them to one output
@@ -150,13 +148,18 @@ func findInputs(unspentInputs []models.UnSpentTx, targetAmount uint64) (forTx []
 			resultInputs = append(resultInputs, unspentInputs[0])
 			return resultInputs, unspentInputs
 		}
-		for _, input := range unspentInputs {
+		for i, input := range unspentInputs {
 			if input.Value >= targetAmount {
 				// check difference between amounts (it will be change)
 				// change (as every output) can't be less than minAllowed - to avoid extra fee -> take next element with large amount
 				if input.Value == targetAmount || input.Value-targetAmount > MinErgoOutputValueConst {
 					// found suitable input
 					resultInputs = append(resultInputs, input)
+					if i == len(unspentInputs)-1 {
+						unspentInputs = unspentInputs[:i]
+					} else {
+						unspentInputs = append(unspentInputs[:i], unspentInputs[i+1:]...)
+					}
 					return resultInputs, unspentInputs
 				}
 			}
