@@ -3,6 +3,7 @@ package listener_test
 import (
 	"context"
 	"fmt"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/services"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 	"net"
@@ -16,10 +17,9 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/server"
 	coreServices "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/config"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/server"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/services"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -175,7 +175,7 @@ func beforeTests(t *testing.T, ctx context.Context) {
 
 	go func() {
 		// start grpc server
-		if err := server.InitAndStart(ctx, config.Cfg.Port, repositories.GetRepository()); err != nil {
+		if err := server.InitAndStart(ctx, config.Cfg.Port, repositories.GetRepository(), models.Waves); err != nil {
 			log.Fatal("Can't start grpc server", err)
 		}
 	}()
