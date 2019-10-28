@@ -2,14 +2,13 @@ package services
 
 import (
 	"context"
-	"github.com/btcsuite/btcd/btcjson"
-	"github.com/shopspring/decimal"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/repository"
-	"strconv"
 	"sync"
 	"time"
 
+	"github.com/btcsuite/btcd/btcjson"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/config"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/repository"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/converter"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
@@ -192,7 +191,7 @@ func (nr *nodeReader) processTx(ctx context.Context, tx btcjson.TxRawResult) err
 		}
 		// if tasks for address were found - we interested in counting inputs for this address
 		if len(tasksForAddress) > 0 {
-			amount, err := GetIntFromFloat(ctx, output.Value)
+			amount, err := converter.GetIntFromFloat(ctx, output.Value)
 			if err != nil {
 				log.Errorf("get amount fails: %s", err)
 				return err
@@ -223,18 +222,6 @@ func (nr *nodeReader) deleteTxInputs(ctx context.Context, vIn []btcjson.Vin) err
 		}
 	}
 	return nil
-}
-
-func GetIntFromFloat(ctx context.Context, value float64) (uint64, error) {
-	amount := decimal.NewFromFloat(value).Shift(8)
-	amount.Truncate(0)
-	strInt := amount.String()
-	result, err := strconv.ParseUint(strInt, 10, 64)
-	if err != nil {
-		logger.FromContext(ctx).Errorf("convert amount from float64 %f to uint64 fails %s", value, err)
-		return 0, err
-	}
-	return result, nil
 }
 
 func (nr *nodeReader) executeTasks(ctx context.Context, tasks []*models.Task, txId string) error {
