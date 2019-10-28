@@ -7,6 +7,8 @@ RUN apk add build-base
 RUN apk update
 RUN apk add git
 
+COPY ./go.mod ./go.sum ./
+RUN go mod download
 RUN CGO_ENABLED=1 GOOS=linux go build -o main .
 
 FROM alpine

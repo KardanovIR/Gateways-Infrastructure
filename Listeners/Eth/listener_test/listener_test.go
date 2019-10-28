@@ -17,7 +17,7 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/server"
-	coreServ "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
+	coreServices "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/config"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Eth/services"
 	"go.mongodb.org/mongo-driver/bson"
@@ -113,6 +113,7 @@ func TestListenerEth(t *testing.T) {
 
 	services.GetNodeReader().Stop(ctx)
 }
+
 func TestListenerErc20(t *testing.T) {
 	ctx := context.Background()
 	// setup
@@ -193,7 +194,7 @@ func beforeTests(ctx context.Context, t *testing.T, startBlock int64) {
 			log.Fatal(err)
 		}
 
-		if err := coreServ.NewCallbackService(ctx, config.Cfg.CallbackUrl, models.Ethereum); err != nil {
+		if err := coreServices.NewCallbackService(ctx, config.Cfg.CallbackUrl, models.Ethereum); err != nil {
 			log.Fatal("Can't create callback service: ", err)
 		}
 
