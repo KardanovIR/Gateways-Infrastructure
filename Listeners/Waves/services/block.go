@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/models"
 )
 

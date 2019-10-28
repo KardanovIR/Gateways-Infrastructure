@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
 )
 
 var Cfg *Config

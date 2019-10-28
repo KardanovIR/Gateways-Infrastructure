@@ -3,23 +3,25 @@ package listener_test
 import (
 	"context"
 	"fmt"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/services"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"testing"
 	"time"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/stretchr/testify/assert"
+	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/grpc"
+	corePb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/grpc/client"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/repositories"
+	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/server"
+	coreServices "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/config"
-	pb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/grpc"
-	corePb "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/grpc/client"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/models"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/repositories"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/server"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Waves/services"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (
@@ -158,7 +160,7 @@ func beforeTests(t *testing.T, ctx context.Context) {
 	if err := repositories.New(ctx, config.Cfg.Db.Host, config.Cfg.Db.Name); err != nil {
 		log.Fatal("Can't create db connection: ", err)
 	}
-	if err := services.NewCallbackService(ctx, config.Cfg.CallbackUrl, config.Cfg.Node.ChainType); err != nil {
+	if err := coreServices.NewCallbackService(ctx, config.Cfg.CallbackUrl, config.Cfg.Node.ChainType); err != nil {
 		log.Fatal("Can't create callback service: ", err)
 	}
 	// create node reader
@@ -173,7 +175,7 @@ func beforeTests(t *testing.T, ctx context.Context) {
 
 	go func() {
 		// start grpc server
-		if err := server.InitAndStart(ctx, config.Cfg.Port, repositories.GetRepository()); err != nil {
+		if err := server.InitAndStart(ctx, config.Cfg.Port, repositories.GetRepository(), models.Waves); err != nil {
 			log.Fatal("Can't start grpc server", err)
 		}
 	}()
@@ -211,6 +213,10 @@ func (c coreServerMock) InitInTx(context.Context, *corePb.InitInTxRequest) (*cor
 	panic("implement me")
 }
 
+func (c coreServerMock) CompleteTx(context.Context, *corePb.TxRequest) (*corePb.Empty, error) {
+	panic("implement me")
+}
+
 func (c coreServerMock) InitOutTx(ctx context.Context, in *corePb.Request) (*corePb.Empty, error) {
 	assert.True(c.t, len(in.ProcessId) > 0)
 	switch in.ProcessId {
@@ -244,7 +250,7 @@ func (c coreServerMock) FinishProcess(ctx context.Context, in *corePb.Request) (
 
 func mongoConnect(ctx context.Context, url string, dbName string) *mongo.Database {
 	log := logger.FromContext(ctx)
-	mongoClient, err := mongo.Connect(ctx, "mongodb://"+url)
+	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+url))
 	if err != nil {
 		log.Fatal("Failed to connect to MongoDB at %s: %v", url, err)
 	}
