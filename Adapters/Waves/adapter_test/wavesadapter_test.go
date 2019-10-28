@@ -166,7 +166,7 @@ func TestGrpcClient(t *testing.T) {
 		log.Error(err)
 		t.FailNow()
 	}
-	log.Infof("send transaction %s", txId2)
+	log.Infof("send transaction %s", txId2.TxId)
 	// wait while transaction will be complete
 	if err := waitForTxComplete(ctx, txId2.TxId); err != nil {
 		log.Error(err)
@@ -208,16 +208,16 @@ func waitForTxComplete(ctx context.Context, txID string) error {
 func TestGetAllBalances(t *testing.T) {
 	ctx, log := beforeTests()
 	address := "3N7DGmkCmUgMo9jpuUekUhCMpiBRR1Zm51p"
-	balanceReply, err := clientgrpc.GetClient().GetAllBalances(ctx, &wavesAdapter.AddressRequest{Address: address})
+	balanceReply, err := clientgrpc.GetClient().GetAllBalance(ctx, &wavesAdapter.GetAllBalanceRequest{Address: address})
 	if err != nil {
 		log.Error(err)
 		t.FailNow()
 	}
 	wBtcsAssetId := "DWgwcZTMhSvnyYCoWLRUXXSH1RSkzThXLJhww9gwkqdn"
 	assert.Equal(t, balanceReply.Amount, "190000000")
-	assert.Equal(t, len(balanceReply.AssetBalances), 1)
-	assert.Equal(t, balanceReply.AssetBalances[0].AssetId, wBtcsAssetId)
-	assert.Equal(t, balanceReply.AssetBalances[0].Amount, "101000")
+	assert.Equal(t, len(balanceReply.TokenBalances), 1)
+	assert.Equal(t, balanceReply.TokenBalances[0].Contract, wBtcsAssetId)
+	assert.Equal(t, balanceReply.TokenBalances[0].Amount, "101000")
 }
 
 func beforeTests() (context.Context, logger.ILogger) {

@@ -1,17 +1,14 @@
 FROM golang:alpine as builder
+ENV GO111MODULE=on
 ADD . /go/src/github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo
 WORKDIR /go/src/github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo
 
 RUN apk add build-base
 RUN apk update
 RUN apk add git
-RUN go get github.com/golang/dep/cmd/dep
 
-COPY Gopkg.toml Gopkg.toml
-COPY Gopkg.lock Gopkg.lock
-
-RUN dep ensure --vendor-only
-
+COPY ./go.mod ./go.sum ./
+RUN go mod download
 RUN CGO_ENABLED=1 GOOS=linux go build -o main .
 
 FROM alpine
