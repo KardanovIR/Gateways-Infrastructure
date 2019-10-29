@@ -1,0 +1,35 @@
+[
+  {
+    "id": "c04d56a3c25af5681465a287b2b4e926e95fdf06d055ecefbe9cc39813633424",
+    "value": 1879910,
+    "creationHeight": 68597,
+    "ergoTree": "0008cd020741296f1bf88bab2270929be88f742bb0f6b267643588af85639e1a8c982a41",
+    "address": "9eaFpf4DR1Fj3WnCvDdgfNNdfa8tAZ1Ga21YchCZpeFSEFtkKDq",
+    "assets": [],
+    "additionalRegisters": {},
+    "spentTransactionId": null,
+    "mainChain": true
+  },
+  {
+    "id": "03dc583c46e7c88e8e2bfabfbc14e0f3820e8dd6a02ebe838a5cc08973c7fffc",
+    "value": 98100000,
+    "creationHeight": 50524,
+    "ergoTree": "0008cd020741296f1bf88bab2270929be88f742bb0f6b267643588af85639e1a8c982a41",
+    "address": "9eaFpf4DR1Fj3WnCvDdgfNNdfa8tAZ1Ga21YchCZpeFSEFtkKDq",
+    "assets": [],
+    "additionalRegisters": {},
+    "spentTransactionId": null,
+    "mainChain": true
+  },
+  {
+    "id": "614fcc2879c26534fc62c86dc0a7be3007a49387b07c074585557ea6249521eb",
+    "value": 384700000,
+    "creationHeight": 36139,
+    "ergoTree": "0008cd020741296f1bf88bab2270929be88f742bb0f6b267643588af85639e1a8c982a41",
+    "address": "9eaFpf4DR1Fj3WnCvDdgfNNdfa8tAZ1Ga21YchCZpeFSEFtkKDq",
+    "assets": [],
+    "additionalRegisters": {},
+    "spentTransactionId": null,
+    "mainChain": true
+  }
+]
