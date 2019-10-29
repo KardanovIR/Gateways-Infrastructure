@@ -2,6 +2,7 @@ package adapter_test
 
 import (
 	"context"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/clientgrpc"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,7 +12,6 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/server"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/services"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/services/converter"
-	"google.golang.org/grpc"
 )
 
 var grpcCl adapter.AdapterClient
@@ -79,11 +79,8 @@ func beforeTests() (context.Context, logger.ILogger) {
 		}
 	}()
 
-	conn, e := grpc.Dial(":"+config.Cfg.Port, grpc.WithInsecure())
-	if e != nil {
-		log.Fatal(e)
+	if err := clientgrpc.New(ctx, ":"+config.Cfg.Port); err != nil {
+		log.Fatal("Can't init grpc client", err)
 	}
-	grpcCl = adapter.NewAdapterClient(conn)
-
 	return ctx, log
 }
