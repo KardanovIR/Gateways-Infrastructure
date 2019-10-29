@@ -14,8 +14,6 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Ergo/config"
 )
 
-const httpRequestTimeoutMs = 2000
-
 type INodeClient interface {
 	BlockAt(ctx context.Context, blockNumber uint64, currentHeight *uint64) (*Block, error)
 	BlockLast(ctx context.Context) (*BlockShortInfo, error)
@@ -36,7 +34,7 @@ func NewNodeClient(ctx context.Context, conf config.Node) INodeClient {
 	onceRPCClientInstance.Do(func() {
 		tr := &http.Transport{}
 		client := http.Client{
-			Timeout:   time.Duration(httpRequestTimeoutMs) * time.Millisecond,
+			Timeout:   time.Duration(conf.RequestTimeoutMs) * time.Millisecond,
 			Transport: tr,
 		}
 		cl = &nodeClient{conf: conf, httpClient: client}

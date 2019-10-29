@@ -24,15 +24,15 @@ type Config struct {
 }
 
 type Node struct {
-	Host        string             `mapstructure:"HOST"`
-	ExplorerUrl string             `mapstructure:"EXPLORER_URL"`
-	ChainID     models.NetworkType `mapstructure:"CHAINID"`
-	ApiKey      string             `mapstructure:"APIKEY"`
+	ExplorerUrl      string             `mapstructure:"EXPLORER_URL"`
+	ChainID          models.NetworkType `mapstructure:"CHAINID"`
+	ApiKey           string             `mapstructure:"APIKEY"`
+	RequestTimeoutMs int64              `mapstructure:"REQUEST_TIMEOUT_MS"`
 }
 
 func (c *Config) String() string {
-	return fmt.Sprintf("NODE_HOST: %s, EXPLORER_URL: %s, NODE_CHAINID: %v, PORT: %s",
-		c.Node.Host, c.Node.ExplorerUrl, c.Node.ChainID, c.Port,
+	return fmt.Sprintf("EXPLORER_URL: %s, NODE_CHAINID: %v, PORT: %s, NODE_REQUEST_TIMEOUT_MS: %d",
+		c.Node.ExplorerUrl, c.Node.ChainID, c.Port, c.Node.RequestTimeoutMs,
 	)
 }
 
@@ -62,8 +62,8 @@ func Load(defaultConfigPath string) error {
 }
 
 func validateConfig() error {
-	if len(Cfg.Node.Host) == 0 {
-		return errors.New("NODE_HOST parameter is empty")
+	if len(Cfg.Node.ExplorerUrl) == 0 {
+		return errors.New("NODE_EXPLORER_URL parameter is empty")
 	}
 	if len(Cfg.Port) == 0 {
 		return errors.New("PORT parameter is empty")

@@ -3,5 +3,6 @@ node:
   explorer_url: "https://api-testnet.ergoplatform.com"
   chainId: 0x10
   apiKey:
+  request_timeout_ms: 10000
 decimals: 8
 port: 5005
