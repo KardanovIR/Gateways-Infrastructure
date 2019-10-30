@@ -10,8 +10,6 @@ import (
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Ergo/models"
 )
 
-const httpRequestTimeoutMs = 2000
-
 type INodeClient interface {
 	ValidateAddress(ctx context.Context, address string) (bool, error)
 	PublicKeyFromAddress(ctx context.Context, address string) []byte
@@ -40,7 +38,7 @@ func New(ctx context.Context, conf config.Node) error {
 		// configuration of TLS will be set here
 		tr := &http.Transport{}
 		client := http.Client{
-			Timeout:   time.Duration(httpRequestTimeoutMs) * time.Millisecond,
+			Timeout:   time.Duration(conf.RequestTimeoutMs) * time.Millisecond,
 			Transport: tr,
 		}
 		cl = &nodeClient{conf: conf, httpClient: client}
