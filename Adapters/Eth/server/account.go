@@ -5,7 +5,6 @@ import (
 
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/server/converter"
 )
 
 // Get account's next nonce
@@ -32,8 +31,12 @@ func (s *grpcServer) GetEthBalance(ctx context.Context, in *pb.AddressRequest) (
 		log.Errorf(" getting balance fails: %s", err)
 		return nil, err
 	}
-
-	return &pb.GetEthBalanceReply{Balance: converter.ToTargetAmountStr(balance)}, nil
+	b, err := s.converter.ToTargetAmountStr(ctx, balance, "")
+	if err != nil {
+		log.Errorf("convert balance fails: %s", err)
+		return nil, err
+	}
+	return &pb.GetEthBalanceReply{Balance: b}, nil
 }
 
 // Get account's balance and balances of requested tokens// Get account's balance
@@ -48,12 +51,22 @@ func (s *grpcServer) GetAllBalance(ctx context.Context, in *pb.GetAllBalanceRequ
 	}
 	tokenBalances := make([]*pb.GetAllBalanceReply_TokenBalance, 0, len(balance.Tokens))
 	for c, amount := range balance.Tokens {
+		am, err := s.converter.ToTargetAmountStr(ctx, amount, c)
+		if err != nil {
+			log.Errorf("convert token's %s balance %s fails: %s", c, amount, err)
+			return nil, err
+		}
 		tokenBalances = append(tokenBalances,
-			&pb.GetAllBalanceReply_TokenBalance{Contract: c, Amount: converter.ToTargetAmountStr(amount)},
+			&pb.GetAllBalanceReply_TokenBalance{Contract: c, Amount: am},
 		)
 	}
+	ethAmount, err := s.converter.ToTargetAmountStr(ctx, balance.Amount, "")
+	if err != nil {
+		log.Errorf("convert token's balances fails: %s", err)
+		return nil, err
+	}
 	return &pb.GetAllBalanceReply{
-		Amount:        converter.ToTargetAmountStr(balance.Amount),
+		Amount:        ethAmount,
 		TokenBalances: tokenBalances,
 	}, nil
 }
@@ -68,8 +81,12 @@ func (s *grpcServer) AllowanceAmountForAddress(ctx context.Context, in *pb.Allow
 		log.Errorf("getting allowance amount for %s of owner's address %s failed: %s", in.SenderAddress, in.OwnerAddress, err)
 		return nil, err
 	}
-
+	convertedAm, err := s.converter.ToTargetAmountStr(ctx, amount, in.Contract)
+	if err != nil {
+		log.Errorf("convert token's %s balances %s fails: %s", in.Contract, amount, err)
+		return nil, err
+	}
 	return &pb.AllowanceAmountForAddressReply{
-		Amount: converter.ToTargetAmountStr(amount),
+		Amount: convertedAm,
 	}, nil
 }

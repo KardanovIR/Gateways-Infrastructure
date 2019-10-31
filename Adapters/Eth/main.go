@@ -31,12 +31,12 @@ func main() {
 	log.Infof("eth adapter will be started with configuration %+v", *config.Cfg)
 	ctx := context.Background()
 	ctx = logger.ToContext(ctx, log)
-	converter.Init(ctx, config.Cfg.Decimals)
 	if err := services.New(ctx, config.Cfg.Node); err != nil {
 		log.Fatal("can't create node's client: ", err)
 	}
+	amountConverter := converter.Init(ctx, config.Cfg.MaxDecimals, services.GetNodeClient().GetContractProvider())
 
-	if err := server.InitAndStart(ctx, config.Cfg.Port, services.GetNodeClient()); err != nil {
+	if err := server.InitAndStart(ctx, config.Cfg.Port, services.GetNodeClient(), amountConverter); err != nil {
 		log.Fatal("Can't start grpc server", err)
 	}
 }
