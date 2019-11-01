@@ -3,51 +3,126 @@ package converter
 import (
 	"context"
 	"math/big"
+	"sync"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
+	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/services"
 )
 
 const (
 	nodeDecimals = 18
 )
 
-var multiplierToNode *big.Int
+type IConverter interface {
+	ToNodeAmount(ctx context.Context, a *big.Int, contract string) (*big.Int, error)
+	ToTargetAmountStr(ctx context.Context, a *big.Int, contract string) (string, error)
+	ToTargetAmount(ctx context.Context, a *big.Int, contract string) (*big.Int, error)
+	ToCommissionStr(a *big.Int) string
+}
+
+type converter struct {
+	sync.RWMutex
+	maxTargetDecimals   int64
+	multiplierToNode    *big.Int
+	contractsMultiplier map[string]*big.Int
+	contractProvider    services.IDecimalsContractProvider
+}
 
 // method should be call one time
-func Init(ctx context.Context, targetDecimals int) {
-	if nodeDecimals < targetDecimals {
-		logger.FromContext(ctx).Fatalf("wrong parameter 'targetDecimals' = %d. It should be less than %d", targetDecimals, nodeDecimals)
+func Init(ctx context.Context, maxTargetDecimals int64, contractProvider services.IDecimalsContractProvider) IConverter {
+	if nodeDecimals < maxTargetDecimals {
+		logger.FromContext(ctx).Fatalf("wrong parameter 'maxTargetDecimals' = %d. It should be less than %d", maxTargetDecimals, nodeDecimals)
 	}
-	diff := nodeDecimals - targetDecimals
-	m := int64(1)
-	for i := 0; i < diff; i++ {
-		m *= 10
+	c := converter{
+		maxTargetDecimals:   maxTargetDecimals,
+		multiplierToNode:    countMultiplier(nodeDecimals, maxTargetDecimals),
+		contractsMultiplier: make(map[string]*big.Int),
+		contractProvider:    contractProvider,
 	}
-	multiplierToNode = big.NewInt(m)
+	return &c
 }
 
-func ToNodeAmount(a *big.Int) *big.Int {
-	return new(big.Int).Mul(a, multiplierToNode)
+func (c *converter) getMultiplierForContract(ctx context.Context, contract string) (*big.Int, error) {
+	if len(contract) == 0 {
+		return c.multiplierToNode, nil
+	}
+	if m, ok := c.readFromContractsMultiplier(contract); ok {
+		return m, nil
+	}
+	decimals, err := c.contractProvider.Decimals(ctx, contract)
+	if err != nil {
+		return nil, err
+	}
+	if decimals == 0 {
+		logger.FromContext(ctx).Warnf("request for decimals for contract %s return 0!", contract)
+	}
+	multiplier := countMultiplier(decimals, c.maxTargetDecimals)
+	c.Lock()
+	defer c.Unlock()
+	c.contractsMultiplier[contract] = multiplier
+	return multiplier, nil
 }
 
-func ToTargetAmountStr(a *big.Int) string {
+func (c *converter) readFromContractsMultiplier(contract string) (*big.Int, bool) {
+	c.RLock()
+	defer c.RUnlock()
+	m, ok := c.contractsMultiplier[contract]
+	return m, ok
+}
+
+func countMultiplier(current, maxTarget int64) *big.Int {
+	// if current is not more than max -> not need to convert it
+	if current <= maxTarget {
+		big.NewInt(1)
+	}
+	diff := current - maxTarget
+	multiplier := int64(1)
+	for i := int64(0); i < diff; i++ {
+		multiplier *= 10
+	}
+	return big.NewInt(multiplier)
+}
+
+// ToNodeAmount return amount with decimals used in eth blockchain
+func (c *converter) ToNodeAmount(ctx context.Context, a *big.Int, contract string) (*big.Int, error) {
+	if a == nil {
+		return new(big.Int), nil
+	}
+	multiplier, err := c.getMultiplierForContract(ctx, contract)
+	if err != nil {
+		return nil, err
+	}
+	return new(big.Int).Mul(a, multiplier), nil
+}
+
+func (c *converter) ToTargetAmountStr(ctx context.Context, a *big.Int, contract string) (string, error) {
+	if a == nil {
+		return "0", nil
+	}
+	convertedAmount, err := c.ToTargetAmount(ctx, a, contract)
+	if err != nil {
+		return "", err
+	}
+	return convertedAmount.String(), nil
+}
+
+func (c *converter) ToTargetAmount(ctx context.Context, a *big.Int, contract string) (*big.Int, error) {
+	if a == nil {
+		return new(big.Int), nil
+	}
+	multiplier, err := c.getMultiplierForContract(ctx, contract)
+	if err != nil {
+		return nil, err
+	}
+	return new(big.Int).Div(a, multiplier), nil
+}
+
+func (c *converter) ToCommissionStr(a *big.Int) string {
 	if a == nil {
 		return "0"
 	}
-	return ToTargetAmount(a).String()
-}
-
-func ToTargetAmount(a *big.Int) *big.Int {
-	if a == nil {
-		return new(big.Int)
-	}
-	return new(big.Int).Div(a, multiplierToNode)
-}
-
-func ToCommissionStr(a *big.Int) string {
-	if a == nil {
-		return "0"
-	}
-	rounded := new(big.Int).Add(ToTargetAmount(a), big.NewInt(1))
+	// fee is paid in eth -> not need to ask for decimals - we know it
+	targetAmount := new(big.Int).Div(a, c.multiplierToNode)
+	rounded := new(big.Int).Add(targetAmount, big.NewInt(1))
 	return rounded.String()
 }

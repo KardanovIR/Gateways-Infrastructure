@@ -16,9 +16,10 @@ const (
 var Cfg *Config
 
 type Config struct {
-	Node     Node   `mapstructure:"NODE"`
-	Port     string `mapstructure:"PORT"`
-	Decimals int    `mapstructure:"DECIMALS"`
+	Node Node   `mapstructure:"NODE"`
+	Port string `mapstructure:"PORT"`
+	// max decimals which amount can have in grpc response
+	MaxDecimals int64 `mapstructure:"DECIMALS"`
 }
 
 type Node struct {

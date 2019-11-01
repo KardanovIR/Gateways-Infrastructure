@@ -10,7 +10,6 @@ import (
 
 	pb "github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/grpc"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/server/converter"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/services"
 )
 
@@ -24,9 +23,12 @@ func (s *grpcServer) GetRawTransaction(ctx context.Context, in *pb.RawTransactio
 		log.Error(err)
 		return nil, err
 	}
-	amount = converter.ToNodeAmount(amount)
+	amount, err := s.converter.ToNodeAmount(ctx, amount, in.Contract)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
 	var tx []byte
-	var err error
 	if len(in.Contract) > 0 {
 		if len(in.SendersPublicKey) > 0 {
 			senderAddress, e := s.nodeClient.AddressByPublicKey(ctx, in.SendersPublicKey)
@@ -67,8 +69,12 @@ func (s *grpcServer) GetErc20RawTransaction(ctx context.Context, in *pb.Erc20Raw
 		log.Error(err)
 		return nil, err
 	}
-	amount = converter.ToNodeAmount(amount)
-	var tx, err = s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount, in.Nonce)
+	amount, err := s.converter.ToNodeAmount(ctx, amount, in.Contract)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	tx, err := s.nodeClient.CreateErc20TokensRawTransaction(ctx, in.AddressFrom, in.Contract, in.AddressTo, amount, in.Nonce)
 	if err != nil {
 		log.Errorf("transaction's creation fails: %s", err)
 		return nil, err
@@ -86,13 +92,17 @@ func (s *grpcServer) ApproveAmountForAddressTransaction(ctx context.Context, in 
 		log.Error(err)
 		return nil, err
 	}
-	amount = converter.ToNodeAmount(amount)
+	amount, cErr := s.converter.ToNodeAmount(ctx, amount, in.Contract)
+	if cErr != nil {
+		log.Error(cErr)
+		return nil, cErr
+	}
 	var tx, fee, err = s.nodeClient.Erc20TokensRawApproveTransaction(ctx, in.OwnerAddress, in.Contract, amount, in.SpenderAddress)
 	if err != nil {
 		log.Errorf("erc-20 tokens approve transaction's creation fails: %s", err)
 		return nil, err
 	}
-	feeStr := converter.ToCommissionStr(fee)
+	feeStr := s.converter.ToCommissionStr(fee)
 	return &pb.ApproveAmountForAddressReply{Tx: tx, Fee: feeStr}, nil
 }
 
@@ -158,18 +168,38 @@ func (s *grpcServer) TransactionByHash(ctx context.Context, in *pb.TransactionBy
 	}
 	outputs := make([]*pb.InputOutput, len(tx.InternalTransfers))
 	for i, transfer := range tx.InternalTransfers {
+		amount, cErr := s.converter.ToTargetAmountStr(ctx, transfer.Value, "") // internal is eth tx
+		if cErr != nil {
+			log.Error(cErr)
+			return nil, cErr
+		}
 		outputs[i] = &pb.InputOutput{
 			Address: transfer.To.String(),
-			Amount:  converter.ToTargetAmountStr(transfer.Value)}
+			Amount:  amount}
 	}
 
+	txAmount, err := s.converter.ToTargetAmountStr(ctx, tx.Amount, "") // internal is eth tx
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	fee, err := s.converter.ToTargetAmountStr(ctx, tx.Fee, "") // fee is in eth
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	assetAmount, err := s.converter.ToTargetAmountStr(ctx, tx.AssetAmount, tx.Contract)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
 	return &pb.TransactionByHashReply{
 		SenderAddress:    tx.From,
 		RecipientAddress: tx.To,
-		Amount:           converter.ToTargetAmountStr(tx.Amount),
-		Fee:              converter.ToTargetAmountStr(tx.Fee),
+		Amount:           txAmount,
+		Fee:              fee,
 		AssetId:          tx.Contract,
-		AssetAmount:      converter.ToTargetAmountStr(tx.AssetAmount),
+		AssetAmount:      assetAmount,
 		Status:           string(tx.Status),
 		TxHash:           tx.TxHash,
 		SpecificFields: &pb.BCSpecific{

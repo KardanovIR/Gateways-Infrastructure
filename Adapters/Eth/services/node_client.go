@@ -14,6 +14,8 @@ import (
 )
 
 type INodeClient interface {
+	GetContractProvider() *Erc20ContractProvider
+
 	SuggestGasPrice(ctx context.Context) (*big.Int, error)
 	SuggestFee(ctx context.Context) (*big.Int, error)
 
@@ -92,6 +94,10 @@ func New(ctx context.Context, config config.Node) error {
 		}
 	})
 	return err
+}
+
+func (cl *nodeClient) GetContractProvider() *Erc20ContractProvider {
+	return cl.contractProvider
 }
 
 // GetNodeClient returns node's client.
