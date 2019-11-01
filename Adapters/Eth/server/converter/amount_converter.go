@@ -3,6 +3,7 @@ package converter
 import (
 	"context"
 	"math/big"
+	"sync"
 
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/logger"
 	"github.com/wavesplatform/GatewaysInfrastructure/Adapters/Eth/services"
@@ -24,6 +25,7 @@ type converter struct {
 	multiplierToNode    *big.Int
 	contractsMultiplier map[string]*big.Int
 	contractProvider    services.IDecimalsContractProvider
+	mapAccessMutex      sync.RWMutex
 }
 
 // method should be call one time
@@ -37,6 +39,7 @@ func Init(ctx context.Context, maxTargetDecimals int64, contractProvider service
 		contractsMultiplier: make(map[string]*big.Int),
 		contractProvider:    contractProvider,
 		maxTargetDecimals:   maxTargetDecimals,
+		mapAccessMutex:      sync.RWMutex{},
 	}
 	return &c
 }
@@ -45,7 +48,7 @@ func (c *converter) getMultiplierForContract(ctx context.Context, contract strin
 	if len(contract) == 0 {
 		return c.multiplierToNode, nil
 	}
-	if m, ok := c.contractsMultiplier[contract]; ok {
+	if m, ok := c.readFromContractsMultiplier(contract); ok {
 		return m, nil
 	}
 	decimals, err := c.contractProvider.Decimals(ctx, contract)
@@ -56,8 +59,17 @@ func (c *converter) getMultiplierForContract(ctx context.Context, contract strin
 		logger.FromContext(ctx).Warnf("request for decimals for contract %s return 0!", contract)
 	}
 	multiplier := countMultiplier(decimals, c.maxTargetDecimals)
+	c.mapAccessMutex.Lock()
+	defer c.mapAccessMutex.Unlock()
 	c.contractsMultiplier[contract] = multiplier
 	return multiplier, nil
+}
+
+func (c *converter) readFromContractsMultiplier(contract string) (*big.Int, bool) {
+	c.mapAccessMutex.RLock()
+	defer c.mapAccessMutex.RUnlock()
+	m, ok := c.contractsMultiplier[contract]
+	return m, ok
 }
 
 func countMultiplier(current, maxTarget int64) *big.Int {
