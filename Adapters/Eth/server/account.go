@@ -31,12 +31,12 @@ func (s *grpcServer) GetEthBalance(ctx context.Context, in *pb.AddressRequest) (
 		log.Errorf(" getting balance fails: %s", err)
 		return nil, err
 	}
-	b, err := s.converter.ToTargetAmountStr(ctx, balance, "")
+	convertedBalanceStr, err := s.converter.ToTargetAmountStr(ctx, balance, "")
 	if err != nil {
 		log.Errorf("convert balance fails: %s", err)
 		return nil, err
 	}
-	return &pb.GetEthBalanceReply{Balance: b}, nil
+	return &pb.GetEthBalanceReply{Balance: convertedBalanceStr}, nil
 }
 
 // Get account's balance and balances of requested tokens// Get account's balance
@@ -51,13 +51,13 @@ func (s *grpcServer) GetAllBalance(ctx context.Context, in *pb.GetAllBalanceRequ
 	}
 	tokenBalances := make([]*pb.GetAllBalanceReply_TokenBalance, 0, len(balance.Tokens))
 	for c, amount := range balance.Tokens {
-		am, err := s.converter.ToTargetAmountStr(ctx, amount, c)
+		tokenConvertedAmount, err := s.converter.ToTargetAmountStr(ctx, amount, c)
 		if err != nil {
 			log.Errorf("convert token's %s balance %s fails: %s", c, amount, err)
 			return nil, err
 		}
 		tokenBalances = append(tokenBalances,
-			&pb.GetAllBalanceReply_TokenBalance{Contract: c, Amount: am},
+			&pb.GetAllBalanceReply_TokenBalance{Contract: c, Amount: tokenConvertedAmount},
 		)
 	}
 	ethAmount, err := s.converter.ToTargetAmountStr(ctx, balance.Amount, "")

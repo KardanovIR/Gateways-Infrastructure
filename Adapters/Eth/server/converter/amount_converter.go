@@ -55,9 +55,9 @@ func (c *converter) getMultiplierForContract(ctx context.Context, contract strin
 	if decimals == 0 {
 		logger.FromContext(ctx).Warnf("request for decimals for contract %s return 0!", contract)
 	}
-	m := countMultiplier(decimals, c.maxTargetDecimals)
-	c.contractsMultiplier[contract] = m
-	return m, nil
+	multiplier := countMultiplier(decimals, c.maxTargetDecimals)
+	c.contractsMultiplier[contract] = multiplier
+	return multiplier, nil
 }
 
 func countMultiplier(current, maxTarget int64) *big.Int {
@@ -66,11 +66,11 @@ func countMultiplier(current, maxTarget int64) *big.Int {
 		big.NewInt(1)
 	}
 	diff := current - maxTarget
-	m := int64(1)
+	multiplier := int64(1)
 	for i := int64(0); i < diff; i++ {
-		m *= 10
+		multiplier *= 10
 	}
-	return big.NewInt(m)
+	return big.NewInt(multiplier)
 }
 
 // ToNodeAmount return amount with decimals used in eth blockchain
@@ -78,33 +78,33 @@ func (c *converter) ToNodeAmount(ctx context.Context, a *big.Int, contract strin
 	if a == nil {
 		return new(big.Int), nil
 	}
-	m, err := c.getMultiplierForContract(ctx, contract)
+	multiplier, err := c.getMultiplierForContract(ctx, contract)
 	if err != nil {
 		return nil, err
 	}
-	return new(big.Int).Mul(a, m), nil
+	return new(big.Int).Mul(a, multiplier), nil
 }
 
 func (c *converter) ToTargetAmountStr(ctx context.Context, a *big.Int, contract string) (string, error) {
 	if a == nil {
 		return "0", nil
 	}
-	am, err := c.ToTargetAmount(ctx, a, contract)
+	convertedAmount, err := c.ToTargetAmount(ctx, a, contract)
 	if err != nil {
 		return "", err
 	}
-	return am.String(), nil
+	return convertedAmount.String(), nil
 }
 
 func (c *converter) ToTargetAmount(ctx context.Context, a *big.Int, contract string) (*big.Int, error) {
 	if a == nil {
 		return new(big.Int), nil
 	}
-	m, err := c.getMultiplierForContract(ctx, contract)
+	multiplier, err := c.getMultiplierForContract(ctx, contract)
 	if err != nil {
 		return nil, err
 	}
-	return new(big.Int).Div(a, m), nil
+	return new(big.Int).Div(a, multiplier), nil
 }
 
 func (c *converter) ToCommissionStr(a *big.Int) string {
