@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum"
@@ -35,6 +36,11 @@ func (cl *nodeClient) GetAllBalances(ctx context.Context, address string, contra
 		return &balances, nil
 	}
 	for _, c := range contracts {
+		if !common.IsHexAddress(c) {
+			err := fmt.Errorf("contract's address %s is not valid", c)
+			log.Error(err)
+			return nil, err
+		}
 		tokenBalance, err := cl.contractProvider.BalanceOf(ctx, address, c)
 		if err != nil {
 			return nil, err
