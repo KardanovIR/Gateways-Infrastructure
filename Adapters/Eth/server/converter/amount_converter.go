@@ -21,11 +21,11 @@ type IConverter interface {
 }
 
 type converter struct {
+	sync.RWMutex
 	maxTargetDecimals   int64
 	multiplierToNode    *big.Int
 	contractsMultiplier map[string]*big.Int
 	contractProvider    services.IDecimalsContractProvider
-	mapAccessMutex      sync.RWMutex
 }
 
 // method should be call one time
@@ -33,13 +33,12 @@ func Init(ctx context.Context, maxTargetDecimals int64, contractProvider service
 	if nodeDecimals < maxTargetDecimals {
 		logger.FromContext(ctx).Fatalf("wrong parameter 'maxTargetDecimals' = %d. It should be less than %d", maxTargetDecimals, nodeDecimals)
 	}
-	m := countMultiplier(nodeDecimals, maxTargetDecimals)
 	c := converter{
-		multiplierToNode:    m,
-		contractsMultiplier: make(map[string]*big.Int),
-		contractProvider:    contractProvider,
-		maxTargetDecimals:   maxTargetDecimals,
-		mapAccessMutex:      sync.RWMutex{},
+		sync.RWMutex{},
+		maxTargetDecimals,
+		countMultiplier(nodeDecimals, maxTargetDecimals),
+		make(map[string]*big.Int),
+		contractProvider,
 	}
 	return &c
 }
@@ -59,15 +58,15 @@ func (c *converter) getMultiplierForContract(ctx context.Context, contract strin
 		logger.FromContext(ctx).Warnf("request for decimals for contract %s return 0!", contract)
 	}
 	multiplier := countMultiplier(decimals, c.maxTargetDecimals)
-	c.mapAccessMutex.Lock()
-	defer c.mapAccessMutex.Unlock()
+	c.Lock()
+	defer c.Unlock()
 	c.contractsMultiplier[contract] = multiplier
 	return multiplier, nil
 }
 
 func (c *converter) readFromContractsMultiplier(contract string) (*big.Int, bool) {
-	c.mapAccessMutex.RLock()
-	defer c.mapAccessMutex.RUnlock()
+	c.RLock()
+	defer c.RUnlock()
 	m, ok := c.contractsMultiplier[contract]
 	return m, ok
 }
