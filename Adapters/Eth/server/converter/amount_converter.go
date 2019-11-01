@@ -34,11 +34,10 @@ func Init(ctx context.Context, maxTargetDecimals int64, contractProvider service
 		logger.FromContext(ctx).Fatalf("wrong parameter 'maxTargetDecimals' = %d. It should be less than %d", maxTargetDecimals, nodeDecimals)
 	}
 	c := converter{
-		sync.RWMutex{},
-		maxTargetDecimals,
-		countMultiplier(nodeDecimals, maxTargetDecimals),
-		make(map[string]*big.Int),
-		contractProvider,
+		maxTargetDecimals:   maxTargetDecimals,
+		multiplierToNode:    countMultiplier(nodeDecimals, maxTargetDecimals),
+		contractsMultiplier: make(map[string]*big.Int),
+		contractProvider:    contractProvider,
 	}
 	return &c
 }
