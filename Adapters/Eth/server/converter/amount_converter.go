@@ -2,6 +2,7 @@ package converter
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"sync"
 
@@ -55,6 +56,11 @@ func (c *converter) getMultiplierForContract(ctx context.Context, contract strin
 	}
 	if decimals == 0 {
 		logger.FromContext(ctx).Warnf("request for decimals for contract %s return 0!", contract)
+	}
+	if decimals > nodeDecimals {
+		err := fmt.Errorf("decimals %d > node's decimal %d for contract %s", decimals, nodeDecimals, contract)
+		logger.FromContext(ctx).Error(err)
+		return nil, err
 	}
 	multiplier := countMultiplier(decimals, c.maxTargetDecimals)
 	c.Lock()
