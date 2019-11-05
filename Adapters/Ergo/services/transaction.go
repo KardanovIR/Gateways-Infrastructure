@@ -14,10 +14,9 @@ import (
 )
 
 const (
-	txIsNotInBlockchain = "Cannot find transaction with id"
-	sendTxUrl           = "/transactions"
-	unconfirmedTxUrl    = "/transactions/unconfirmed"
-	TxByIdUrlTemplate   = "/transactions/%s"
+	sendTxUrl         = "/transactions"
+	unconfirmedTxUrl  = "/transactions/unconfirmed"
+	TxByIdUrlTemplate = "/transactions/%s"
 )
 
 type SendTxResponse struct {
@@ -74,7 +73,7 @@ func (cl *nodeClient) TransactionByHash(ctx context.Context, txId string) (*mode
 	txResp, err := cl.Request(ctx, http.MethodGet, cl.conf.ExplorerUrl+fmt.Sprintf(TxByIdUrlTemplate, txId), nil)
 	if err != nil {
 		if e, ok := err.(*WrongCodeError); ok {
-			if e.Code == 404 && strings.Contains(e.Body, txIsNotInBlockchain) {
+			if e.Code == 404 {
 				if hasInUnconfirmed {
 					return &models.TxInfo{Status: models.TxStatusPending}, nil
 				}
