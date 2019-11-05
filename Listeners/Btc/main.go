@@ -10,7 +10,6 @@ import (
 	btcRep "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/repository"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Btc/services"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/logger"
-	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/models"
 	"github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/server"
 	coreServices "github.com/wavesplatform/GatewaysInfrastructure/Listeners/Core/services"
 )
@@ -53,7 +52,7 @@ func main() {
 	}
 	defer nodeReader.Stop(ctx)
 
-	if err := server.InitAndStart(ctx, config.Cfg.Port, rep, models.Btc); err != nil {
+	if err := server.InitAndStart(ctx, config.Cfg.Port, rep, config.Cfg.Node.ChainType); err != nil {
 		log.Fatal("Can't start grpc server", err)
 	}
 }
